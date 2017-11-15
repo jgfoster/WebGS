@@ -10,6 +10,27 @@ names := userProfile symbolList names.
 	userProfile insertDictionary: symbolDictionary at: names size + 1.
 ].
 %
+! ------------------- Class definition for WebExternalSession
+expectvalue /Class
+doit
+GsExternalSession subclass: 'WebExternalSession'
+  instVarNames: #( hostPassword password)
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #()
+
+%
+expectvalue /Class
+doit
+WebExternalSession comment: 
+'It seems that GsExternalSession does not properly handle hostPassword encryption (see HR9764).'
+%
+expectvalue /Class
+doit
+WebExternalSession category: 'User Interface'
+%
 ! ------------------- Class definition for Html4Element
 expectvalue /Class
 doit
@@ -205,6 +226,65 @@ Object subclass: 'WebServer'
 expectvalue /Class
 doit
 WebServer category: 'User Interface'
+%
+
+! ------------------- Remove existing behavior from WebExternalSession
+expectvalue /Metaclass3       
+doit
+WebExternalSession removeAllMethods.
+WebExternalSession class removeAllMethods.
+%
+! ------------------- Class methods for WebExternalSession
+! ------------------- Instance methods for WebExternalSession
+set compile_env: 0
+category: 'other'
+method: WebExternalSession
+hostPassword: aString
+
+	hostPassword := aString.
+%
+category: 'other'
+method: WebExternalSession
+login
+
+	| result |
+	stoneSessionId ifNotNil: [
+		ImproperOperation signal: 'Stone session ' , stoneSessionId printString , 
+			' already associated with this GsExternalSession!'.
+	].
+	self _gciLibrary
+		GciSetNetEx_: parameters gemStoneName
+		_: parameters hostUsername
+		_: hostPassword
+		_: parameters gemService
+		_: 0.		"parameters passwordIsEncryptedAsIntegerBoolean."	"1 or 0: GCI_LOGIN_PW_ENCRYPTED"
+	self _signalIfError.
+	result := self _gciLibrary 
+		GciLoginEx_: parameters username
+		_: password
+		_: (parameters loginFlags bitAnd: 1 bitInvert)
+		_: 0. "haltOnErrNum"
+	self _signalIfError.
+	0 == result ifTrue: [
+		self error: 'Login failed for unknown reason!'.
+	].
+	gciSessionId := self _gciLibrary GciGetSessionId.
+	stoneSessionId := Object _objectForOop: (self _gciLibrary GciPerform_: System asOop _: 'session' _: nil _: 0).
+	self _signalIfError.
+	self _isOnMyStone ifTrue: [
+		stoneSessionSerial := GsSession serialOfSession: stoneSessionId.
+		gemProcessId := (System descriptionOfSession: stoneSessionId) at: 2.
+	] ifFalse: [
+		stoneSessionSerial := self executeString: 'GsSession currentSession serialNumber'.
+		gemProcessId := self executeString: 'System gemVersionAt: #''processId'''.
+	].
+	self log: 'GsExternalSession login: ' , self _describe.
+%
+category: 'other'
+method: WebExternalSession
+password: aString
+
+	password := aString.
 %
 
 ! ------------------- Remove existing behavior from Html4Element
@@ -5397,6 +5477,26 @@ defaultPort
 %
 category: 'startup'
 classmethod: WebApp
+externalSession
+
+	^WebExternalSession newDefault 
+		login; 
+		yourself
+"
+	^(WebExternalSession
+		gemNRS: GsNetworkResourceString defaultGemNRSFromCurrent
+		stoneNRS: GsNetworkResourceString defaultStoneNRSFromCurrent
+		username: System myUserProfile userId
+		password: 'swordfish'
+		hostUsername: 'gsadmin' 
+		hostPassword: 'swordfish')
+		login;
+		executeBlock: [WebAppSample doLocalSessionInitialization];
+		yourself
+"
+%
+category: 'startup'
+classmethod: WebApp
 run
 "
 	WebApp run.
@@ -5410,7 +5510,12 @@ set compile_env: 0
 category: 'base'
 method: WebApp
 buildResponse
-	"If you override this method, then you simply need to populate (or remove) the response object.
+	"If you override this method, then you simply need to populate (or remove) the response object:
+
+		response 
+			content: self myObject asJson;
+			contentType: 'text/json';
+			yourself.
 
 	This implementation assumes that the first piece of the path is a differentiator (e.g., a selector to be performed).
 	For example, 'http://localhost:8888/foo/bar' will build a response for 'foo'."
@@ -5756,15 +5861,7 @@ category: 'running'
 classmethod: WebServer
 new
 
-	^self new: self defaultSlaveGemCount
-%
-category: 'running'
-classmethod: WebServer
-new: anInteger
-
-	^self basicNew
-		initialize: anInteger;
-		yourself.
+	self error: 'Use #serveOnPort:delegate:*'
 %
 category: 'running'
 classmethod: WebServer
@@ -5773,22 +5870,25 @@ serveOnPort: anInteger delegate: anObject
 	self
 		serveOnPort: anInteger 
 		delegate: anObject 
-		withSlaveGemCount: self defaultSlaveGemCount.
+		withWorkerGemCount: self defaultSlaveGemCount.
 %
 category: 'running'
 classmethod: WebServer
-serveOnPort: portInteger delegate: anObject withSlaveGemCount: sessionCountInteger
+serveOnPort: portInteger delegate: anObject withWorkerGemCount: sessionCountInteger
 
-	(self new: sessionCountInteger)
-		delegate: anObject
+	self basicNew
+		initializeDelegate: anObject withWorkerGemCount: sessionCountInteger;
 		startOnPort: portInteger.
 %
 ! ------------------- Instance methods for WebServer
 set compile_env: 0
 category: 'Initializing'
 method: WebServer
-initialize: anInteger
+initializeDelegate: anObject withWorkerGemCount: anInteger
 
+	delegate := anObject.
+	delegate log.	"to ensure that it exists; create now and commit"
+	System commit.
 	GsSocket closeAll.	"debugging could have left some open sockets"
 	System 		"some extra overhead, but we want to get exception stacks"
 		gemConfigurationAt: #GemExceptionSignalCapturesStack 
@@ -5997,7 +6097,7 @@ loginSessions: anInteger
 	| sessions |
 	sessions := self sessions.	"starts as an empty IdentitySet"
 	anInteger timesRepeat: [
-		sessions add: (GsExternalSession newDefault login; yourself) -> true.		"logged-in session is available"
+		sessions add: delegate externalSession -> true.		"logged-in session is available"
 	].
 	sessions do: [:each | 
 		each key executeBlock: [System gemConfigurationAt: #GemExceptionSignalCapturesStack put: true].
@@ -6027,23 +6127,6 @@ sessions
 		ifAbsentPut: [IdentitySet new].
 %
 set compile_env: 0
-category: 'Web Server'
-method: WebServer
-delegate: anObject startOnPort: anInteger
-	"primary entry point; called immediately after initialization"
-
-	delegate := anObject.
-	delegate log.	"to ensure that it exists; create now and commit"
-	System commit.
-	self reportServerUrlOn: anInteger.
-	[ 
-		self listenOn: anInteger.
-		self mainLoop.		"<- work is done here"
-	] ensure: [
-		self listeningSocket close.
-		self sessions do: [:each | each key forceLogout].
-	].
-%
 category: 'Web Server'
 method: WebServer
 handleRequest
@@ -6121,4 +6204,18 @@ reportServerUrlOn: anInteger
 	| serverURL |
 	serverURL := 'http://' , (GsSocket getHostNameByAddress: ((System descriptionOfSession: System session) at: 11)) , ':' , anInteger printString , '/'.
 	self class log: #'startup' string: serverURL.
+%
+category: 'Web Server'
+method: WebServer
+startOnPort: anInteger
+	"primary entry point; called immediately after initialization"
+
+	self reportServerUrlOn: anInteger.
+	[ 
+		self listenOn: anInteger.
+		self mainLoop.		"<- work is done here"
+	] ensure: [
+		self listeningSocket close.
+		self sessions do: [:each | each key forceLogout].
+	].
 %
