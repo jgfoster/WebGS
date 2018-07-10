@@ -5936,12 +5936,12 @@ handleRequestForFile: pathString on: aSocket method: methodString
 				[gsFile atEnd not] whileTrue: [socket write: (gsFile next: 32000)].
 			].
 		].
+		self 
+			sendResponse: response 
+			on: aSocket.
 	] ensure: [
 		gsFile close.
 	].
-	self 
-		sendResponse: response 
-		on: aSocket.
 %
 category: 'Request Handler'
 method: WebServer
