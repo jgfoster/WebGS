@@ -1,6 +1,4 @@
-!
-! SymbolDictionary WebGS
-!
+﻿! ------- Create dictionary if it is not present
 run
 | aSymbol names userProfile |
 aSymbol := #'WebGS'.
@@ -52,7 +50,8 @@ Html4Element comment:
 	http://en.wikipedia.org/wiki/HTML_element
 	http://www.w3schools.com/html/html_elements.asp
 
-Although you can get a new instance using the class-side #''new'' method, the typical approach is to send the #''html'' message to get a new HTML document (an element with the tag ''html''). This top-level element is initialized with two child elements, a <head> and a <body>, accessed with the #''head'' and #''body'' messages respectively. 
+Although you can get a new instance using the class-side #''new'' method, the typical approach is to send the #''html'' message to get a new HTML document (an element with the tag ''html''). This top-level element is initialized with two child elements, a <head> <meta charset="utf-8" />
+and a <body>, accessed with the #''head'' and #''body'' messages respectively. 
 
 You can set attributes using messages based on the attribute name (e.g., the #''class:'' message will set the element''s class attribute).
 
@@ -229,12 +228,28 @@ expectvalue /Class
 doit
 WebServer category: 'User Interface'
 %
+! ------------------- Class definition for HttpsServer
+expectvalue /Class
+doit
+WebServer subclass: 'HttpsServer'
+  instVarNames: #()
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #()
+
+%
+expectvalue /Class
+doit
+HttpsServer category: 'User Interface'
+%
 
 ! ------------------- Remove existing behavior from WebExternalSession
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
-WebExternalSession removeAllMethods.
-WebExternalSession class removeAllMethods.
+WebExternalSession removeAllMethods .
+WebExternalSession class  removeAllMethods .
 %
 ! ------------------- Class methods for WebExternalSession
 ! ------------------- Instance methods for WebExternalSession
@@ -290,10 +305,10 @@ password: aString
 %
 
 ! ------------------- Remove existing behavior from Html4Element
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
-Html4Element removeAllMethods.
-Html4Element class removeAllMethods.
+Html4Element removeAllMethods .
+Html4Element class  removeAllMethods .
 %
 ! ------------------- Class methods for Html4Element
 set compile_env: 0
@@ -4192,10 +4207,10 @@ printStyleOn: aStream
 %
 
 ! ------------------- Remove existing behavior from HtmlElement
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
-HtmlElement removeAllMethods.
-HtmlElement class removeAllMethods.
+HtmlElement removeAllMethods .
+HtmlElement class  removeAllMethods .
 %
 ! ------------------- Class methods for HtmlElement
 ! ------------------- Instance methods for HtmlElement
@@ -4464,10 +4479,10 @@ textInputNamed: nameString class: classString value: valueString
 %
 
 ! ------------------- Remove existing behavior from HttpRequest
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
-HttpRequest removeAllMethods.
-HttpRequest class removeAllMethods.
+HttpRequest removeAllMethods .
+HttpRequest class  removeAllMethods .
 %
 ! ------------------- Class methods for HttpRequest
 set compile_env: 0
@@ -4869,6 +4884,7 @@ readLine1
 	] on: EndOfStream do: [:ex | 
 		ex return: ''.
 	].
+	WebServer log: #'debug' string: 'HttpRequest>>readLine1 got method of ' , method printString.
 	method isEmpty ifTrue: [^self].
 	(#('GET' 'HEAD' 'POST') includes: method) ifFalse: [
 		self error: 'Expected a GET, HEAD, or POST but got ' , method printString , ' (' , method size printString , ' characters)'
@@ -5080,14 +5096,29 @@ _fillStream
 	want := sizeLeft ifNil: [4096].
 	4096 < want ifTrue: [want := 4096].
 	[
+		WebServer log: #'debug' string: 'HttpRequest>>_fillStream - 1 - want = ' , want printString , '; have = ' , bytes size printString.
 		self _socket readWillNotBlockWithin: 1000.
 	] whileTrue: [
-		self _socket read: want into: bytes startingAt: bytes size + 1.
+		| bytesRead |
+		bytesRead := self _socket read: want into: bytes startingAt: bytes size + 1.
+		WebServer log: #'debug' string: 'HttpRequest>>_fillStream - 2 - bytesRead = ' , bytesRead printString.
+		bytesRead == 0 ifTrue: [
+			| errors |
+			self _socket fetchLastIoErrorString ifNotNil: [:value | 
+				WebServer log: #'error' string: value.
+				EndOfStream signal: value.
+			].
+			(errors := self _socket class fetchErrorStringArray) notEmpty ifTrue: [
+				errors do: [:each | WebServer log: #'error' string: each].
+				EndOfStream signal: errors.
+			].
+			WebServer log: #'warning' string: 'nothing more to read'.
+			EndOfStream signal: 'nothing more to read'.
+		].
 		((sizeLeft notNil and: [sizeLeft <= bytes size]) or: [0 < (bytes indexOf: Character lf codePoint)]) ifTrue: [
 			stream := ReadStream on: bytes.
 			sizeLeft notNil ifTrue: [sizeLeft := sizeLeft - bytes size].
-			"(UserGlobals at: #'James') last addAll: bytes.
-			System commit."
+			WebServer log: #'debug' string: 'HttpRequest>>_fillStream - 4'.
 			^self
 		].
 	].
@@ -5096,10 +5127,10 @@ _fillStream
 %
 
 ! ------------------- Remove existing behavior from HttpResponse
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
-HttpResponse removeAllMethods.
-HttpResponse class removeAllMethods.
+HttpResponse removeAllMethods .
+HttpResponse class  removeAllMethods .
 %
 ! ------------------- Class methods for HttpResponse
 set compile_env: 0
@@ -5413,10 +5444,10 @@ _content
 %
 
 ! ------------------- Remove existing behavior from HtmlElementTests
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
-HtmlElementTests removeAllMethods.
-HtmlElementTests class removeAllMethods.
+HtmlElementTests removeAllMethods .
+HtmlElementTests class  removeAllMethods .
 %
 ! ------------------- Class methods for HtmlElementTests
 ! ------------------- Instance methods for HtmlElementTests
@@ -5496,10 +5527,10 @@ test_prettyPrintString
 %
 
 ! ------------------- Remove existing behavior from WebApp
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
-WebApp removeAllMethods.
-WebApp class removeAllMethods.
+WebApp removeAllMethods .
+WebApp class  removeAllMethods .
 %
 ! ------------------- Class methods for WebApp
 set compile_env: 0
@@ -5598,11 +5629,17 @@ externalSession
 %
 category: 'startup'
 classmethod: WebApp
+httpServerClass
+
+	^WebServer
+%
+category: 'startup'
+classmethod: WebApp
 run
 "
 	WebApp run.
 "
-	WebServer 
+	self httpServerClass
 		serveOnPort: self defaultPort
 		delegate: self.
 %
@@ -5766,12 +5803,19 @@ encode: aString
 %
 
 ! ------------------- Remove existing behavior from WebAppSample
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
-WebAppSample removeAllMethods.
-WebAppSample class removeAllMethods.
+WebAppSample removeAllMethods .
+WebAppSample class  removeAllMethods .
 %
 ! ------------------- Class methods for WebAppSample
+set compile_env: 0
+category: 'startup'
+classmethod: WebAppSample
+httpServerClass
+
+	^HttpsServer
+%
 ! ------------------- Instance methods for WebAppSample
 set compile_env: 0
 category: 'other'
@@ -5878,10 +5922,10 @@ renderWelcome
 %
 
 ! ------------------- Remove existing behavior from WebServer
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
-WebServer removeAllMethods.
-WebServer class removeAllMethods.
+WebServer removeAllMethods .
+WebServer class  removeAllMethods .
 %
 ! ------------------- Class methods for WebServer
 set compile_env: 0
@@ -5980,7 +6024,7 @@ supportedLogTypes
 
 	^SessionTemps current 
 			at: #'WebServer_logTypes'
-			ifAbsentPut: [ #(#'startup' #'error') ]
+			ifAbsentPut: [ #(#'startup' " #'debug' #'warning' " #'error') ]
 %
 category: 'logging'
 classmethod: WebServer
@@ -6079,6 +6123,12 @@ initializeDelegate: aDelegate withWorkerGemCount: anInteger
 		put: true.
 	self loginSessions: anInteger.
 %
+category: 'Initializing'
+method: WebServer
+log: aSymbol string: aString
+
+	self class log: aSymbol string: aString
+%
 set compile_env: 0
 category: 'Request Handler'
 method: WebServer
@@ -6126,7 +6176,9 @@ handleRequestOn: aSocket
 	| error logEntry request response |
 	logEntry := self newWebLogEntry.	"might include a #'critical:' block"
 	[
+		self log: #'debug' string: 'handleRequestOn: ' , aSocket printString , ' - a'.
 		request := HttpRequest readFromSocket: aSocket.
+		self log: #'debug' string: 'handleRequestOn: ' , aSocket printString , ' - b'.
 		self critical: [logEntry key: request].
 		request method isEmpty ifTrue: [
 			self class log: #'warning' string: 'Got an empty request'.
@@ -6163,13 +6215,6 @@ handleRequestOn: aSocket
 		response := HttpResponse serverError: error.
 		self sendResponse: response on: aSocket.
 	].
-%
-category: 'Request Handler'
-method: WebServer
-mutex
-	"In case anyone persists an instance of WebServer, we don't want the mutex to prevent the commit!"
-
-	^self class mutex
 %
 category: 'Request Handler'
 method: WebServer
@@ -6303,6 +6348,12 @@ sessions
 set compile_env: 0
 category: 'Web Server'
 method: WebServer
+acceptSocket
+
+	^self listeningSocket accept
+%
+category: 'Web Server'
+method: WebServer
 listeningSocket
 
 	^SessionTemps current at: #'WebServer_listeningSocket'.
@@ -6322,15 +6373,16 @@ listenOn: anInteger
 	"set up the listening socket"
 
 	| listenerSocket |
-	listenerSocket := GsSocket new.
+	listenerSocket := self newServerSocket.
 	(listenerSocket makeServer: self sessions size * 2 atPort: anInteger) isNil ifTrue: [
 		| string |
 		string := listenerSocket lastErrorString.
 		listenerSocket close.
 		self error: string.
 	].
+	listenerSocket port == anInteger ifFalse: [self error: 'Asked for port ' , anInteger printString , ' but got ' , listenerSocket port printString].
 	self listeningSocket: listenerSocket.
-	self class log: #'debug' string: 'listening on aGsSocket(' , listenerSocket asOop printString , ')'.
+	self class log: #'debug' string: 'listening on a' , listenerSocket class name , '(' , listenerSocket asOop printString , ')'.
 %
 category: 'Web Server'
 method: WebServer
@@ -6343,7 +6395,8 @@ mainLoop
 		| flag socket |
 		flag := self listeningSocket readWillNotBlockWithin: 60000. 	"60,000 milliseconds = 60 seconds"
 		[flag] whileTrue: [
-			self critical: [ socket := self listeningSocket accept ].
+			self log: #'debug' string: 'received connection request'.
+			self critical: [ socket := self acceptSocket ].
 			socket isNil 
 				ifTrue: [ self class log: #'warning' string: 'ReadWillNotBlock but accept failed!' ]
 				ifFalse: [ 
@@ -6353,6 +6406,12 @@ mainLoop
 			flag := self listeningSocket readWillNotBlock.
 		].
 	].
+%
+category: 'Web Server'
+method: WebServer
+newServerSocket
+
+	^GsSocket new
 %
 category: 'Web Server'
 method: WebServer
@@ -6394,4 +6453,61 @@ startOnPort: anInteger
 		self listeningSocket close.
 		self sessions do: [:each | each key forceLogout].
 	].
+%
+
+! ------------------- Remove existing behavior from HttpsServer
+expectvalue /Metaclass3
+doit
+HttpsServer removeAllMethods .
+HttpsServer class  removeAllMethods .
+%
+! ------------------- Class methods for HttpsServer
+set compile_env: 0
+category: 'other'
+classmethod: HttpsServer
+serveOnPort: portInteger delegate: anObject withWorkerGemCount: sessionCountInteger
+
+	| password |
+	password := GsSecureSocket getPasswordFromFile: '$GEMSTONE/examples/openssl/private/server_1_server_passwd.txt'.
+	GsSecureSocket 
+		useServerCertificateFile: '$GEMSTONE/examples/openssl/certs/server_1_servercert.pem'
+		withPrivateKeyFile: '$GEMSTONE/examples/openssl/private/server_1_serverkey.pem'
+		privateKeyPassphrase: password.
+
+	"Don't request a certificate from the client. This is typical."
+	GsSecureSocket disableCertificateVerificationOnServer.
+
+	"Use all ciphers except NULL ciphers and anonymous Diffie-Hellman and sort by strength."
+	GsSecureSocket setServerCipherListFromString: 'ALL:!ADH:@STRENGTH'.
+
+	self log: #'debug' string: 'specified certificate, private key, and password'.
+	super
+		serveOnPort: portInteger 
+		delegate: anObject 
+		withWorkerGemCount: sessionCountInteger
+%
+! ------------------- Instance methods for HttpsServer
+set compile_env: 0
+category: 'Web Server'
+method: HttpsServer
+acceptSocket
+
+	| socket |
+	(socket := self listeningSocket accept) ifNil: [^nil].
+	self log: #'debug' string: 'accepted normal connection on ' , socket printString.
+	[
+		socket secureAccept.
+	] on: SocketError do: [:ex | 
+		self log: #'error' string: 'Cert error: ' , GsSecureSocket fetchLastCertificateVerificationErrorForServer.
+		socket close.
+		^nil
+	].
+	self log: #'debug' string: 'established secure connection on ' , socket printString.
+	^socket
+%
+category: 'Web Server'
+method: HttpsServer
+newServerSocket
+
+	^GsSecureSocket newServer
 %
