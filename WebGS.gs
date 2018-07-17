@@ -1,4 +1,6 @@
-! ------- Create dictionary if it is not present
+!
+! SymbolDictionary WebGS
+!
 run
 | aSymbol names userProfile |
 aSymbol := #'WebGS'.
@@ -25,7 +27,7 @@ GsExternalSession subclass: 'WebExternalSession'
 expectvalue /Class
 doit
 WebExternalSession comment: 
-'It seems that GsExternalSession does not properly handle hostPassword encryption (see HR9764).'
+'It seems that GsExternalSession does not properly handle hostPassword encryption (see HR9764 and http://kermit.gemtalksystems.com/bug?bug=47308).'
 %
 expectvalue /Class
 doit
@@ -117,9 +119,9 @@ doit
 Object subclass: 'HttpRequest'
   instVarNames: #( stream method uri
                     path version headers arguments
-                    sizeLeft multipartFormDataBoundary)
+                    bodyContents sizeLeft multipartFormDataBoundary)
   classVars: #()
-  classInstVars: #()
+  classInstVars: #( contentTypeHandlers)
   poolDictionaries: #()
   inDictionary: WebGS
   options: #()
@@ -241,7 +243,7 @@ category: 'other'
 method: WebExternalSession
 hostPassword: aString
 
-	hostPassword := aString.
+	hostPassword := aString copy
 %
 category: 'other'
 method: WebExternalSession
@@ -284,7 +286,7 @@ category: 'other'
 method: WebExternalSession
 password: aString
 
-	password := aString.
+	password := aString copy
 %
 
 ! ------------------- Remove existing behavior from Html4Element
@@ -4471,6 +4473,19 @@ HttpRequest class removeAllMethods.
 set compile_env: 0
 category: 'other'
 classmethod: HttpRequest
+contentTypeHandlers
+
+	" I return a dictionary with all configured Content-type handlers.
+	  Handlers are blocks that take a httpRequest and a string as arguments. "
+
+	contentTypeHandlers isNil ifTrue: [
+		self installContentTypeHandlers
+	].
+
+	^contentTypeHandlers
+%
+category: 'other'
+classmethod: HttpRequest
 fromBytes: aByteArray
 	"Used exclusively by tests"
  
@@ -4521,6 +4536,18 @@ fromString: aString
 %
 category: 'other'
 classmethod: HttpRequest
+installContentTypeHandlers
+
+	" I set a dictionary with all configured Content-type handlers.
+	  Handlers are blocks that take a httpRequest and a string as arguments. "
+
+	contentTypeHandlers := Dictionary new 
+		at: 'application/x-www-form-urlencoded' put:  [ :httpReq :str | httpReq readArgumentsFrom: str ];
+		at: 'application/json' put: [ :httpReq :str | httpReq parseContentsFrom: str interpreterClassName: #JSONReader action: #fromJSON:  ];
+	yourself
+%
+category: 'other'
+classmethod: HttpRequest
 new
 
 	self error: 'use #''readFromSocket:'''.
@@ -4532,6 +4559,14 @@ readFromSocket: aSocket
 	^self basicNew
 		initializeWithSocket: aSocket;
 		yourself.
+%
+category: 'other'
+classmethod: HttpRequest
+unsetContentTypeHandlers
+
+	" I dischard old contentTypeHandlers. "
+
+	contentTypeHandlers := nil
 %
 ! ------------------- Instance methods for HttpRequest
 set compile_env: 0
@@ -4558,6 +4593,19 @@ method: HttpRequest
 argumentsAt: aKey ifAbsentPut: aBlock
 
    ^arguments at: aKey ifAbsentPut: aBlock
+%
+category: 'Accessing'
+method: HttpRequest
+bodyContents
+
+   ^bodyContents
+
+%
+category: 'Accessing'
+method: HttpRequest
+contentType
+
+   ^headers at: 'Content-Type' ifAbsent: nil
 %
 category: 'Accessing'
 method: HttpRequest
@@ -4701,6 +4749,21 @@ isMultiPart
 %
 category: 'other'
 method: HttpRequest
+parseContentsFrom: aString interpreterClassName: aClassName action: aSelector
+
+	" I resolve the interpreter class and send it aSelector, the result is saved in bodyContents attribute. "
+
+	| interpreterClass |
+
+	(interpreterClass := System myUserProfile resolveSymbol: aClassName) ifNil: [
+		self error: 'Can''t resolve symbol: ' , aClassName printString , ' - Handle of request content fail.'
+	].
+
+	bodyContents := interpreterClass value perform: aSelector with: aString
+
+%
+category: 'other'
+method: HttpRequest
 printOn: aStream
 
 	aStream nextPutAll: (method ifNil: ['???']).
@@ -4709,19 +4772,9 @@ printOn: aStream
 %
 category: 'other'
 method: HttpRequest
-readArguments
+readArgumentsFrom: aString
 
-	| string pieces |
-	method = 'GET' ifTrue: [
-		pieces := uri subStrings: $?.
-		path := pieces at: 1.
-		string := 1 < pieces size 
-			ifTrue: [pieces at: 2]
-			ifFalse: [''].
-	] ifFalse: [
-		string := self upToEnd.
-	].
-	(string subStrings: $&) do: [:each | 
+	(aString subStrings: $&) do: [:each | 
 		| index key value values |
 		index := each indexOf: $=.
 		key := each copyFrom: 1 to: index - 1.
@@ -4745,6 +4798,43 @@ readArguments
 			].
 		].
 	].
+
+%
+category: 'other'
+method: HttpRequest
+readContents
+
+	" Read and parse the content itself. 
+	  In GET method there are interpreted as arguments.
+	  For POST methos how I handle contents depends on Content-Type value.
+	  For each Content-Type supported must be a handler configured. 
+	  If none, the original string contents is saved. 
+	  For handlers configuration see class method #contentTypeHandlers.  "
+
+	| string pieces handler |
+
+	method = 'GET' ifTrue: [
+		pieces := uri subStrings: $?.
+		path := pieces at: 1.
+		string := 1 < pieces size 
+			ifTrue: [pieces at: 2]
+			ifFalse: [''].
+		^self readArgumentsFrom: string
+	].
+	string := self upToEnd.
+	method = 'POST' ifTrue: [
+		handler := self class contentTypeHandlers 
+			at: (headers at: 'Content-Type') 
+			ifAbsent: [ nil ].
+		handler isNil ifTrue: [ 
+			" No handler for current Content-Type, just set the string as bodyContents "
+			bodyContents := string.
+			^self
+		].
+
+		handler value: self value: string
+	]
+
 %
 category: 'other'
 method: HttpRequest
@@ -4797,8 +4887,9 @@ readRequest
 	method isEmpty ifTrue: [^true].
 	self readHeaders.
 	self isMultiPart ifTrue: [^false].
-	self readArguments.
+	self readContents.
 	^true.
+
 %
 category: 'other'
 method: HttpRequest
@@ -4897,7 +4988,7 @@ upTo: aCharacter ifNotFoundWaitMs: anInteger
 category: 'stream'
 method: HttpRequest
 upToEnd
-	"Called by #'readArguments'"
+	"Called by #'readContents'"
 
 	| utf8 |
 	utf8 := stream upToEnd.
@@ -5248,7 +5339,11 @@ method: HttpResponse
 sendResponseOn: aSocket
 
 	| stream string count |
-	aSocket writeWillNotBlock ifFalse: [self error: 'aSocket write will block'].
+
+	aSocket isActive ifFalse: [ self error: 'aSocket is not active. fDesc: ', aSocket fileDescriptor printString ].
+	aSocket isConnected ifFalse: [ self error: 'aSocket is not connected. fDesc: ', aSocket fileDescriptor printString ].
+	aSocket writeWillNotBlock ifFalse: [ self error: 'aSocket write will block. fDesc: ', aSocket fileDescriptor printString ].
+
 	stream := WriteStream on: String new.
 	self printAllExceptContentOn: stream.		"Headers, etc."
 	string := stream contents. 
@@ -5439,6 +5534,12 @@ purgeWebLogKeeping: anInteger
 	webLog := webLog reject: [:each | each isNil].
 	UserGlobals at: #'WebLog' put: webLog.
 	System commit.
+%
+category: 'logging'
+classmethod: WebApp
+resetLog
+
+	log := Array new
 %
 set compile_env: 0
 category: 'required'
@@ -5810,16 +5911,76 @@ contentTypes
 		yourself.
 %
 set compile_env: 0
+category: 'critical'
+classmethod: WebServer
+critical: aBlock
+	"Evaluate aBlock inside a commit while holding the mutex"
+
+	^self mutex critical: [
+		| result |
+		[
+			result := aBlock value.
+			System commit.
+		] whileFalse: [
+			System abort.
+		].
+		result
+	].
+%
+category: 'critical'
+classmethod: WebServer
+mutex
+	"In case anyone persists an instance of WebServer, we don't want the mutex to prevent the commit!"
+
+	^SessionTemps current 
+		at: #'WebServer_mutex'
+		ifAbsentPut: [Semaphore forMutualExclusion].
+%
+set compile_env: 0
 category: 'logging'
 classmethod: WebServer
 log: aSymbol string: aString
-	"Write a string to the Gem's log."
+	"Write a string to the log if aSymbol in supportedLogTypes."
 
-	| captureTypes |
-	captureTypes := #(#'startup' #'error' " #'warning' #'debug' " ).	"What types do we want to include?"
-	(captureTypes includes: aSymbol) ifTrue: [
-		GsFile gciLogServer: DateAndTime now printStringWithRoundedSeconds , ' - ' , Processor activeProcess asOop printString , ' - ' , aString.
+	| log |
+	(self supportedLogTypes includes: aSymbol) ifTrue: [
+		self critical: [
+			log := GsFile openAppendOnServer: self logName.
+		 	log log: '[', System gemProcessId printString ,'] - (', aSymbol , ') ' , (HttpResponse webStringForDateTime: DateTime now) , ' - ' , Processor activeProcess asOop printString , ' - ' , aString.
+		  	log close ]
 	].
+%
+category: 'logging'
+classmethod: WebServer
+logName
+
+	^SessionTemps current 
+			at: #'WebServer_logName'
+			ifAbsentPut: [ (System performOnServer: 'pwd') trimBoth, '/webServer.log' ]
+%
+category: 'logging'
+classmethod: WebServer
+logName: aString
+
+	SessionTemps current 
+			at: #'WebServer_logName'
+			put: aString
+%
+category: 'logging'
+classmethod: WebServer
+supportedLogTypes
+
+	^SessionTemps current 
+			at: #'WebServer_logTypes'
+			ifAbsentPut: [ #(#'startup' #'error') ]
+%
+category: 'logging'
+classmethod: WebServer
+supportedLogTypes: anArray
+
+	SessionTemps current 
+			at: #'WebServer_logTypes'
+			put: anArray
 %
 set compile_env: 0
 category: 'running'
@@ -5853,7 +6014,7 @@ askDelegate: aDelegate toHandleLogEntry: aLogEntry
 %
 category: 'running'
 classmethod: WebServer
-defaultSlaveGemCount
+defaultWorkerGemCount
 
 	^2
 %
@@ -5870,7 +6031,7 @@ serveOnPort: anInteger delegate: anObject
 	self
 		serveOnPort: anInteger 
 		delegate: anObject 
-		withWorkerGemCount: self defaultSlaveGemCount.
+		withWorkerGemCount: self defaultWorkerGemCount.
 %
 category: 'running'
 classmethod: WebServer
@@ -5880,13 +6041,28 @@ serveOnPort: portInteger delegate: anObject withWorkerGemCount: sessionCountInte
 		initializeDelegate: anObject withWorkerGemCount: sessionCountInteger;
 		startOnPort: portInteger.
 %
+category: 'running'
+classmethod: WebServer
+serveOnPort: aPortNumber
+		delegate: aWebApp
+		withWorkerGemCount: workerGemCountNumber
+		logFileName: aFileNameString
+		supportedLogTypes: anArray
+
+	self 
+		supportedLogTypes: anArray;
+		logName: aFileNameString;
+		serveOnPort: aPortNumber 
+			delegate: aWebApp 
+			withWorkerGemCount: workerGemCountNumber
+%
 ! ------------------- Instance methods for WebServer
 set compile_env: 0
 category: 'Initializing'
 method: WebServer
-initializeDelegate: anObject withWorkerGemCount: anInteger
+initializeDelegate: aDelegate withWorkerGemCount: anInteger
 
-	delegate := anObject.
+	delegate := aDelegate.
 	delegate log.	"to ensure that it exists; create now and commit"
 	System commit.
 	GsSocket closeAll.	"debugging could have left some open sockets"
@@ -5901,16 +6077,7 @@ method: WebServer
 critical: aBlock
 	"Evaluate aBlock inside a commit while holding the mutex"
 
-	^self mutex critical: [
-		| result |
-		[
-			result := aBlock value.
-			System commit.
-		] whileFalse: [
-			System abort.
-		].
-		result
-	].
+	^self class critical: aBlock
 %
 category: 'Request Handler'
 method: WebServer
@@ -5994,9 +6161,7 @@ method: WebServer
 mutex
 	"In case anyone persists an instance of WebServer, we don't want the mutex to prevent the commit!"
 
-	^SessionTemps current 
-		at: #'WebServer_mutex'
-		ifAbsentPut: [Semaphore forMutualExclusion].
+	^self class mutex
 %
 category: 'Request Handler'
 method: WebServer
@@ -6021,8 +6186,8 @@ method: WebServer
 respondToRequestInLogEntry: aLogEntry
 	"We are in a forked process (thread) and aLogEntry.key contains anHttpRequest.
 	We put something in aLogEntry.value and return.
-	The action might be done in our Gem or in a remote (slave) Gem.
-	In either case, we call WebServer class>>asDelegate:toHandleLogEntry: to do the work."
+	The action might be done in our Gem or in a remote (worker) Gem.
+	In either case, we call WebServer class>>askDelegate:toHandleLogEntry: to do the work."
 
 	| session useLocalGem |
 	useLocalGem := aLogEntry key isMultiPart		"We need the local socket to read request" 
@@ -6049,8 +6214,9 @@ sendResponse: anHttpResponse on: aSocket
 
 	[
 		anHttpResponse sendResponseOn: aSocket.
+		self class log: #'debug' string: 'Response sent to socket: ', aSocket asOop asString, ' fDesc: ' , aSocket fileDescriptor printString
 	] on: Error do: [:ex | 
-		self class log: #'error' string: ex description , Character lf asString , (GsProcess stackReportToLevel: 40).
+		self class log: #'error' string: ex description , ' - socket: ', aSocket asOop asString,  Character lf asString , (GsProcess stackReportToLevel: 40).
 	].
 %
 set compile_env: 0
@@ -6061,7 +6227,7 @@ abortIdleSessions
 	self critical: [	"so no other process changes a session state"
 		self sessions do: [:each | 
 			each value ifTrue: [		"session is available (idle)"
-				each key executeBlock: [		"block evaluated in remote (slave) process"
+				each key executeBlock: [		"block evaluated in remote (worker) process"
 					(Delay forMilliseconds: 100) wait. 	"Allow background processes to run"
 					System abort.								"Avoid CR backlog"
 				].
@@ -6106,7 +6272,7 @@ loginSessions: anInteger
 category: 'Sessions'
 method: WebServer
 returnSession: aGciSession
-	"all done using this remote, slave, Gem"
+	"all done using this remote, worker, Gem"
 
 	self critical: [
 		| assoc |
@@ -6129,25 +6295,6 @@ sessions
 set compile_env: 0
 category: 'Web Server'
 method: WebServer
-handleRequest
-	"we are in a forked process, separate from the main loop managing the listening socket"
-
-	| socket |
-	self critical: [socket := self listeningSocket accept].
-	socket ifNil: [
-		self class log: #'warning' string: 'ReadWillNotBlock but accept failed!'.
-		^self
-	].
-	self class log: #'debug' string: 'accepted serverSocket ' , socket asOop asString.
-	[
-		self handleRequestOn: socket.		"<- work is done here"
-	] ensure: [
-		socket close.
-	].
-	System commit.
-%
-category: 'Web Server'
-method: WebServer
 listeningSocket
 
 	^SessionTemps current at: #'WebServer_listeningSocket'.
@@ -6168,7 +6315,7 @@ listenOn: anInteger
 
 	| listenerSocket |
 	listenerSocket := GsSocket new.
-	(listenerSocket makeServerAtPort: anInteger) isNil ifTrue: [
+	(listenerSocket makeServer: self sessions size * 2 atPort: anInteger) isNil ifTrue: [
 		| string |
 		string := listenerSocket lastErrorString.
 		listenerSocket close.
@@ -6185,13 +6332,16 @@ mainLoop
 		self abortIdleSessions.	"this does an abort/commit in the current gem as well"
 		true.
 	] whileTrue: [
-		| flag |
+		| flag socket |
 		flag := self listeningSocket readWillNotBlockWithin: 60000. 	"60,000 milliseconds = 60 seconds"
 		[flag] whileTrue: [
-			[
-				self handleRequest.		"<- work is done here"
-			] fork.
-			Processor yield.		"let new process get started and accept the connection"
+			self critical: [ socket := self listeningSocket accept ].
+			socket isNil 
+				ifTrue: [ self class log: #'warning' string: 'ReadWillNotBlock but accept failed!' ]
+				ifFalse: [ 
+					self class log: #'debug' string: 'accepted serverSocket ' , socket asOop asString, ' fileDesc: ' , socket fileDescriptor printString.
+					self serveClientSocket: socket.
+				].
 			flag := self listeningSocket readWillNotBlock.
 		].
 	].
@@ -6204,6 +6354,24 @@ reportServerUrlOn: anInteger
 	| serverURL |
 	serverURL := 'http://' , (GsSocket getHostNameByAddress: ((System descriptionOfSession: System session) at: 11)) , ':' , anInteger printString , '/'.
 	self class log: #'startup' string: serverURL.
+%
+category: 'Web Server'
+method: WebServer
+serveClientSocket: aSocket
+
+	" Serve the request on the client socket in a forked process. 
+	  Extract from mainLoop due temp variables conflict (wrong socket closed!). "
+
+	[
+		[ aSocket isConnected 
+			ifTrue: [ self handleRequestOn: aSocket ]		"<- work is done here"
+			ifFalse: [ self class log: #'warning' string: 'Socket is not connected: ' , aSocket asOop asString ].
+		] ensure: [ 
+			aSocket close.
+		].
+		System commit.
+	] fork.
+	Processor yield.		"let new process get started"
 %
 category: 'Web Server'
 method: WebServer
