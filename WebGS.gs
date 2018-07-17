@@ -179,7 +179,7 @@ Object subclass: 'WebApp'
 expectvalue /Class
 doit
 WebApp comment: 
-'This is the abstract superclass for a WebServer delegate.
+'This is the abstract superclass for a HttpServer delegate.
 
 The required methods are in the ''required'' category.'
 %
@@ -212,10 +212,10 @@ expectvalue /Class
 doit
 WebAppSample category: 'User Interface'
 %
-! ------------------- Class definition for WebServer
+! ------------------- Class definition for HttpServer
 expectvalue /Class
 doit
-Object subclass: 'WebServer'
+Object subclass: 'HttpServer'
   instVarNames: #( delegate)
   classVars: #()
   classInstVars: #()
@@ -226,12 +226,12 @@ Object subclass: 'WebServer'
 %
 expectvalue /Class
 doit
-WebServer category: 'User Interface'
+HttpServer category: 'User Interface'
 %
 ! ------------------- Class definition for HttpsServer
 expectvalue /Class
 doit
-WebServer subclass: 'HttpsServer'
+HttpServer subclass: 'HttpsServer'
   instVarNames: #()
   classVars: #()
   classInstVars: #()
@@ -4884,7 +4884,7 @@ readLine1
 	] on: EndOfStream do: [:ex | 
 		ex return: ''.
 	].
-	WebServer log: #'debug' string: 'HttpRequest>>readLine1 got method of ' , method printString.
+	HttpServer log: #'debug' string: 'HttpRequest>>readLine1 got method of ' , method printString.
 	method isEmpty ifTrue: [^self].
 	(#('GET' 'HEAD' 'POST') includes: method) ifFalse: [
 		self error: 'Expected a GET, HEAD, or POST but got ' , method printString , ' (' , method size printString , ' characters)'
@@ -4892,7 +4892,7 @@ readLine1
 	uri := self upToSpace asString.
 	path := uri.
 	version := self nextLine asString.
-	WebServer log: #'debug' string: method , ' ' , (uri copyFrom: 1 to: (40 min: uri size)).
+	HttpServer log: #'debug' string: method , ' ' , (uri copyFrom: 1 to: (40 min: uri size)).
 %
 category: 'other'
 method: HttpRequest
@@ -5096,29 +5096,29 @@ _fillStream
 	want := sizeLeft ifNil: [4096].
 	4096 < want ifTrue: [want := 4096].
 	[
-		WebServer log: #'debug' string: 'HttpRequest>>_fillStream - 1 - want = ' , want printString , '; have = ' , bytes size printString.
+		HttpServer log: #'debug' string: 'HttpRequest>>_fillStream - 1 - want = ' , want printString , '; have = ' , bytes size printString.
 		self _socket readWillNotBlockWithin: 1000.
 	] whileTrue: [
 		| bytesRead |
 		bytesRead := self _socket read: want into: bytes startingAt: bytes size + 1.
-		WebServer log: #'debug' string: 'HttpRequest>>_fillStream - 2 - bytesRead = ' , bytesRead printString.
+		HttpServer log: #'debug' string: 'HttpRequest>>_fillStream - 2 - bytesRead = ' , bytesRead printString.
 		bytesRead == 0 ifTrue: [
 			| errors |
 			self _socket fetchLastIoErrorString ifNotNil: [:value | 
-				WebServer log: #'error' string: value.
+				HttpServer log: #'error' string: value.
 				EndOfStream signal: value.
 			].
 			(errors := self _socket class fetchErrorStringArray) notEmpty ifTrue: [
-				errors do: [:each | WebServer log: #'error' string: each].
+				errors do: [:each | HttpServer log: #'error' string: each].
 				EndOfStream signal: errors.
 			].
-			WebServer log: #'warning' string: 'nothing more to read'.
+			HttpServer log: #'warning' string: 'nothing more to read'.
 			EndOfStream signal: 'nothing more to read'.
 		].
 		((sizeLeft notNil and: [sizeLeft <= bytes size]) or: [0 < (bytes indexOf: Character lf codePoint)]) ifTrue: [
 			stream := ReadStream on: bytes.
 			sizeLeft notNil ifTrue: [sizeLeft := sizeLeft - bytes size].
-			WebServer log: #'debug' string: 'HttpRequest>>_fillStream - 4'.
+			HttpServer log: #'debug' string: 'HttpRequest>>_fillStream - 4'.
 			^self
 		].
 	].
@@ -5254,7 +5254,7 @@ initialize
 		at: 'Content-Encoding'		put: 'none';
 		at: 'Content-Language'		put: 'en';
 		at: 'Content-Type'			put: 'text/html; charset=utf-8';
-		at: 'Server'						put: 'GemStone/S 64 Bit WebServer';
+		at: 'Server'						put: 'GemStone/S 64 Bit HttpServer';
 		yourself.
 	code := 200.
 %
@@ -5631,7 +5631,7 @@ category: 'startup'
 classmethod: WebApp
 httpServerClass
 
-	^WebServer
+	^HttpServer
 %
 category: 'startup'
 classmethod: WebApp
@@ -5921,16 +5921,16 @@ renderWelcome
 	].
 %
 
-! ------------------- Remove existing behavior from WebServer
+! ------------------- Remove existing behavior from HttpServer
 expectvalue /Metaclass3
 doit
-WebServer removeAllMethods .
-WebServer class  removeAllMethods .
+HttpServer removeAllMethods .
+HttpServer class  removeAllMethods .
 %
-! ------------------- Class methods for WebServer
+! ------------------- Class methods for HttpServer
 set compile_env: 0
 category: 'constants'
-classmethod: WebServer
+classmethod: HttpServer
 contentTypeFor: aPath
 		"Used when sending a file"
 
@@ -5939,7 +5939,7 @@ contentTypeFor: aPath
 		otherwise: 'text/html; UTF-8'.
 %
 category: 'constants'
-classmethod: WebServer
+classmethod: HttpServer
 contentTypes
 		"Used when sending a file"
 
@@ -5956,7 +5956,7 @@ contentTypes
 %
 set compile_env: 0
 category: 'critical'
-classmethod: WebServer
+classmethod: HttpServer
 critical: aBlock
 	"Evaluate aBlock inside a commit while holding the mutex"
 
@@ -5972,9 +5972,9 @@ critical: aBlock
 	].
 %
 category: 'critical'
-classmethod: WebServer
+classmethod: HttpServer
 mutex
-	"In case anyone persists an instance of WebServer, we don't want the mutex to prevent the commit!"
+	"In case anyone persists an instance of HttpServer, we don't want the mutex to prevent the commit!"
 
 	^SessionTemps current 
 		at: #'WebServer_mutex'
@@ -5982,7 +5982,7 @@ mutex
 %
 set compile_env: 0
 category: 'logging'
-classmethod: WebServer
+classmethod: HttpServer
 log: aSymbol string: aString
 	"Write a string to the log if aSymbol in supportedLogTypes."
 
@@ -6003,7 +6003,7 @@ log: aSymbol string: aString
 	].
 %
 category: 'logging'
-classmethod: WebServer
+classmethod: HttpServer
 logName
 
 	^SessionTemps current 
@@ -6011,7 +6011,7 @@ logName
 			ifAbsentPut: [ (System performOnServer: 'pwd') trimBoth, '/webServer.log' ]
 %
 category: 'logging'
-classmethod: WebServer
+classmethod: HttpServer
 logName: aString
 
 	SessionTemps current 
@@ -6019,7 +6019,7 @@ logName: aString
 			put: aString
 %
 category: 'logging'
-classmethod: WebServer
+classmethod: HttpServer
 supportedLogTypes
 
 	^SessionTemps current 
@@ -6027,7 +6027,7 @@ supportedLogTypes
 			ifAbsentPut: [ #(#'startup' " #'debug' #'warning' " #'error') ]
 %
 category: 'logging'
-classmethod: WebServer
+classmethod: HttpServer
 supportedLogTypes: anArray
 
 	SessionTemps current 
@@ -6036,7 +6036,7 @@ supportedLogTypes: anArray
 %
 set compile_env: 0
 category: 'running'
-classmethod: WebServer
+classmethod: HttpServer
 askDelegate: aDelegate toHandleLogEntry: aLogEntry
 	"This is called from the Gem that handles the socket and
 	is typically run in a separate gem to allow for parallel requests.
@@ -6065,19 +6065,19 @@ askDelegate: aDelegate toHandleLogEntry: aLogEntry
 	].
 %
 category: 'running'
-classmethod: WebServer
+classmethod: HttpServer
 defaultWorkerGemCount
 
 	^2
 %
 category: 'running'
-classmethod: WebServer
+classmethod: HttpServer
 new
 
 	self error: 'Use #serveOnPort:delegate:*'
 %
 category: 'running'
-classmethod: WebServer
+classmethod: HttpServer
 serveOnPort: anInteger delegate: anObject
 
 	self
@@ -6086,7 +6086,7 @@ serveOnPort: anInteger delegate: anObject
 		withWorkerGemCount: self defaultWorkerGemCount.
 %
 category: 'running'
-classmethod: WebServer
+classmethod: HttpServer
 serveOnPort: portInteger delegate: anObject withWorkerGemCount: sessionCountInteger
 
 	self basicNew
@@ -6094,7 +6094,7 @@ serveOnPort: portInteger delegate: anObject withWorkerGemCount: sessionCountInte
 		startOnPort: portInteger.
 %
 category: 'running'
-classmethod: WebServer
+classmethod: HttpServer
 serveOnPort: aPortNumber
 		delegate: aWebApp
 		withWorkerGemCount: workerGemCountNumber
@@ -6108,10 +6108,10 @@ serveOnPort: aPortNumber
 			delegate: aWebApp 
 			withWorkerGemCount: workerGemCountNumber
 %
-! ------------------- Instance methods for WebServer
+! ------------------- Instance methods for HttpServer
 set compile_env: 0
 category: 'Initializing'
-method: WebServer
+method: HttpServer
 initializeDelegate: aDelegate withWorkerGemCount: anInteger
 
 	delegate := aDelegate.
@@ -6124,21 +6124,21 @@ initializeDelegate: aDelegate withWorkerGemCount: anInteger
 	self loginSessions: anInteger.
 %
 category: 'Initializing'
-method: WebServer
+method: HttpServer
 log: aSymbol string: aString
 
 	self class log: aSymbol string: aString
 %
 set compile_env: 0
 category: 'Request Handler'
-method: WebServer
+method: HttpServer
 critical: aBlock
 	"Evaluate aBlock inside a commit while holding the mutex"
 
 	^self class critical: aBlock
 %
 category: 'Request Handler'
-method: WebServer
+method: HttpServer
 handleRequestForFile: pathString on: aSocket method: methodString
 	"The delegate returned nil, indicating that it didn't have a response to offer.
 	We will check to see if there is a static file available that matches the path."
@@ -6169,7 +6169,7 @@ handleRequestForFile: pathString on: aSocket method: methodString
 	].
 %
 category: 'Request Handler'
-method: WebServer
+method: HttpServer
 handleRequestOn: aSocket
 	"We are in a forked process (thread) and aSocket has the unread request (new socket from accept)"
 
@@ -6217,7 +6217,7 @@ handleRequestOn: aSocket
 	].
 %
 category: 'Request Handler'
-method: WebServer
+method: HttpServer
 newWebLogEntry
 	"A weblog entry is an association. Its contents indicates a status:
 		timestamp -> nil 
@@ -6235,25 +6235,25 @@ newWebLogEntry
 	^self critical: [delegate log add: DateTime now -> nil].
 %
 category: 'Request Handler'
-method: WebServer
+method: HttpServer
 respondToRequestInLogEntry: aLogEntry
 	"We are in a forked process (thread) and aLogEntry.key contains anHttpRequest.
 	We put something in aLogEntry.value and return.
 	The action might be done in our Gem or in a remote (worker) Gem.
-	In either case, we call WebServer class>>askDelegate:toHandleLogEntry: to do the work."
+	In either case, we call HttpServer class>>askDelegate:toHandleLogEntry: to do the work."
 
 	| session useLocalGem |
 	useLocalGem := aLogEntry key isMultiPart		"We need the local socket to read request" 
 		or: [(session := self getSession) isNil]. 	"No worker gem available"
 	useLocalGem ifTrue: [		"Handle request in this process"
-		WebServer askDelegate: delegate toHandleLogEntry: aLogEntry.	"<- work is done either here"
+		HttpServer askDelegate: delegate toHandleLogEntry: aLogEntry.	"<- work is done either here"
 	] ifFalse: [						"Let a worker gem handle the request"
 		self class log: #'debug' string: 'sending task to ' , session printString.
 		[
 			session
 				executeBlock: [System abort];	"so it can see the new logEntry"
 				send: #'askDelegate:toHandleLogEntry:' 							"<- or work is done here"
-					to: WebServer asOop 
+					to: HttpServer asOop 
 					withArguments: (Array with: delegate with: aLogEntry);
 				yourself.
 		] ensure: [
@@ -6262,7 +6262,7 @@ respondToRequestInLogEntry: aLogEntry
 	].
 %
 category: 'Request Handler'
-method: WebServer
+method: HttpServer
 sendResponse: anHttpResponse on: aSocket
 
 	[
@@ -6274,7 +6274,7 @@ sendResponse: anHttpResponse on: aSocket
 %
 set compile_env: 0
 category: 'Sessions'
-method: WebServer
+method: HttpServer
 abortIdleSessions
 
 	self critical: [	"so no other process changes a session state"
@@ -6289,7 +6289,7 @@ abortIdleSessions
 	].
 %
 category: 'Sessions'
-method: WebServer
+method: HttpServer
 getSession
 	"Returns a GciExternalSession that is idle and can be used to build an HttpResponse"
 
@@ -6309,7 +6309,7 @@ getSession
 	^assoc key
 %
 category: 'Sessions'
-method: WebServer
+method: HttpServer
 loginSessions: anInteger
 	"part of the initialization sequence"
 
@@ -6323,7 +6323,7 @@ loginSessions: anInteger
 	].
 %
 category: 'Sessions'
-method: WebServer
+method: HttpServer
 returnSession: aGciSession
 	"all done using this remote, worker, Gem"
 
@@ -6334,12 +6334,12 @@ returnSession: aGciSession
 	].
 %
 category: 'Sessions'
-method: WebServer
+method: HttpServer
 sessions
 	"Collection of Association instances
 		key: GsExternalSession
 		value: aBoolean indicating whether session is available
-	In case anyone persists an instance of WebServer, we don't want the sessions to prevent the commit!"
+	In case anyone persists an instance of HttpServer, we don't want the sessions to prevent the commit!"
 
 	^SessionTemps current 
 		at: #'WebServer_sessions'
@@ -6347,28 +6347,28 @@ sessions
 %
 set compile_env: 0
 category: 'Web Server'
-method: WebServer
+method: HttpServer
 acceptSocket
 
 	^self listeningSocket accept
 %
 category: 'Web Server'
-method: WebServer
+method: HttpServer
 listeningSocket
 
 	^SessionTemps current at: #'WebServer_listeningSocket'.
 %
 category: 'Web Server'
-method: WebServer
+method: HttpServer
 listeningSocket: aSocket
-	"In case anyone persists an instance of WebServer, we don't want the socket to prevent the commit!"
+	"In case anyone persists an instance of HttpServer, we don't want the socket to prevent the commit!"
 
 	SessionTemps current 
 		at: #'WebServer_listeningSocket'
 		put: aSocket.
 %
 category: 'Web Server'
-method: WebServer
+method: HttpServer
 listenOn: anInteger
 	"set up the listening socket"
 
@@ -6385,7 +6385,7 @@ listenOn: anInteger
 	self class log: #'debug' string: 'listening on a' , listenerSocket class name , '(' , listenerSocket asOop printString , ')'.
 %
 category: 'Web Server'
-method: WebServer
+method: HttpServer
 mainLoop
 
 	[
@@ -6408,13 +6408,13 @@ mainLoop
 	].
 %
 category: 'Web Server'
-method: WebServer
+method: HttpServer
 newServerSocket
 
 	^GsSocket new
 %
 category: 'Web Server'
-method: WebServer
+method: HttpServer
 reportServerUrlOn: anInteger
 	"log some startup information"
 
@@ -6423,7 +6423,7 @@ reportServerUrlOn: anInteger
 	self class log: #'startup' string: serverURL.
 %
 category: 'Web Server'
-method: WebServer
+method: HttpServer
 serveClientSocket: aSocket
 
 	" Serve the request on the client socket in a forked process. 
@@ -6441,7 +6441,7 @@ serveClientSocket: aSocket
 	Processor yield.		"let new process get started"
 %
 category: 'Web Server'
-method: WebServer
+method: HttpServer
 startOnPort: anInteger
 	"primary entry point; called immediately after initialization"
 
