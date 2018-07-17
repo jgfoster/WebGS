@@ -5944,10 +5944,18 @@ log: aSymbol string: aString
 
 	| log |
 	(self supportedLogTypes includes: aSymbol) ifTrue: [
-		self critical: [
-			log := GsFile openAppendOnServer: self logName.
-		 	log log: '[', System gemProcessId printString ,'] - (', aSymbol , ') ' , (HttpResponse webStringForDateTime: DateTime now) , ' - ' , Processor activeProcess asOop printString , ' - ' , aString.
-		  	log close ]
+		System clientIsRemote ifTrue: [
+			self critical: [
+				log := GsFile openAppendOnServer: self logName.
+				log log: '[', System gemProcessId printString ,'] - (', aSymbol , ') ' , (HttpResponse webStringForDateTime: DateTime now) , ' - ' , Processor activeProcess asOop printString , ' - ' , aString.
+				log close.
+			].
+		] ifFalse: [
+			GsFile gciLogServer: 
+				DateAndTime now printStringWithRoundedSeconds , 
+				' - ' , Processor activeProcess asOop printString , 
+				' - ' , aString.
+		]
 	].
 %
 category: 'logging'
