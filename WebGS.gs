@@ -5168,6 +5168,20 @@ webStringForDateTime: aDateTime
 set compile_env: 0
 category: 'other'
 method: HttpResponse
+accessControlAllowOrigin: aStringOrNil
+
+	aStringOrNil ifNil: [
+		headers
+			removeKey: 'Access-Control-Allow-Origin'
+			ifAbsent: [].
+	] ifNotNil: [
+		headers
+			at: 'Access-Control-Allow-Origin'
+			put: aStringOrNil.
+	].
+%
+category: 'other'
+method: HttpResponse
 beNoCache
 
 	headers
@@ -5588,31 +5602,25 @@ askDelegate: aDelegate toHandleLogEntry: aLogEntry
 %
 category: 'running'
 classmethod: HttpServer
-defaultWorkerGemCount
-
-	^2
-%
-category: 'running'
-classmethod: HttpServer
 new
 
 	self error: 'Use #serveOnPort:delegate:*'
 %
 category: 'running'
 classmethod: HttpServer
-serveOnPort: anInteger delegate: anObject
+serveOnPort: anInteger delegate: aWebApp
 
 	self
 		serveOnPort: anInteger 
-		delegate: anObject 
-		withWorkerGemCount: self defaultWorkerGemCount.
+		delegate: aWebApp 
+		withWorkerGemCount: aWebApp workerCount.
 %
 category: 'running'
 classmethod: HttpServer
-serveOnPort: portInteger delegate: anObject withWorkerGemCount: sessionCountInteger
+serveOnPort: portInteger delegate: aWebApp withWorkerGemCount: sessionCountInteger
 
 	self basicNew
-		initializeDelegate: anObject withWorkerGemCount: sessionCountInteger;
+		initializeDelegate: aWebApp withWorkerGemCount: sessionCountInteger;
 		startOnPort: portInteger.
 %
 category: 'running'
@@ -6190,6 +6198,12 @@ classmethod: WebApp
 responseForRequest: anHttpRequest
 
 	^self new responseForRequest: anHttpRequest.
+%
+category: 'required'
+classmethod: WebApp
+workerCount
+
+	^2
 %
 set compile_env: 0
 category: 'startup'
