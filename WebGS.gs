@@ -5109,7 +5109,13 @@ _fillStream
 				EndOfStream signal: value.
 			].
 			(errors := self _socket class fetchErrorStringArray) notEmpty ifTrue: [
-				errors do: [:each | HttpServer log: #'error' string: each].
+				errors do: [:each | 
+					((each subStrings: $:) copyFrom: 1 to: 6) = #('error' '1410E114' 'SSL routines' 'SSL_peek' 'uninitialized' 'ssl/ssl_lib.c') ifTrue: [
+						HttpServer log: #'warn' string: each.
+					] ifFalse: [
+						HttpServer log: #'error' string: each.
+					].
+				].
 				EndOfStream signal: errors.
 			].
 			HttpServer log: #'warning' string: 'nothing more to read'.
@@ -5808,6 +5814,7 @@ method: HttpServer
 abortIdleSessions
 
 	self critical: [	"so no other process changes a session state"
+		System abort.
 		self sessions do: [:each | 
 			each value ifTrue: [		"session is available (idle)"
 				each key executeBlock: [		"block evaluated in remote (worker) process"
