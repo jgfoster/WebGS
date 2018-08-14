@@ -10,6 +10,7 @@ names := userProfile symbolList names.
 	userProfile insertDictionary: symbolDictionary at: names size + 1.
 ].
 %
+set compile_env: 0
 ! ------------------- Class definition for WebExternalSession
 expectvalue /Class
 doit
@@ -31,6 +32,7 @@ expectvalue /Class
 doit
 WebExternalSession category: 'User Interface'
 %
+set compile_env: 0
 ! ------------------- Class definition for Html4Element
 expectvalue /Class
 doit
@@ -72,6 +74,7 @@ expectvalue /Class
 doit
 Html4Element category: 'Model'
 %
+set compile_env: 0
 ! ------------------- Class definition for HtmlElement
 expectvalue /Class
 doit
@@ -112,6 +115,7 @@ expectvalue /Class
 doit
 HtmlElement category: 'Model'
 %
+set compile_env: 0
 ! ------------------- Class definition for HttpRequest
 expectvalue /Class
 doit
@@ -130,6 +134,7 @@ expectvalue /Class
 doit
 HttpRequest category: 'Model'
 %
+set compile_env: 0
 ! ------------------- Class definition for HttpResponse
 expectvalue /Class
 doit
@@ -147,6 +152,7 @@ expectvalue /Class
 doit
 HttpResponse category: 'Model'
 %
+set compile_env: 0
 ! ------------------- Class definition for HttpServer
 expectvalue /Class
 doit
@@ -163,6 +169,7 @@ expectvalue /Class
 doit
 HttpServer category: 'User Interface'
 %
+set compile_env: 0
 ! ------------------- Class definition for HttpsServer
 expectvalue /Class
 doit
@@ -179,6 +186,7 @@ expectvalue /Class
 doit
 HttpsServer category: 'User Interface'
 %
+set compile_env: 0
 ! ------------------- Class definition for HtmlElementTests
 expectvalue /Class
 doit
@@ -195,6 +203,7 @@ expectvalue /Class
 doit
 HtmlElementTests category: 'Tests'
 %
+set compile_env: 0
 ! ------------------- Class definition for WebApp
 expectvalue /Class
 doit
@@ -219,6 +228,7 @@ expectvalue /Class
 doit
 WebApp category: 'User Interface'
 %
+set compile_env: 0
 ! ------------------- Class definition for WebAppSample
 expectvalue /Class
 doit
@@ -246,10 +256,10 @@ WebAppSample category: 'User Interface'
 %
 
 ! ------------------- Remove existing behavior from WebExternalSession
-expectvalue /Metaclass3
+expectvalue /Metaclass3       
 doit
-WebExternalSession removeAllMethods .
-WebExternalSession class  removeAllMethods .
+WebExternalSession removeAllMethods.
+WebExternalSession class removeAllMethods.
 %
 ! ------------------- Class methods for WebExternalSession
 ! ------------------- Instance methods for WebExternalSession
@@ -305,10 +315,10 @@ password: aString
 %
 
 ! ------------------- Remove existing behavior from Html4Element
-expectvalue /Metaclass3
+expectvalue /Metaclass3       
 doit
-Html4Element removeAllMethods .
-Html4Element class  removeAllMethods .
+Html4Element removeAllMethods.
+Html4Element class removeAllMethods.
 %
 ! ------------------- Class methods for Html4Element
 set compile_env: 0
@@ -4207,10 +4217,10 @@ printStyleOn: aStream
 %
 
 ! ------------------- Remove existing behavior from HtmlElement
-expectvalue /Metaclass3
+expectvalue /Metaclass3       
 doit
-HtmlElement removeAllMethods .
-HtmlElement class  removeAllMethods .
+HtmlElement removeAllMethods.
+HtmlElement class removeAllMethods.
 %
 ! ------------------- Class methods for HtmlElement
 ! ------------------- Instance methods for HtmlElement
@@ -4479,10 +4489,10 @@ textInputNamed: nameString class: classString value: valueString
 %
 
 ! ------------------- Remove existing behavior from HttpRequest
-expectvalue /Metaclass3
+expectvalue /Metaclass3       
 doit
-HttpRequest removeAllMethods .
-HttpRequest class  removeAllMethods .
+HttpRequest removeAllMethods.
+HttpRequest class removeAllMethods.
 %
 ! ------------------- Class methods for HttpRequest
 set compile_env: 0
@@ -5133,10 +5143,10 @@ _fillStream
 %
 
 ! ------------------- Remove existing behavior from HttpResponse
-expectvalue /Metaclass3
+expectvalue /Metaclass3       
 doit
-HttpResponse removeAllMethods .
-HttpResponse class  removeAllMethods .
+HttpResponse removeAllMethods.
+HttpResponse class removeAllMethods.
 %
 ! ------------------- Class methods for HttpResponse
 set compile_env: 0
@@ -5464,10 +5474,10 @@ _content
 %
 
 ! ------------------- Remove existing behavior from HttpServer
-expectvalue /Metaclass3
+expectvalue /Metaclass3       
 doit
-HttpServer removeAllMethods .
-HttpServer class  removeAllMethods .
+HttpServer removeAllMethods.
+HttpServer class removeAllMethods.
 %
 ! ------------------- Class methods for HttpServer
 set compile_env: 0
@@ -5952,11 +5962,17 @@ newServerSocket
 %
 category: 'Web Server'
 method: HttpServer
+protocol
+
+	^'http'
+%
+category: 'Web Server'
+method: HttpServer
 reportServerUrlOn: anInteger
 	"log some startup information"
 
 	| serverURL |
-	serverURL := 'http://' , (GsSocket getHostNameByAddress: ((System descriptionOfSession: System session) at: 11)) , ':' , anInteger printString , '/'.
+	serverURL := self protocol , '://' , (GsSocket getHostNameByAddress: ((System descriptionOfSession: System session) at: 11)) , ':' , anInteger printString , '/'.
 	self class log: #'startup' string: serverURL.
 %
 category: 'Web Server'
@@ -5993,10 +6009,10 @@ startOnPort: anInteger
 %
 
 ! ------------------- Remove existing behavior from HttpsServer
-expectvalue /Metaclass3
+expectvalue /Metaclass3       
 doit
-HttpsServer removeAllMethods .
-HttpsServer class  removeAllMethods .
+HttpsServer removeAllMethods.
+HttpsServer class removeAllMethods.
 %
 ! ------------------- Class methods for HttpsServer
 set compile_env: 0
@@ -6035,7 +6051,7 @@ acceptSocket
 	[
 		socket secureAccept.
 	] on: SocketError do: [:ex | 
-		self log: #'error' string: 'Cert error: ' , GsSecureSocket fetchLastCertificateVerificationErrorForServer.
+		self log: #'error' string: ex description.
 		socket close.
 		^nil
 	].
@@ -6048,12 +6064,18 @@ newServerSocket
 
 	^GsSecureSocket newServer
 %
+category: 'Web Server'
+method: HttpsServer
+protocol
+
+	^'https'
+%
 
 ! ------------------- Remove existing behavior from HtmlElementTests
-expectvalue /Metaclass3
+expectvalue /Metaclass3       
 doit
-HtmlElementTests removeAllMethods .
-HtmlElementTests class  removeAllMethods .
+HtmlElementTests removeAllMethods.
+HtmlElementTests class removeAllMethods.
 %
 ! ------------------- Class methods for HtmlElementTests
 ! ------------------- Instance methods for HtmlElementTests
@@ -6133,10 +6155,10 @@ test_prettyPrintString
 %
 
 ! ------------------- Remove existing behavior from WebApp
-expectvalue /Metaclass3
+expectvalue /Metaclass3       
 doit
-WebApp removeAllMethods .
-WebApp class  removeAllMethods .
+WebApp removeAllMethods.
+WebApp class removeAllMethods.
 %
 ! ------------------- Class methods for WebApp
 set compile_env: 0
@@ -6415,10 +6437,10 @@ encode: aString
 %
 
 ! ------------------- Remove existing behavior from WebAppSample
-expectvalue /Metaclass3
+expectvalue /Metaclass3       
 doit
-WebAppSample removeAllMethods .
-WebAppSample class  removeAllMethods .
+WebAppSample removeAllMethods.
+WebAppSample class removeAllMethods.
 %
 ! ------------------- Class methods for WebAppSample
 set compile_env: 0
