@@ -1,4 +1,4 @@
-! ------- Create dictionary if it is not present
+﻿! ------- Create dictionary if it is not present
 run
 | aSymbol names userProfile |
 aSymbol := #'WebGS'.
@@ -4896,8 +4896,8 @@ readLine1
 	].
 	HttpServer log: #'debug' string: 'HttpRequest>>readLine1 got method of ' , method printString.
 	method isEmpty ifTrue: [^self].
-	(#('GET' 'HEAD' 'POST') includes: method) ifFalse: [
-		self error: 'Expected a GET, HEAD, or POST but got ' , method printString , ' (' , method size printString , ' characters)'
+	(#('GET' 'HEAD' 'OPTIONS' 'POST') includes: method) ifFalse: [
+		self error: 'Expected a GET, HEAD, OPTIONS, or POST but got ' , method printString , ' (' , method size printString , ' characters)'
 	].
 	uri := self upToSpace asString.
 	path := uri.
@@ -5184,6 +5184,20 @@ webStringForDateTime: aDateTime
 set compile_env: 0
 category: 'other'
 method: HttpResponse
+accessControlAllowHeaders: aStringOrNil
+
+	aStringOrNil ifNil: [
+		headers
+			removeKey: 'Access-Control-Allow-Headers'
+			ifAbsent: [].
+	] ifNotNil: [
+		headers
+			at: 'Access-Control-Allow-Headers'
+			put: aStringOrNil.
+	].
+%
+category: 'other'
+method: HttpResponse
 accessControlAllowOrigin: aStringOrNil
 
 	aStringOrNil ifNil: [
@@ -5279,7 +5293,7 @@ initialize
 
 	headers := Dictionary new
 		at: 'Accept-Ranges'			put: 'bytes';
-		at: 'Allow'						put: 'GET, POST';
+		at: 'Allow'						put: 'GET, HEAD, OPTIONS, POST';
 		at: 'Cache-Control'			put: 'no-cache';
 		at: 'Content-Encoding'		put: 'none';
 		at: 'Content-Language'		put: 'en';
