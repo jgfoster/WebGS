@@ -4779,13 +4779,11 @@ parseContentsFrom: aString interpreterClassName: aClassName action: aSelector
 	" I resolve the interpreter class and send it aSelector, the result is saved in bodyContents attribute. "
 
 	| interpreterClass |
-
 	(interpreterClass := System myUserProfile resolveSymbol: aClassName) ifNil: [
 		self error: 'Can''t resolve symbol: ' , aClassName printString , ' - Handle of request content fail.'
 	].
 
 	bodyContents := interpreterClass value perform: aSelector with: aString
-
 %
 category: 'other'
 method: HttpRequest
@@ -4859,7 +4857,6 @@ readContents
 
 		handler value: self value: string
 	]
-
 %
 category: 'other'
 method: HttpRequest
