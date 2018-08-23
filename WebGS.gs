@@ -5423,9 +5423,10 @@ sendResponseOn: aSocket
 	count isNil ifTrue: [self error: aSocket lastErrorString].
 	count < string size ifTrue: [self error: 'Tried to write ' , string size printString , ', but wrote ' , count printString].
 	sendContentsBlock ifNil: [
-		content ifNil: [content := ''].
-		content class isBytes ifFalse: [self error: 'content class is is ' , content class name].
-		aSocket write: content.
+		content ifNotNil: [
+			content class isBytes ifFalse: [self error: 'content class is is ' , content class name].
+			aSocket write: content.
+		].
 	] ifNotNil: [
 		sendContentsBlock value: aSocket.
 	].
