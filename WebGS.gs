@@ -10,7 +10,6 @@ names := userProfile symbolList names.
 	userProfile insertDictionary: symbolDictionary at: names size + 1.
 ].
 %
-set compile_env: 0
 ! ------------------- Class definition for WebExternalSession
 expectvalue /Class
 doit
@@ -32,7 +31,6 @@ expectvalue /Class
 doit
 WebExternalSession category: 'User Interface'
 %
-set compile_env: 0
 ! ------------------- Class definition for Html4Element
 expectvalue /Class
 doit
@@ -74,7 +72,6 @@ expectvalue /Class
 doit
 Html4Element category: 'Model'
 %
-set compile_env: 0
 ! ------------------- Class definition for HtmlElement
 expectvalue /Class
 doit
@@ -115,7 +112,6 @@ expectvalue /Class
 doit
 HtmlElement category: 'Model'
 %
-set compile_env: 0
 ! ------------------- Class definition for HttpRequest
 expectvalue /Class
 doit
@@ -134,7 +130,6 @@ expectvalue /Class
 doit
 HttpRequest category: 'Model'
 %
-set compile_env: 0
 ! ------------------- Class definition for HttpResponse
 expectvalue /Class
 doit
@@ -152,7 +147,6 @@ expectvalue /Class
 doit
 HttpResponse category: 'Model'
 %
-set compile_env: 0
 ! ------------------- Class definition for HttpServer
 expectvalue /Class
 doit
@@ -169,7 +163,6 @@ expectvalue /Class
 doit
 HttpServer category: 'User Interface'
 %
-set compile_env: 0
 ! ------------------- Class definition for HttpsServer
 expectvalue /Class
 doit
@@ -186,7 +179,6 @@ expectvalue /Class
 doit
 HttpsServer category: 'User Interface'
 %
-set compile_env: 0
 ! ------------------- Class definition for HtmlElementTests
 expectvalue /Class
 doit
@@ -203,7 +195,6 @@ expectvalue /Class
 doit
 HtmlElementTests category: 'Tests'
 %
-set compile_env: 0
 ! ------------------- Class definition for WebApp
 expectvalue /Class
 doit
@@ -228,7 +219,6 @@ expectvalue /Class
 doit
 WebApp category: 'User Interface'
 %
-set compile_env: 0
 ! ------------------- Class definition for WebAppSample
 expectvalue /Class
 doit
@@ -5528,7 +5518,7 @@ critical: aBlock
 		| result |
 		[
 			result := aBlock value.
-			System commit.
+			System commitTransaction.
 		] whileFalse: [
 			System abort.
 		].
@@ -5559,7 +5549,7 @@ log: aSymbol string: aString
 				log close.
 			].
 		] ifFalse: [
-			GsFile gciLogServer: 
+			GsFile gciLogServer: 	"stdout for linked topaz"
 				DateAndTime now printStringWithRoundedSeconds , 
 				' - ' , Processor activeProcess asOop printString , 
 				' - ' , aString.
@@ -5572,7 +5562,7 @@ logName
 
 	^SessionTemps current 
 			at: #'WebServer_logName'
-			ifAbsentPut: [ (System performOnServer: 'pwd') trimBoth, '/webServer.log' ]
+			ifAbsentPut: [ (System performOnServer: 'pwd') trimSeparators, '/webServer.log' ]
 %
 category: 'logging'
 classmethod: HttpServer
