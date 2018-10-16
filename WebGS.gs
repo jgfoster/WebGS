@@ -4626,6 +4626,12 @@ category: 'Accessing'
 method: HttpRequest
 cookie
 
+   ^self cookies
+%
+category: 'Accessing'
+method: HttpRequest
+cookies
+
 	| cookie string |
 	cookie := Dictionary new.
 	string := headers at: 'Cookie' ifAbsent: [^cookie].
@@ -5456,9 +5462,34 @@ category: 'other'
 method: HttpResponse
 setCookie: keyString value: valueString
 
+	self
+		setCookie: keyString 
+		value: valueString 
+		path: nil 
+		maxAge: 365 * 24 * 60 * 60		"usually one year"
+		secure: false 
+		serverOnly: false 
+		sameSite: false.
+%
+category: 'other'
+method: HttpResponse
+setCookie: keyString 
+	value: valueString 
+	path: pathString 
+	maxAge: secondsInteger 
+	secure: secureBoolean 
+	serverOnly: serverBoolean 
+	sameSite: sameSiteBoolean
+
+	| string |
+	string := keyString , '=' , valueString , '; Path=' , (pathString ifNil: ['/'] ifNotNil: [pathString]).
+	secondsInteger		ifNotNil:	[string := string , '; Max-Age=' , secondsInteger printString].
+	secureBoolean 		ifTrue: 	[string := string , '; Secure'].
+	serverBoolean 			ifTrue: 	[string := string , '; HttpOnly'].
+	sameSiteBoolean 		ifTrue: 	[string := string , '; SameSite=Strict'].
 	headers
 		at: 'Set-Cookie'
-		put: keyString , '=' , valueString , '; Path=/; Max-Age=31536000'.	"365 days"
+		put: string
 %
 category: 'other'
 method: HttpResponse
@@ -6294,14 +6325,20 @@ buildResponse
 	This implementation assumes that the first piece of the path is a differentiator (e.g., a selector to be performed).
 	For example, 'http://localhost:8888/foo/bar' will build a response for 'foo'."
 
-	| pieces selector |
+	| newSelector pieces selector size |
 	pieces := request path subStrings: $/.
 	selector := pieces at: 2.
 	selector isEmpty ifTrue: [selector := self defaultSelector].
-	(self pathExists: selector asString) ifFalse: [
-		response := nil. 
-		^self
-	].
+	size := selector size.
+	(3 < size and: [(selector copyFrom: size - 2 to: size) = '.gs' and: [
+		self class canUnderstand: (newSelector := (selector copyFrom: 1 to: size - 3) , '_gs')]]) 
+		ifTrue: [selector := newSelector]
+		ifFalse: [
+			(self pathExists: selector asString) ifFalse: [
+				response := nil. 
+				^self
+			].
+		].
 	"We don't generate the response body, so we don't know the content length (as we would for a file).
 	According to the standard, we SHOULD provide the length, but that is optional
 	(versus SHALL which would be required)."
