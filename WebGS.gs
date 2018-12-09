@@ -24,7 +24,7 @@ GsExternalSession subclass: 'WebExternalSession'
 %
 expectvalue /Class
 doit
-WebExternalSession comment: 
+WebExternalSession comment:
 'It seems that GsExternalSession does not properly handle hostPassword encryption (see HR9764 and http://kermit.gemtalksystems.com/bug?bug=47308).'
 %
 expectvalue /Class
@@ -45,13 +45,13 @@ Object subclass: 'Html4Element'
 %
 expectvalue /Class
 doit
-Html4Element comment: 
+Html4Element comment:
 'This class represents an HTML Element. To learn more see books about HTML or on-line resources, including the following:
 	http://en.wikipedia.org/wiki/HTML_element
 	http://www.w3schools.com/html/html_elements.asp
 
 Although you can get a new instance using the class-side #''new'' method, the typical approach is to send the #''html'' message to get a new HTML document (an element with the tag ''html''). This top-level element is initialized with two child elements, a <head> <meta charset="utf-8" />
-and a <body>, accessed with the #''head'' and #''body'' messages respectively. 
+and a <body>, accessed with the #''head'' and #''body'' messages respectively.
 
 You can set attributes using messages based on the attribute name (e.g., the #''class:'' message will set the element''s class attribute).
 
@@ -86,12 +86,12 @@ Html4Element subclass: 'HtmlElement'
 %
 expectvalue /Class
 doit
-HtmlElement comment: 
+HtmlElement comment:
 'This class represents an HTML Element. To learn more see books about HTML or on-line resources, including the following:
 	http://en.wikipedia.org/wiki/HTML_element
 	http://www.w3schools.com/html/html_elements.asp
 
-Although you can get a new instance using the class-side #''new'' method, the typical approach is to send the #''html'' message to get a new HTML document (an element with the tag ''html''). This top-level element is initialized with two child elements, a <head> and a <body>, accessed with the #''head'' and #''body'' messages respectively. 
+Although you can get a new instance using the class-side #''new'' method, the typical approach is to send the #''html'' message to get a new HTML document (an element with the tag ''html''). This top-level element is initialized with two child elements, a <head> and a <body>, accessed with the #''head'' and #''body'' messages respectively.
 
 You can set attributes using messages based on the attribute name (e.g., the #''class:'' message will set the element''s class attribute).
 
@@ -179,22 +179,6 @@ expectvalue /Class
 doit
 HttpsServer category: 'User Interface'
 %
-! ------------------- Class definition for HtmlElementTests
-expectvalue /Class
-doit
-TestCase subclass: 'HtmlElementTests'
-  instVarNames: #()
-  classVars: #()
-  classInstVars: #()
-  poolDictionaries: #()
-  inDictionary: WebGS
-  options: #()
-
-%
-expectvalue /Class
-doit
-HtmlElementTests category: 'Tests'
-%
 ! ------------------- Class definition for WebApp
 expectvalue /Class
 doit
@@ -210,7 +194,7 @@ Object subclass: 'WebApp'
 %
 expectvalue /Class
 doit
-WebApp comment: 
+WebApp comment:
 'This is the abstract superclass for a HttpServer delegate.
 
 The required methods are in the ''required'' category.'
@@ -219,11 +203,11 @@ expectvalue /Class
 doit
 WebApp category: 'User Interface'
 %
-! ------------------- Class definition for WebAppSample
+! ------------------- Class definition for RestSample
 expectvalue /Class
 doit
-WebApp subclass: 'WebAppSample'
-  instVarNames: #( main top)
+WebApp subclass: 'RestSample'
+  instVarNames: #()
   classVars: #()
   classInstVars: #()
   poolDictionaries: #()
@@ -233,8 +217,8 @@ WebApp subclass: 'WebAppSample'
 %
 expectvalue /Class
 doit
-WebAppSample comment: 
-'No class-specific documentation for WebAppSample, hierarchy is: 
+RestSample comment:
+'No class-specific documentation for WebAppSample, hierarchy is:
 Object
   WebApp( begin end exception html request response)
     WebAppSample( main)
@@ -242,11 +226,11 @@ Object
 %
 expectvalue /Class
 doit
-WebAppSample category: 'User Interface'
+RestSample category: 'User Interface'
 %
 
 ! ------------------- Remove existing behavior from WebExternalSession
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
 WebExternalSession removeAllMethods.
 WebExternalSession class removeAllMethods.
@@ -266,7 +250,7 @@ login
 
 	| result |
 	stoneSessionId ifNotNil: [
-		ImproperOperation signal: 'Stone session ' , stoneSessionId printString , 
+		ImproperOperation signal: 'Stone session ' , stoneSessionId printString ,
 			' already associated with this GsExternalSession!'.
 	].
 	self _gciLibrary
@@ -276,7 +260,7 @@ login
 		_: parameters gemService
 		_: 0.		"parameters passwordIsEncryptedAsIntegerBoolean."	"1 or 0: GCI_LOGIN_PW_ENCRYPTED"
 	self _signalIfError.
-	result := self _gciLibrary 
+	result := self _gciLibrary
 		GciLoginEx_: parameters username
 		_: password
 		_: (parameters loginFlags bitAnd: 1 bitInvert)
@@ -305,7 +289,7 @@ password: aString
 %
 
 ! ------------------- Remove existing behavior from Html4Element
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
 Html4Element removeAllMethods.
 Html4Element class removeAllMethods.
@@ -325,9 +309,9 @@ align	CAPTION	%CAlign;	#IMPLIED	D	L	relative to table
 align	APPLET, IFRAME, IMG, INPUT, OBJECT	%IAlign;	#IMPLIED	D	L	vertical or horizontal alignment
 align	LEGEND	%LAlign;	#IMPLIED	D	L	relative to fieldset
 align	TABLE	%TAlign;	#IMPLIED	D	L	table position relative to window
-align	HR	(left | center | right)	#IMPLIED	D	L	 
+align	HR	(left | center | right)	#IMPLIED	D	L
 align	DIV, H1, H2, H3, H4, H5, H6, P	(left | center | right | justify)	#IMPLIED	D	L	align, text alignment
-align	COL, COLGROUP, TBODY, TD, TFOOT, TH, THEAD, TR	(left | center | right | justify | char)	#IMPLIED	 	 	 
+align	COL, COLGROUP, TBODY, TD, TFOOT, TH, THEAD, TR	(left | center | right | justify | char)	#IMPLIED
 alink	BODY	%Color;	#IMPLIED	D	L	color of selected links
 alt	APPLET	%Text;	#IMPLIED	D	L	short description
 alt	AREA, IMG	%Text;	#REQUIRED	 	 	short description
@@ -359,7 +343,7 @@ codebase	APPLET	%URI;	#IMPLIED	D	L	optional base URI for applet
 codetype	OBJECT	%ContentType;	#IMPLIED	 	 	content type for code
 color	BASEFONT, FONT	%Color;	#IMPLIED	D	L	text color
 cols	FRAMESET	%MultiLengths;	#IMPLIED	 	F	list of lengths, default: 100% (1 col)
-cols	TEXTAREA	NUMBER	#REQUIRED	 	 	 
+cols	TEXTAREA	NUMBER	#REQUIRED
 colspan	TD, TH	NUMBER	1	 	 	number of cols spanned by cell
 compact	DIR, DL, MENU, OL, UL	(compact)	#IMPLIED	D	L	reduced interitem spacing
 content	META	CDATA	#REQUIRED	 	 	associated information
@@ -372,7 +356,7 @@ defer	SCRIPT	(defer)	#IMPLIED	 	 	UA may defer execution of script
 dir	All elements but APPLET, BASE, BASEFONT, BDO, BR, FRAME, FRAMESET, IFRAME, PARAM, SCRIPT	(ltr | rtl)	#IMPLIED	 	 	direction for weak/neutral text
 dir	BDO	(ltr | rtl)	#REQUIRED	 	 	directionality
 disabled	BUTTON, INPUT, OPTGROUP, OPTION, SELECT, TEXTAREA	(disabled)	#IMPLIED	 	 	unavailable in this context
-enctype	FORM	%ContentType;	""application/x-www- form-urlencoded""	 	 	 
+enctype	FORM	%ContentType;	""application/x-www- form-urlencoded""
 face	BASEFONT, FONT	CDATA	#IMPLIED	D	L	comma-separated list of font names
 for	LABEL	IDREF	#IMPLIED	 	 	matches field ID value
 frame	TABLE	%TFrame;	#IMPLIED	 	 	which parts of frame to render
@@ -403,7 +387,7 @@ media	STYLE	%MediaDesc;	#IMPLIED	 	 	designed for use with these media
 media	LINK	%MediaDesc;	#IMPLIED	 	 	for rendering on these media
 method	FORM	(GET | POST)	GET	 	 	HTTP method used to submit the form
 multiple	SELECT	(multiple)	#IMPLIED	 	 	default is single selection
-name	BUTTON, TEXTAREA	CDATA	#IMPLIED	 	 	 
+name	BUTTON, TEXTAREA	CDATA	#IMPLIED
 name	APPLET	CDATA	#IMPLIED	D	L	allows applets to find each other
 name	SELECT	CDATA	#IMPLIED	 	 	field name
 name	FORM	CDATA	#IMPLIED	 	 	name of form for scripting
@@ -416,7 +400,7 @@ name	PARAM	CDATA	#REQUIRED	 	 	property name
 name	META	NAME	#IMPLIED	 	 	metainformation name
 nohref	AREA	(nohref)	#IMPLIED	 	 	this region has no action
 noresize	FRAME	(noresize)	#IMPLIED	 	F	allow users to resize frames?
-noshade	HR	(noshade)	#IMPLIED	D	L	 
+noshade	HR	(noshade)	#IMPLIED	D	L
 nowrap	TD, TH	(nowrap)	#IMPLIED	D	L	suppress word wrap
 object	APPLET	CDATA	#IMPLIED	D	L	serialized applet file
 onblur	A, AREA, BUTTON, INPUT, LABEL, SELECT, TEXTAREA	%Script;	#IMPLIED	 	 	the element lost the focus
@@ -441,21 +425,21 @@ onunload	FRAMESET	%Script;	#IMPLIED	 	F	all the frames have been removed
 onunload	BODY	%Script;	#IMPLIED	 	 	the document has been removed
 profile	HEAD	%URI;	#IMPLIED	 	 	named dictionary of meta info
 prompt	ISINDEX	%Text;	#IMPLIED	D	L	prompt message
-readonly	TEXTAREA	(readonly)	#IMPLIED	 	 	 
+readonly	TEXTAREA	(readonly)	#IMPLIED
 readonly	INPUT	(readonly)	#IMPLIED	 	 	for text and passwd
 rel	A, LINK	%LinkTypes;	#IMPLIED	 	 	forward link types
 rev	A, LINK	%LinkTypes;	#IMPLIED	 	 	reverse link types
 rows	FRAMESET	%MultiLengths;	#IMPLIED	 	F	list of lengths, default: 100% (1 row)
-rows	TEXTAREA	NUMBER	#REQUIRED	 	 	 
+rows	TEXTAREA	NUMBER	#REQUIRED
 rowspan	TD, TH	NUMBER	1	 	 	number of rows spanned by cell
 rules	TABLE	%TRules;	#IMPLIED	 	 	rulings between rows and cols
 scheme	META	CDATA	#IMPLIED	 	 	select form of content
 scope	TD, TH	%Scope;	#IMPLIED	 	 	scope covered by header cells
 scrolling	FRAME, IFRAME	(yes | no | auto)	auto	 	F	scrollbar or none
-selected	OPTION	(selected)	#IMPLIED	 	 	 
+selected	OPTION	(selected)	#IMPLIED
 shape	AREA	%Shape;	rect	 	 	controls interpretation of coords
 shape	A	%Shape;	rect	 	 	for use with client-side image maps
-size	HR	%Pixels;	#IMPLIED	D	L	 
+size	HR	%Pixels;	#IMPLIED	D	L
 size	FONT	CDATA	#IMPLIED	D	L	[+|-]nn e.g. size=""+1"", size=""4""
 size	INPUT	CDATA	#IMPLIED	 	 	specific to each type of field
 size	BASEFONT	CDATA	#REQUIRED	D	L	base font size for FONT elements
@@ -495,7 +479,7 @@ valuetype	PARAM	(DATA | REF | OBJECT)	DATA	 	 	How to interpret value
 version	HTML	CDATA	%HTML.Version;	D	L	Constant
 vlink	BODY	%Color;	#IMPLIED	D	L	color of visited links
 vspace	APPLET, IMG, OBJECT	%Pixels;	#IMPLIED	D	L	vertical gutter
-width	HR	%Length;	#IMPLIED	D	L	 
+width	HR	%Length;	#IMPLIED	D	L
 width	IFRAME	%Length;	#IMPLIED	 	L	frame width
 width	IMG, OBJECT	%Length;	#IMPLIED	 	 	override width
 width	TABLE	%Length;	#IMPLIED	 	 	table width
@@ -520,29 +504,29 @@ buildAttribute: anArray
 		ifFalse: [(key copyFrom: 1 to: index - 1) , (key copyFrom: index + 1 to: index + 1) asUppercase , (key copyFrom: index + 2 to: key size)].
 	(self duplicateSelectors includes: key) ifTrue: [selector := selector , 'Attribute'].
 	source := selector , ': anObject' , lf , tab , '"'.
-	anArray do: [:each | 
-		source add: (each at: 2) , lf , tab , tab , (each at: 3) , tab , (each at: 4) , tab , 
-			((each at: 5) = 'D' ifTrue: ['deprecated'] ifFalse: ['']) , tab , 
-			((each at: 6) = 'L' ifTrue: ['Loose DTD'] ifFalse: ['']) , tab , 
-			((each at: 6) = 'F' ifTrue: ['Frameset DTD'] ifFalse: ['']) , tab , lf , tab , tab , 
+	anArray do: [:each |
+		source add: (each at: 2) , lf , tab , tab , (each at: 3) , tab , (each at: 4) , tab ,
+			((each at: 5) = 'D' ifTrue: ['deprecated'] ifFalse: ['']) , tab ,
+			((each at: 6) = 'L' ifTrue: ['Loose DTD'] ifFalse: ['']) , tab ,
+			((each at: 6) = 'F' ifTrue: ['Frameset DTD'] ifFalse: ['']) , tab , lf , tab , tab ,
 			(each at: 7) , lf , tab.
 	].
-	source add: '(generated)"' , lf , lf , 
-		tab , 'anObject' , lf , 
+	source add: '(generated)"' , lf , lf ,
+		tab , 'anObject' , lf ,
 		tab , tab , 'ifNil: [attributes removeKey: ''' , key , ''' otherwise: nil]' , lf ,
 		tab , tab , 'ifNotNil: [attributes at: ''' , key , ''' put: '.
 	types := (anArray collect: [:each | each at: 3]) asSet.
-	source add: ((types size == 1 and: [types any = ('(' , key , ')')]) 
+	source add: ((types size == 1 and: [types any = ('(' , key , ')')])
 		ifFalse: ['anObject asString']
 		ifTrue: ['(anObject ifTrue: [''' , key , '''] ifFalse: [nil])']).
 	source add: '].' , lf.
 	[
-		self 
+		self
 			compileMethod: source
 			dictionaries: SymbolList new
 			category: 'attributes'
 			environmentId: 0.
-	] on: CompileError do: [:ex | 
+	] on: CompileError do: [:ex |
 		ex halt.
 	].
 %
@@ -553,10 +537,10 @@ buildAttributes
 	| dict list |
 	list := (self attributes subStrings: Character lf) collect: [:each | each subStrings: Character tab].
 	dict := Dictionary new.
-	list do: [:each | 
+	list do: [:each |
 		(dict at: each first ifAbsentPut: [Array new]) add: each.
 	].
-	dict keys asSortedCollection do: [:each | 
+	dict keys asSortedCollection do: [:each |
 		self buildAttribute: (dict at: each).
 	].
 %
@@ -570,18 +554,18 @@ buildDuplicateSelectors
 	lf := Character lf asString.
 	symbolList := GsCurrentSession currentSession symbolList.
 	tab := Character tab asString.
-	self duplicateSelectors do: [:each | 
-		source := each , ': anObject' , lf , tab , '"Some attribute names overlap with element names (generated method)."' , lf , lf , 
-			tab , '^(anObject isKindOf: ExecBlock)' , lf , 
-			tab , tab , 'ifTrue: [self ' , each , 'Element: anObject]' , lf , 
+	self duplicateSelectors do: [:each |
+		source := each , ': anObject' , lf , tab , '"Some attribute names overlap with element names (generated method)."' , lf , lf ,
+			tab , '^(anObject isKindOf: ExecBlock)' , lf ,
+			tab , tab , 'ifTrue: [self ' , each , 'Element: anObject]' , lf ,
 			tab , tab , 'ifFalse: [self ' , each , 'Attribute: anObject].' , lf.
 		[
-			self 
+			self
 				compileMethod: source
 				dictionaries: symbolList
 				category: 'either'
 				environmentId: 0.
-		] on: CompileError do: [:ex | 
+		] on: CompileError do: [:ex |
 			ex halt.
 		].
 	].
@@ -605,24 +589,24 @@ buildElement: aString
 	(list at: 6) = 'F' ifTrue: [source add: lf , tab , 'Frameset DTD'].
 	source add: lf , tab , '(generated method)"' , lf , lf , tab , '^self newChildWithTag: ''' , tag , '''.' , lf.
 	[
-		self 
+		self
 			compileMethod: source
 			dictionaries: SymbolList new
 			category: 'elements'
 			environmentId: 0.
-	] on: CompileError do: [:ex | 
+	] on: CompileError do: [:ex |
 		ex halt.
 	].
 
 	source := tag , ((self duplicateSelectors includes: tag) ifTrue: ['Element'] ifFalse: ['']).
 	source add: ': aBlock' , lf , lf , tab , '^aBlock value: self ' , tag , '.' , lf.
 	[
-		self 
+		self
 			compileMethod: source
 			dictionaries: GsCurrentSession currentSession symbolList
 			category: 'elements'
 			environmentId: 0.
-	] on: CompileError do: [:ex | 
+	] on: CompileError do: [:ex |
 		ex halt.
 	].
 %
@@ -630,7 +614,7 @@ category: 'code generation'
 classmethod: Html4Element
 buildElements
 
-	(self elements subStrings: Character lf) do: [:each | 
+	(self elements subStrings: Character lf) do: [:each |
 		self buildElement: each.
 	].
 %
@@ -652,7 +636,7 @@ duplicateSelectors
 	| duplicates tags |
 	duplicates := Set new.
 	tags := (self elements subStrings: Character lf) collect: [:each | (each subStrings: Character tab) first asLowercase].
-	(self attributes subStrings: Character lf) do: [:each | 
+	(self attributes subStrings: Character lf) do: [:each |
 		| attribute |
 		attribute := (each subStrings: Character tab) first.
 		(tags includes: attribute) ifTrue: [duplicates add: attribute].
@@ -665,7 +649,7 @@ elements
 
 ^'A	 	 	 	 	 	anchor
 ABBR	 	 	 	 	 	abbreviated form (e.g., WWW, HTTP, etc.)
-ACRONYM	 	 	 	 	 	 
+ACRONYM
 ADDRESS	 	 	 	 	 	information on author
 APPLET	 	 	 	D	L	Java applet
 AREA	 	F	E	 	 	client-side image map area
@@ -741,7 +725,7 @@ STRONG	 	 	 	 	 	strong emphasis
 STYLE	 	 	 	 	 	style info
 SUB	 	 	 	 	 	subscript
 SUP	 	 	 	 	 	superscript
-TABLE	 	 	 	 	 	 
+TABLE
 TBODY	O	O	 	 	 	table body
 TD	 	O	 	 	 	table data cell
 TEXTAREA	 	 	 	 	 	multi-line text field
@@ -764,7 +748,7 @@ comment
 	http://en.wikipedia.org/wiki/HTML_element
 	http://www.w3schools.com/html/html_elements.asp
 
-Although you can get a new instance using the class-side #''new'' method, the typical approach is to send the #''html'' message to get a new HTML document (an element with the tag ''html''). This top-level element is initialized with two child elements, a <head> and a <body>, accessed with the #''head'' and #''body'' messages respectively. 
+Although you can get a new instance using the class-side #''new'' method, the typical approach is to send the #''html'' message to get a new HTML document (an element with the tag ''html''). This top-level element is initialized with two child elements, a <head> and a <body>, accessed with the #''head'' and #''body'' messages respectively.
 
 You can set attributes using messages based on the attribute name (e.g., the #''class:'' message will set the element''s class attribute).
 
@@ -809,7 +793,7 @@ category: 'attributes'
 method: Html4Element
 abbrAttribute: anObject
 	"TD, TH
-		%Text;	#IMPLIED				
+		%Text;	#IMPLIED
 		abbreviation for header cell
 	(generated)"
 
@@ -821,7 +805,7 @@ category: 'attributes'
 method: Html4Element
 accept: anObject
 	"FORM, INPUT
-		%ContentTypes;	#IMPLIED				
+		%ContentTypes;	#IMPLIED
 		list of MIME types for file upload
 	(generated)"
 
@@ -833,7 +817,7 @@ category: 'attributes'
 method: Html4Element
 acceptCharset: anObject
 	"FORM
-		%Charsets;	#IMPLIED				
+		%Charsets;	#IMPLIED
 		list of supported charsets
 	(generated)"
 
@@ -845,7 +829,7 @@ category: 'attributes'
 method: Html4Element
 accesskey: anObject
 	"A, AREA, BUTTON, INPUT, LABEL, LEGEND, TEXTAREA
-		%Character;	#IMPLIED				
+		%Character;	#IMPLIED
 		accessibility key character
 	(generated)"
 
@@ -857,7 +841,7 @@ category: 'attributes'
 method: Html4Element
 action: anObject
 	"FORM
-		%URI;	#REQUIRED				
+		%URI;	#REQUIRED
 		server-side form handler
 	(generated)"
 
@@ -869,26 +853,26 @@ category: 'attributes'
 method: Html4Element
 align: anObject
 	"CAPTION
-		%CAlign;	#IMPLIED	deprecated	Loose DTD		
+		%CAlign;	#IMPLIED	deprecated	Loose DTD
 		relative to table
 	APPLET, IFRAME, IMG, INPUT, OBJECT
-		%IAlign;	#IMPLIED	deprecated	Loose DTD		
+		%IAlign;	#IMPLIED	deprecated	Loose DTD
 		vertical or horizontal alignment
 	LEGEND
-		%LAlign;	#IMPLIED	deprecated	Loose DTD		
+		%LAlign;	#IMPLIED	deprecated	Loose DTD
 		relative to fieldset
 	TABLE
-		%TAlign;	#IMPLIED	deprecated	Loose DTD		
+		%TAlign;	#IMPLIED	deprecated	Loose DTD
 		table position relative to window
 	HR
-		(left | center | right)	#IMPLIED	deprecated	Loose DTD		
-		 
+		(left | center | right)	#IMPLIED	deprecated	Loose DTD
+
 	DIV, H1, H2, H3, H4, H5, H6, P
-		(left | center | right | justify)	#IMPLIED	deprecated	Loose DTD		
+		(left | center | right | justify)	#IMPLIED	deprecated	Loose DTD
 		align, text alignment
 	COL, COLGROUP, TBODY, TD, TFOOT, TH, THEAD, TR
-		(left | center | right | justify | char)	#IMPLIED				
-		 
+		(left | center | right | justify | char)	#IMPLIED
+
 	(generated)"
 
 	anObject
@@ -899,7 +883,7 @@ category: 'attributes'
 method: Html4Element
 alink: anObject
 	"BODY
-		%Color;	#IMPLIED	deprecated	Loose DTD		
+		%Color;	#IMPLIED	deprecated	Loose DTD
 		color of selected links
 	(generated)"
 
@@ -911,13 +895,13 @@ category: 'attributes'
 method: Html4Element
 alt: anObject
 	"APPLET
-		%Text;	#IMPLIED	deprecated	Loose DTD		
+		%Text;	#IMPLIED	deprecated	Loose DTD
 		short description
 	AREA, IMG
-		%Text;	#REQUIRED				
+		%Text;	#REQUIRED
 		short description
 	INPUT
-		CDATA	#IMPLIED				
+		CDATA	#IMPLIED
 		short description
 	(generated)"
 
@@ -929,10 +913,10 @@ category: 'attributes'
 method: Html4Element
 archive: anObject
 	"APPLET
-		CDATA	#IMPLIED	deprecated	Loose DTD		
+		CDATA	#IMPLIED	deprecated	Loose DTD
 		comma-separated archive list
 	OBJECT
-		CDATA	#IMPLIED				
+		CDATA	#IMPLIED
 		space-separated list of URIs
 	(generated)"
 
@@ -944,7 +928,7 @@ category: 'attributes'
 method: Html4Element
 axis: anObject
 	"TD, TH
-		CDATA	#IMPLIED				
+		CDATA	#IMPLIED
 		comma-separated list of related headers
 	(generated)"
 
@@ -956,7 +940,7 @@ category: 'attributes'
 method: Html4Element
 background: anObject
 	"BODY
-		%URI;	#IMPLIED	deprecated	Loose DTD		
+		%URI;	#IMPLIED	deprecated	Loose DTD
 		texture tile for document background
 	(generated)"
 
@@ -968,16 +952,16 @@ category: 'attributes'
 method: Html4Element
 bgcolor: anObject
 	"TABLE
-		%Color;	#IMPLIED	deprecated	Loose DTD		
+		%Color;	#IMPLIED	deprecated	Loose DTD
 		background color for cells
 	TR
-		%Color;	#IMPLIED	deprecated	Loose DTD		
+		%Color;	#IMPLIED	deprecated	Loose DTD
 		background color for row
 	TD, TH
-		%Color;	#IMPLIED	deprecated	Loose DTD		
+		%Color;	#IMPLIED	deprecated	Loose DTD
 		cell background color
 	BODY
-		%Color;	#IMPLIED	deprecated	Loose DTD		
+		%Color;	#IMPLIED	deprecated	Loose DTD
 		document background color
 	(generated)"
 
@@ -989,10 +973,10 @@ category: 'attributes'
 method: Html4Element
 border: anObject
 	"TABLE
-		%Pixels;	#IMPLIED				
+		%Pixels;	#IMPLIED
 		controls frame width around table
 	IMG, OBJECT
-		%Pixels;	#IMPLIED	deprecated	Loose DTD		
+		%Pixels;	#IMPLIED	deprecated	Loose DTD
 		link border width
 	(generated)"
 
@@ -1004,7 +988,7 @@ category: 'attributes'
 method: Html4Element
 cellpadding: anObject
 	"TABLE
-		%Length;	#IMPLIED				
+		%Length;	#IMPLIED
 		spacing within cells
 	(generated)"
 
@@ -1016,7 +1000,7 @@ category: 'attributes'
 method: Html4Element
 cellspacing: anObject
 	"TABLE
-		%Length;	#IMPLIED				
+		%Length;	#IMPLIED
 		spacing between cells
 	(generated)"
 
@@ -1028,7 +1012,7 @@ category: 'attributes'
 method: Html4Element
 char: anObject
 	"COL, COLGROUP, TBODY, TD, TFOOT, TH, THEAD, TR
-		%Character;	#IMPLIED				
+		%Character;	#IMPLIED
 		alignment char, e.g. char=':'
 	(generated)"
 
@@ -1040,7 +1024,7 @@ category: 'attributes'
 method: Html4Element
 charoff: anObject
 	"COL, COLGROUP, TBODY, TD, TFOOT, TH, THEAD, TR
-		%Length;	#IMPLIED				
+		%Length;	#IMPLIED
 		offset for alignment char
 	(generated)"
 
@@ -1052,7 +1036,7 @@ category: 'attributes'
 method: Html4Element
 charset: anObject
 	"A, LINK, SCRIPT
-		%Charset;	#IMPLIED				
+		%Charset;	#IMPLIED
 		char encoding of linked resource
 	(generated)"
 
@@ -1064,7 +1048,7 @@ category: 'attributes'
 method: Html4Element
 checked: anObject
 	"INPUT
-		(checked)	#IMPLIED				
+		(checked)	#IMPLIED
 		for radio buttons and check boxes
 	(generated)"
 
@@ -1076,10 +1060,10 @@ category: 'attributes'
 method: Html4Element
 citeAttribute: anObject
 	"BLOCKQUOTE, Q
-		%URI;	#IMPLIED				
+		%URI;	#IMPLIED
 		URI for source document or msg
 	DEL, INS
-		%URI;	#IMPLIED				
+		%URI;	#IMPLIED
 		info on reason for change
 	(generated)"
 
@@ -1091,7 +1075,7 @@ category: 'attributes'
 method: Html4Element
 class: anObject
 	"All elements but BASE, BASEFONT, HEAD, HTML, META, PARAM, SCRIPT, STYLE, TITLE
-		CDATA	#IMPLIED				
+		CDATA	#IMPLIED
 		space-separated list of classes
 	(generated)"
 
@@ -1103,7 +1087,7 @@ category: 'attributes'
 method: Html4Element
 classid: anObject
 	"OBJECT
-		%URI;	#IMPLIED				
+		%URI;	#IMPLIED
 		identifies an implementation
 	(generated)"
 
@@ -1115,7 +1099,7 @@ category: 'attributes'
 method: Html4Element
 clear: anObject
 	"BR
-		(left | all | right | none)	none	deprecated	Loose DTD		
+		(left | all | right | none)	none	deprecated	Loose DTD
 		control of text flow
 	(generated)"
 
@@ -1127,7 +1111,7 @@ category: 'attributes'
 method: Html4Element
 codeAttribute: anObject
 	"APPLET
-		CDATA	#IMPLIED	deprecated	Loose DTD		
+		CDATA	#IMPLIED	deprecated	Loose DTD
 		applet class file
 	(generated)"
 
@@ -1139,10 +1123,10 @@ category: 'attributes'
 method: Html4Element
 codebase: anObject
 	"OBJECT
-		%URI;	#IMPLIED				
+		%URI;	#IMPLIED
 		base URI for classid, data, archive
 	APPLET
-		%URI;	#IMPLIED	deprecated	Loose DTD		
+		%URI;	#IMPLIED	deprecated	Loose DTD
 		optional base URI for applet
 	(generated)"
 
@@ -1154,7 +1138,7 @@ category: 'attributes'
 method: Html4Element
 codetype: anObject
 	"OBJECT
-		%ContentType;	#IMPLIED				
+		%ContentType;	#IMPLIED
 		content type for code
 	(generated)"
 
@@ -1166,7 +1150,7 @@ category: 'attributes'
 method: Html4Element
 color: anObject
 	"BASEFONT, FONT
-		%Color;	#IMPLIED	deprecated	Loose DTD		
+		%Color;	#IMPLIED	deprecated	Loose DTD
 		text color
 	(generated)"
 
@@ -1178,11 +1162,11 @@ category: 'attributes'
 method: Html4Element
 cols: anObject
 	"FRAMESET
-		%MultiLengths;	#IMPLIED			Frameset DTD	
+		%MultiLengths;	#IMPLIED			Frameset DTD
 		list of lengths, default: 100% (1 col)
 	TEXTAREA
-		NUMBER	#REQUIRED				
-		 
+		NUMBER	#REQUIRED
+
 	(generated)"
 
 	anObject
@@ -1193,7 +1177,7 @@ category: 'attributes'
 method: Html4Element
 colspan: anObject
 	"TD, TH
-		NUMBER	1				
+		NUMBER	1
 		number of cols spanned by cell
 	(generated)"
 
@@ -1205,7 +1189,7 @@ category: 'attributes'
 method: Html4Element
 compact: anObject
 	"DIR, DL, MENU, OL, UL
-		(compact)	#IMPLIED	deprecated	Loose DTD		
+		(compact)	#IMPLIED	deprecated	Loose DTD
 		reduced interitem spacing
 	(generated)"
 
@@ -1217,10 +1201,10 @@ category: 'attributes'
 method: Html4Element
 coords: anObject
 	"AREA
-		%Coords;	#IMPLIED				
+		%Coords;	#IMPLIED
 		comma-separated list of lengths
 	A
-		%Coords;	#IMPLIED				
+		%Coords;	#IMPLIED
 		for use with client-side image maps
 	(generated)"
 
@@ -1232,7 +1216,7 @@ category: 'attributes'
 method: Html4Element
 data: anObject
 	"OBJECT
-		%URI;	#IMPLIED				
+		%URI;	#IMPLIED
 		reference to object's data
 	(generated)"
 
@@ -1244,7 +1228,7 @@ category: 'attributes'
 method: Html4Element
 datetime: anObject
 	"DEL, INS
-		%Datetime;	#IMPLIED				
+		%Datetime;	#IMPLIED
 		date and time of change
 	(generated)"
 
@@ -1256,7 +1240,7 @@ category: 'attributes'
 method: Html4Element
 declare: anObject
 	"OBJECT
-		(declare)	#IMPLIED				
+		(declare)	#IMPLIED
 		declare but don't instantiate flag
 	(generated)"
 
@@ -1268,7 +1252,7 @@ category: 'attributes'
 method: Html4Element
 defer: anObject
 	"SCRIPT
-		(defer)	#IMPLIED				
+		(defer)	#IMPLIED
 		UA may defer execution of script
 	(generated)"
 
@@ -1280,10 +1264,10 @@ category: 'attributes'
 method: Html4Element
 dirAttribute: anObject
 	"All elements but APPLET, BASE, BASEFONT, BDO, BR, FRAME, FRAMESET, IFRAME, PARAM, SCRIPT
-		(ltr | rtl)	#IMPLIED				
+		(ltr | rtl)	#IMPLIED
 		direction for weak/neutral text
 	BDO
-		(ltr | rtl)	#REQUIRED				
+		(ltr | rtl)	#REQUIRED
 		directionality
 	(generated)"
 
@@ -1295,7 +1279,7 @@ category: 'attributes'
 method: Html4Element
 disabled: anObject
 	"BUTTON, INPUT, OPTGROUP, OPTION, SELECT, TEXTAREA
-		(disabled)	#IMPLIED				
+		(disabled)	#IMPLIED
 		unavailable in this context
 	(generated)"
 
@@ -1307,8 +1291,8 @@ category: 'attributes'
 method: Html4Element
 enctype: anObject
 	"FORM
-		%ContentType;	""application/x-www- form-urlencoded""				
-		 
+		%ContentType;	""application/x-www- form-urlencoded""
+
 	(generated)"
 
 	anObject
@@ -1319,7 +1303,7 @@ category: 'attributes'
 method: Html4Element
 face: anObject
 	"BASEFONT, FONT
-		CDATA	#IMPLIED	deprecated	Loose DTD		
+		CDATA	#IMPLIED	deprecated	Loose DTD
 		comma-separated list of font names
 	(generated)"
 
@@ -1331,7 +1315,7 @@ category: 'attributes'
 method: Html4Element
 for: anObject
 	"LABEL
-		IDREF	#IMPLIED				
+		IDREF	#IMPLIED
 		matches field ID value
 	(generated)"
 
@@ -1343,7 +1327,7 @@ category: 'attributes'
 method: Html4Element
 frameAttribute: anObject
 	"TABLE
-		%TFrame;	#IMPLIED				
+		%TFrame;	#IMPLIED
 		which parts of frame to render
 	(generated)"
 
@@ -1355,7 +1339,7 @@ category: 'attributes'
 method: Html4Element
 frameborder: anObject
 	"FRAME, IFRAME
-		(1 | 0)	1			Frameset DTD	
+		(1 | 0)	1			Frameset DTD
 		request frame borders?
 	(generated)"
 
@@ -1367,7 +1351,7 @@ category: 'attributes'
 method: Html4Element
 headers: anObject
 	"TD, TH
-		IDREFS	#IMPLIED				
+		IDREFS	#IMPLIED
 		list of id's for header cells
 	(generated)"
 
@@ -1379,16 +1363,16 @@ category: 'attributes'
 method: Html4Element
 height: anObject
 	"IFRAME
-		%Length;	#IMPLIED		Loose DTD		
+		%Length;	#IMPLIED		Loose DTD
 		frame height
 	TD, TH
-		%Length;	#IMPLIED	deprecated	Loose DTD		
+		%Length;	#IMPLIED	deprecated	Loose DTD
 		height for cell
 	IMG, OBJECT
-		%Length;	#IMPLIED				
+		%Length;	#IMPLIED
 		override height
 	APPLET
-		%Length;	#REQUIRED	deprecated	Loose DTD		
+		%Length;	#REQUIRED	deprecated	Loose DTD
 		initial height
 	(generated)"
 
@@ -1406,10 +1390,10 @@ category: 'attributes'
 method: Html4Element
 href: anObject
 	"A, AREA, LINK
-		%URI;	#IMPLIED				
+		%URI;	#IMPLIED
 		URI for linked resource
 	BASE
-		%URI;	#IMPLIED				
+		%URI;	#IMPLIED
 		URI that acts as base URI
 	(generated)"
 
@@ -1421,7 +1405,7 @@ category: 'attributes'
 method: Html4Element
 hreflang: anObject
 	"A, LINK
-		%LanguageCode;	#IMPLIED				
+		%LanguageCode;	#IMPLIED
 		language code
 	(generated)"
 
@@ -1433,7 +1417,7 @@ category: 'attributes'
 method: Html4Element
 hspace: anObject
 	"APPLET, IMG, OBJECT
-		%Pixels;	#IMPLIED	deprecated	Loose DTD		
+		%Pixels;	#IMPLIED	deprecated	Loose DTD
 		horizontal gutter
 	(generated)"
 
@@ -1445,7 +1429,7 @@ category: 'attributes'
 method: Html4Element
 httpEquiv: anObject
 	"META
-		NAME	#IMPLIED				
+		NAME	#IMPLIED
 		HTTP response header name
 	(generated)"
 
@@ -1457,7 +1441,7 @@ category: 'attributes'
 method: Html4Element
 id: anObject
 	"All elements but BASE, HEAD, HTML, META, SCRIPT, STYLE, TITLE
-		ID	#IMPLIED				
+		ID	#IMPLIED
 		document-wide unique id
 	(generated)"
 
@@ -1469,7 +1453,7 @@ category: 'attributes'
 method: Html4Element
 ismap: anObject
 	"IMG, INPUT
-		(ismap)	#IMPLIED				
+		(ismap)	#IMPLIED
 		use server-side image map
 	(generated)"
 
@@ -1481,10 +1465,10 @@ category: 'attributes'
 method: Html4Element
 labelAttribute: anObject
 	"OPTION
-		%Text;	#IMPLIED				
+		%Text;	#IMPLIED
 		for use in hierarchical menus
 	OPTGROUP
-		%Text;	#REQUIRED				
+		%Text;	#REQUIRED
 		for use in hierarchical menus
 	(generated)"
 
@@ -1496,7 +1480,7 @@ category: 'attributes'
 method: Html4Element
 lang: anObject
 	"All elements but APPLET, BASE, BASEFONT, BR, FRAME, FRAMESET, IFRAME, PARAM, SCRIPT
-		%LanguageCode;	#IMPLIED				
+		%LanguageCode;	#IMPLIED
 		language code
 	(generated)"
 
@@ -1508,7 +1492,7 @@ category: 'attributes'
 method: Html4Element
 language: anObject
 	"SCRIPT
-		CDATA	#IMPLIED	deprecated	Loose DTD		
+		CDATA	#IMPLIED	deprecated	Loose DTD
 		predefined script language name
 	(generated)"
 
@@ -1520,7 +1504,7 @@ category: 'attributes'
 method: Html4Element
 linkAttribute: anObject
 	"BODY
-		%Color;	#IMPLIED	deprecated	Loose DTD		
+		%Color;	#IMPLIED	deprecated	Loose DTD
 		color of links
 	(generated)"
 
@@ -1532,10 +1516,10 @@ category: 'attributes'
 method: Html4Element
 longdesc: anObject
 	"IMG
-		%URI;	#IMPLIED				
+		%URI;	#IMPLIED
 		link to long description (complements alt)
 	FRAME, IFRAME
-		%URI;	#IMPLIED			Frameset DTD	
+		%URI;	#IMPLIED			Frameset DTD
 		link to long description (complements title)
 	(generated)"
 
@@ -1547,7 +1531,7 @@ category: 'attributes'
 method: Html4Element
 marginheight: anObject
 	"FRAME, IFRAME
-		%Pixels;	#IMPLIED			Frameset DTD	
+		%Pixels;	#IMPLIED			Frameset DTD
 		margin height in pixels
 	(generated)"
 
@@ -1559,7 +1543,7 @@ category: 'attributes'
 method: Html4Element
 marginwidth: anObject
 	"FRAME, IFRAME
-		%Pixels;	#IMPLIED			Frameset DTD	
+		%Pixels;	#IMPLIED			Frameset DTD
 		margin widths in pixels
 	(generated)"
 
@@ -1571,7 +1555,7 @@ category: 'attributes'
 method: Html4Element
 maxlength: anObject
 	"INPUT
-		NUMBER	#IMPLIED				
+		NUMBER	#IMPLIED
 		max chars for text fields
 	(generated)"
 
@@ -1583,10 +1567,10 @@ category: 'attributes'
 method: Html4Element
 media: anObject
 	"STYLE
-		%MediaDesc;	#IMPLIED				
+		%MediaDesc;	#IMPLIED
 		designed for use with these media
 	LINK
-		%MediaDesc;	#IMPLIED				
+		%MediaDesc;	#IMPLIED
 		for rendering on these media
 	(generated)"
 
@@ -1598,7 +1582,7 @@ category: 'attributes'
 method: Html4Element
 method: anObject
 	"FORM
-		(GET | POST)	GET				
+		(GET | POST)	GET
 		HTTP method used to submit the form
 	(generated)"
 
@@ -1610,7 +1594,7 @@ category: 'attributes'
 method: Html4Element
 multiple: anObject
 	"SELECT
-		(multiple)	#IMPLIED				
+		(multiple)	#IMPLIED
 		default is single selection
 	(generated)"
 
@@ -1622,37 +1606,37 @@ category: 'attributes'
 method: Html4Element
 name: anObject
 	"BUTTON, TEXTAREA
-		CDATA	#IMPLIED				
-		 
+		CDATA	#IMPLIED
+
 	APPLET
-		CDATA	#IMPLIED	deprecated	Loose DTD		
+		CDATA	#IMPLIED	deprecated	Loose DTD
 		allows applets to find each other
 	SELECT
-		CDATA	#IMPLIED				
+		CDATA	#IMPLIED
 		field name
 	FORM
-		CDATA	#IMPLIED				
+		CDATA	#IMPLIED
 		name of form for scripting
 	FRAME, IFRAME
-		CDATA	#IMPLIED			Frameset DTD	
+		CDATA	#IMPLIED			Frameset DTD
 		name of frame for targetting
 	IMG
-		CDATA	#IMPLIED				
+		CDATA	#IMPLIED
 		name of image for scripting
 	A
-		CDATA	#IMPLIED				
+		CDATA	#IMPLIED
 		named link end
 	INPUT, OBJECT
-		CDATA	#IMPLIED				
+		CDATA	#IMPLIED
 		submit as part of form
 	MAP
-		CDATA	#REQUIRED				
+		CDATA	#REQUIRED
 		for reference by usemap
 	PARAM
-		CDATA	#REQUIRED				
+		CDATA	#REQUIRED
 		property name
 	META
-		NAME	#IMPLIED				
+		NAME	#IMPLIED
 		metainformation name
 	(generated)"
 
@@ -1664,7 +1648,7 @@ category: 'attributes'
 method: Html4Element
 nohref: anObject
 	"AREA
-		(nohref)	#IMPLIED				
+		(nohref)	#IMPLIED
 		this region has no action
 	(generated)"
 
@@ -1676,7 +1660,7 @@ category: 'attributes'
 method: Html4Element
 noresize: anObject
 	"FRAME
-		(noresize)	#IMPLIED			Frameset DTD	
+		(noresize)	#IMPLIED			Frameset DTD
 		allow users to resize frames?
 	(generated)"
 
@@ -1688,8 +1672,8 @@ category: 'attributes'
 method: Html4Element
 noshade: anObject
 	"HR
-		(noshade)	#IMPLIED	deprecated	Loose DTD		
-		 
+		(noshade)	#IMPLIED	deprecated	Loose DTD
+
 	(generated)"
 
 	anObject
@@ -1700,7 +1684,7 @@ category: 'attributes'
 method: Html4Element
 nowrap: anObject
 	"TD, TH
-		(nowrap)	#IMPLIED	deprecated	Loose DTD		
+		(nowrap)	#IMPLIED	deprecated	Loose DTD
 		suppress word wrap
 	(generated)"
 
@@ -1712,7 +1696,7 @@ category: 'attributes'
 method: Html4Element
 objectAttribute: anObject
 	"APPLET
-		CDATA	#IMPLIED	deprecated	Loose DTD		
+		CDATA	#IMPLIED	deprecated	Loose DTD
 		serialized applet file
 	(generated)"
 
@@ -1724,7 +1708,7 @@ category: 'attributes'
 method: Html4Element
 onblur: anObject
 	"A, AREA, BUTTON, INPUT, LABEL, SELECT, TEXTAREA
-		%Script;	#IMPLIED				
+		%Script;	#IMPLIED
 		the element lost the focus
 	(generated)"
 
@@ -1736,7 +1720,7 @@ category: 'attributes'
 method: Html4Element
 onchange: anObject
 	"INPUT, SELECT, TEXTAREA
-		%Script;	#IMPLIED				
+		%Script;	#IMPLIED
 		the element value was changed
 	(generated)"
 
@@ -1748,7 +1732,7 @@ category: 'attributes'
 method: Html4Element
 onclick: anObject
 	"All elements but APPLET, BASE, BASEFONT, BDO, BR, FONT, FRAME, FRAMESET, HEAD, HTML, IFRAME, ISINDEX, META, PARAM, SCRIPT, STYLE, TITLE
-		%Script;	#IMPLIED				
+		%Script;	#IMPLIED
 		a pointer button was clicked
 	(generated)"
 
@@ -1760,7 +1744,7 @@ category: 'attributes'
 method: Html4Element
 ondblclick: anObject
 	"All elements but APPLET, BASE, BASEFONT, BDO, BR, FONT, FRAME, FRAMESET, HEAD, HTML, IFRAME, ISINDEX, META, PARAM, SCRIPT, STYLE, TITLE
-		%Script;	#IMPLIED				
+		%Script;	#IMPLIED
 		a pointer button was double clicked
 	(generated)"
 
@@ -1772,7 +1756,7 @@ category: 'attributes'
 method: Html4Element
 onfocus: anObject
 	"A, AREA, BUTTON, INPUT, LABEL, SELECT, TEXTAREA
-		%Script;	#IMPLIED				
+		%Script;	#IMPLIED
 		the element got the focus
 	(generated)"
 
@@ -1784,7 +1768,7 @@ category: 'attributes'
 method: Html4Element
 onkeydown: anObject
 	"All elements but APPLET, BASE, BASEFONT, BDO, BR, FONT, FRAME, FRAMESET, HEAD, HTML, IFRAME, ISINDEX, META, PARAM, SCRIPT, STYLE, TITLE
-		%Script;	#IMPLIED				
+		%Script;	#IMPLIED
 		a key was pressed down
 	(generated)"
 
@@ -1796,7 +1780,7 @@ category: 'attributes'
 method: Html4Element
 onkeypress: anObject
 	"All elements but APPLET, BASE, BASEFONT, BDO, BR, FONT, FRAME, FRAMESET, HEAD, HTML, IFRAME, ISINDEX, META, PARAM, SCRIPT, STYLE, TITLE
-		%Script;	#IMPLIED				
+		%Script;	#IMPLIED
 		a key was pressed and released
 	(generated)"
 
@@ -1808,7 +1792,7 @@ category: 'attributes'
 method: Html4Element
 onkeyup: anObject
 	"All elements but APPLET, BASE, BASEFONT, BDO, BR, FONT, FRAME, FRAMESET, HEAD, HTML, IFRAME, ISINDEX, META, PARAM, SCRIPT, STYLE, TITLE
-		%Script;	#IMPLIED				
+		%Script;	#IMPLIED
 		a key was released
 	(generated)"
 
@@ -1820,10 +1804,10 @@ category: 'attributes'
 method: Html4Element
 onload: anObject
 	"FRAMESET
-		%Script;	#IMPLIED			Frameset DTD	
+		%Script;	#IMPLIED			Frameset DTD
 		all the frames have been loaded
 	BODY
-		%Script;	#IMPLIED				
+		%Script;	#IMPLIED
 		the document has been loaded
 	(generated)"
 
@@ -1835,7 +1819,7 @@ category: 'attributes'
 method: Html4Element
 onmousedown: anObject
 	"All elements but APPLET, BASE, BASEFONT, BDO, BR, FONT, FRAME, FRAMESET, HEAD, HTML, IFRAME, ISINDEX, META, PARAM, SCRIPT, STYLE, TITLE
-		%Script;	#IMPLIED				
+		%Script;	#IMPLIED
 		a pointer button was pressed down
 	(generated)"
 
@@ -1847,7 +1831,7 @@ category: 'attributes'
 method: Html4Element
 onmousemove: anObject
 	"All elements but APPLET, BASE, BASEFONT, BDO, BR, FONT, FRAME, FRAMESET, HEAD, HTML, IFRAME, ISINDEX, META, PARAM, SCRIPT, STYLE, TITLE
-		%Script;	#IMPLIED				
+		%Script;	#IMPLIED
 		a pointer was moved within
 	(generated)"
 
@@ -1859,7 +1843,7 @@ category: 'attributes'
 method: Html4Element
 onmouseout: anObject
 	"All elements but APPLET, BASE, BASEFONT, BDO, BR, FONT, FRAME, FRAMESET, HEAD, HTML, IFRAME, ISINDEX, META, PARAM, SCRIPT, STYLE, TITLE
-		%Script;	#IMPLIED				
+		%Script;	#IMPLIED
 		a pointer was moved away
 	(generated)"
 
@@ -1871,7 +1855,7 @@ category: 'attributes'
 method: Html4Element
 onmouseover: anObject
 	"All elements but APPLET, BASE, BASEFONT, BDO, BR, FONT, FRAME, FRAMESET, HEAD, HTML, IFRAME, ISINDEX, META, PARAM, SCRIPT, STYLE, TITLE
-		%Script;	#IMPLIED				
+		%Script;	#IMPLIED
 		a pointer was moved onto
 	(generated)"
 
@@ -1883,7 +1867,7 @@ category: 'attributes'
 method: Html4Element
 onmouseup: anObject
 	"All elements but APPLET, BASE, BASEFONT, BDO, BR, FONT, FRAME, FRAMESET, HEAD, HTML, IFRAME, ISINDEX, META, PARAM, SCRIPT, STYLE, TITLE
-		%Script;	#IMPLIED				
+		%Script;	#IMPLIED
 		a pointer button was released
 	(generated)"
 
@@ -1895,7 +1879,7 @@ category: 'attributes'
 method: Html4Element
 onreset: anObject
 	"FORM
-		%Script;	#IMPLIED				
+		%Script;	#IMPLIED
 		the form was reset
 	(generated)"
 
@@ -1907,7 +1891,7 @@ category: 'attributes'
 method: Html4Element
 onselect: anObject
 	"INPUT, TEXTAREA
-		%Script;	#IMPLIED				
+		%Script;	#IMPLIED
 		some text was selected
 	(generated)"
 
@@ -1919,7 +1903,7 @@ category: 'attributes'
 method: Html4Element
 onsubmit: anObject
 	"FORM
-		%Script;	#IMPLIED				
+		%Script;	#IMPLIED
 		the form was submitted
 	(generated)"
 
@@ -1931,10 +1915,10 @@ category: 'attributes'
 method: Html4Element
 onunload: anObject
 	"FRAMESET
-		%Script;	#IMPLIED			Frameset DTD	
+		%Script;	#IMPLIED			Frameset DTD
 		all the frames have been removed
 	BODY
-		%Script;	#IMPLIED				
+		%Script;	#IMPLIED
 		the document has been removed
 	(generated)"
 
@@ -1946,7 +1930,7 @@ category: 'attributes'
 method: Html4Element
 profile: anObject
 	"HEAD
-		%URI;	#IMPLIED				
+		%URI;	#IMPLIED
 		named dictionary of meta info
 	(generated)"
 
@@ -1958,7 +1942,7 @@ category: 'attributes'
 method: Html4Element
 prompt: anObject
 	"ISINDEX
-		%Text;	#IMPLIED	deprecated	Loose DTD		
+		%Text;	#IMPLIED	deprecated	Loose DTD
 		prompt message
 	(generated)"
 
@@ -1970,10 +1954,10 @@ category: 'attributes'
 method: Html4Element
 readonly: anObject
 	"TEXTAREA
-		(readonly)	#IMPLIED				
-		 
+		(readonly)	#IMPLIED
+
 	INPUT
-		(readonly)	#IMPLIED				
+		(readonly)	#IMPLIED
 		for text and passwd
 	(generated)"
 
@@ -1985,7 +1969,7 @@ category: 'attributes'
 method: Html4Element
 rel: anObject
 	"A, LINK
-		%LinkTypes;	#IMPLIED				
+		%LinkTypes;	#IMPLIED
 		forward link types
 	(generated)"
 
@@ -1997,7 +1981,7 @@ category: 'attributes'
 method: Html4Element
 rev: anObject
 	"A, LINK
-		%LinkTypes;	#IMPLIED				
+		%LinkTypes;	#IMPLIED
 		reverse link types
 	(generated)"
 
@@ -2009,11 +1993,11 @@ category: 'attributes'
 method: Html4Element
 rows: anObject
 	"FRAMESET
-		%MultiLengths;	#IMPLIED			Frameset DTD	
+		%MultiLengths;	#IMPLIED			Frameset DTD
 		list of lengths, default: 100% (1 row)
 	TEXTAREA
-		NUMBER	#REQUIRED				
-		 
+		NUMBER	#REQUIRED
+
 	(generated)"
 
 	anObject
@@ -2024,7 +2008,7 @@ category: 'attributes'
 method: Html4Element
 rowspan: anObject
 	"TD, TH
-		NUMBER	1				
+		NUMBER	1
 		number of rows spanned by cell
 	(generated)"
 
@@ -2036,7 +2020,7 @@ category: 'attributes'
 method: Html4Element
 rules: anObject
 	"TABLE
-		%TRules;	#IMPLIED				
+		%TRules;	#IMPLIED
 		rulings between rows and cols
 	(generated)"
 
@@ -2048,7 +2032,7 @@ category: 'attributes'
 method: Html4Element
 scheme: anObject
 	"META
-		CDATA	#IMPLIED				
+		CDATA	#IMPLIED
 		select form of content
 	(generated)"
 
@@ -2060,7 +2044,7 @@ category: 'attributes'
 method: Html4Element
 scope: anObject
 	"TD, TH
-		%Scope;	#IMPLIED				
+		%Scope;	#IMPLIED
 		scope covered by header cells
 	(generated)"
 
@@ -2072,7 +2056,7 @@ category: 'attributes'
 method: Html4Element
 scrolling: anObject
 	"FRAME, IFRAME
-		(yes | no | auto)	auto			Frameset DTD	
+		(yes | no | auto)	auto			Frameset DTD
 		scrollbar or none
 	(generated)"
 
@@ -2084,8 +2068,8 @@ category: 'attributes'
 method: Html4Element
 selected: anObject
 	"OPTION
-		(selected)	#IMPLIED				
-		 
+		(selected)	#IMPLIED
+
 	(generated)"
 
 	anObject
@@ -2096,10 +2080,10 @@ category: 'attributes'
 method: Html4Element
 shape: anObject
 	"AREA
-		%Shape;	rect				
+		%Shape;	rect
 		controls interpretation of coords
 	A
-		%Shape;	rect				
+		%Shape;	rect
 		for use with client-side image maps
 	(generated)"
 
@@ -2111,19 +2095,19 @@ category: 'attributes'
 method: Html4Element
 size: anObject
 	"HR
-		%Pixels;	#IMPLIED	deprecated	Loose DTD		
-		 
+		%Pixels;	#IMPLIED	deprecated	Loose DTD
+
 	FONT
-		CDATA	#IMPLIED	deprecated	Loose DTD		
+		CDATA	#IMPLIED	deprecated	Loose DTD
 		[+|-]nn e.g. size=""+1"", size=""4""
 	INPUT
-		CDATA	#IMPLIED				
+		CDATA	#IMPLIED
 		specific to each type of field
 	BASEFONT
-		CDATA	#REQUIRED	deprecated	Loose DTD		
+		CDATA	#REQUIRED	deprecated	Loose DTD
 		base font size for FONT elements
 	SELECT
-		NUMBER	#IMPLIED				
+		NUMBER	#IMPLIED
 		rows visible
 	(generated)"
 
@@ -2135,10 +2119,10 @@ category: 'attributes'
 method: Html4Element
 spanAttribute: anObject
 	"COL
-		NUMBER	1				
+		NUMBER	1
 		COL attributes affect N columns
 	COLGROUP
-		NUMBER	1				
+		NUMBER	1
 		default number of columns in group
 	(generated)"
 
@@ -2150,16 +2134,16 @@ category: 'attributes'
 method: Html4Element
 src: anObject
 	"SCRIPT
-		%URI;	#IMPLIED				
+		%URI;	#IMPLIED
 		URI for an external script
 	INPUT
-		%URI;	#IMPLIED				
+		%URI;	#IMPLIED
 		for fields with images
 	FRAME, IFRAME
-		%URI;	#IMPLIED			Frameset DTD	
+		%URI;	#IMPLIED			Frameset DTD
 		source of frame content
 	IMG
-		%URI;	#REQUIRED				
+		%URI;	#REQUIRED
 		URI of image to embed
 	(generated)"
 
@@ -2171,7 +2155,7 @@ category: 'attributes'
 method: Html4Element
 standby: anObject
 	"OBJECT
-		%Text;	#IMPLIED				
+		%Text;	#IMPLIED
 		message to show while loading
 	(generated)"
 
@@ -2183,7 +2167,7 @@ category: 'attributes'
 method: Html4Element
 start: anObject
 	"OL
-		NUMBER	#IMPLIED	deprecated	Loose DTD		
+		NUMBER	#IMPLIED	deprecated	Loose DTD
 		starting sequence number
 	(generated)"
 
@@ -2195,7 +2179,7 @@ category: 'attributes'
 method: Html4Element
 styleAttribute: anObject
 	"All elements but BASE, BASEFONT, HEAD, HTML, META, PARAM, SCRIPT, STYLE, TITLE
-		%StyleSheet;	#IMPLIED				
+		%StyleSheet;	#IMPLIED
 		associated style info
 	(generated)"
 
@@ -2207,7 +2191,7 @@ category: 'attributes'
 method: Html4Element
 summary: anObject
 	"TABLE
-		%Text;	#IMPLIED				
+		%Text;	#IMPLIED
 		purpose/structure for speech output
 	(generated)"
 
@@ -2219,7 +2203,7 @@ category: 'attributes'
 method: Html4Element
 tabindex: anObject
 	"A, AREA, BUTTON, INPUT, OBJECT, SELECT, TEXTAREA
-		NUMBER	#IMPLIED				
+		NUMBER	#IMPLIED
 		position in tabbing order
 	(generated)"
 
@@ -2231,7 +2215,7 @@ category: 'attributes'
 method: Html4Element
 target: anObject
 	"A, AREA, BASE, FORM, LINK
-		%FrameTarget;	#IMPLIED		Loose DTD		
+		%FrameTarget;	#IMPLIED		Loose DTD
 		render in this frame
 	(generated)"
 
@@ -2243,7 +2227,7 @@ category: 'attributes'
 method: Html4Element
 text: anObject
 	"BODY
-		%Color;	#IMPLIED	deprecated	Loose DTD		
+		%Color;	#IMPLIED	deprecated	Loose DTD
 		document text color
 	(generated)"
 
@@ -2255,7 +2239,7 @@ category: 'attributes'
 method: Html4Element
 titleAttribute: anObject
 	"All elements but BASE, BASEFONT, HEAD, HTML, META, PARAM, SCRIPT, TITLE
-		%Text;	#IMPLIED				
+		%Text;	#IMPLIED
 		advisory title
 	(generated)"
 
@@ -2267,34 +2251,34 @@ category: 'attributes'
 method: Html4Element
 type: anObject
 	"A, LINK
-		%ContentType;	#IMPLIED				
+		%ContentType;	#IMPLIED
 		advisory content type
 	OBJECT
-		%ContentType;	#IMPLIED				
+		%ContentType;	#IMPLIED
 		content type for data
 	PARAM
-		%ContentType;	#IMPLIED				
+		%ContentType;	#IMPLIED
 		content type for value when valuetype=ref
 	SCRIPT
-		%ContentType;	#REQUIRED				
+		%ContentType;	#REQUIRED
 		content type of script language
 	STYLE
-		%ContentType;	#REQUIRED				
+		%ContentType;	#REQUIRED
 		content type of style language
 	INPUT
-		%InputType;	TEXT				
+		%InputType;	TEXT
 		what kind of widget is needed
 	LI
-		%LIStyle;	#IMPLIED	deprecated	Loose DTD		
+		%LIStyle;	#IMPLIED	deprecated	Loose DTD
 		list item style
 	OL
-		%OLStyle;	#IMPLIED	deprecated	Loose DTD		
+		%OLStyle;	#IMPLIED	deprecated	Loose DTD
 		numbering style
 	UL
-		%ULStyle;	#IMPLIED	deprecated	Loose DTD		
+		%ULStyle;	#IMPLIED	deprecated	Loose DTD
 		bullet style
 	BUTTON
-		(button | submit | reset)	submit				
+		(button | submit | reset)	submit
 		for use as form button
 	(generated)"
 
@@ -2306,7 +2290,7 @@ category: 'attributes'
 method: Html4Element
 usemap: anObject
 	"IMG, INPUT, OBJECT
-		%URI;	#IMPLIED				
+		%URI;	#IMPLIED
 		use client-side image map
 	(generated)"
 
@@ -2318,7 +2302,7 @@ category: 'attributes'
 method: Html4Element
 valign: anObject
 	"COL, COLGROUP, TBODY, TD, TFOOT, TH, THEAD, TR
-		(top | middle | bottom | baseline)	#IMPLIED				
+		(top | middle | bottom | baseline)	#IMPLIED
 		vertical alignment in cells
 	(generated)"
 
@@ -2330,19 +2314,19 @@ category: 'attributes'
 method: Html4Element
 value: anObject
 	"INPUT
-		CDATA	#IMPLIED				
+		CDATA	#IMPLIED
 		Specify for radio buttons and checkboxes
 	OPTION
-		CDATA	#IMPLIED				
+		CDATA	#IMPLIED
 		defaults to element content
 	PARAM
-		CDATA	#IMPLIED				
+		CDATA	#IMPLIED
 		property value
 	BUTTON
-		CDATA	#IMPLIED				
+		CDATA	#IMPLIED
 		sent to server when submitted
 	LI
-		NUMBER	#IMPLIED	deprecated	Loose DTD		
+		NUMBER	#IMPLIED	deprecated	Loose DTD
 		reset sequence number
 	(generated)"
 
@@ -2354,7 +2338,7 @@ category: 'attributes'
 method: Html4Element
 valuetype: anObject
 	"PARAM
-		(DATA | REF | OBJECT)	DATA				
+		(DATA | REF | OBJECT)	DATA
 		How to interpret value
 	(generated)"
 
@@ -2366,7 +2350,7 @@ category: 'attributes'
 method: Html4Element
 version: anObject
 	"HTML
-		CDATA	%HTML.Version;	deprecated	Loose DTD		
+		CDATA	%HTML.Version;	deprecated	Loose DTD
 		Constant
 	(generated)"
 
@@ -2378,7 +2362,7 @@ category: 'attributes'
 method: Html4Element
 vlink: anObject
 	"BODY
-		%Color;	#IMPLIED	deprecated	Loose DTD		
+		%Color;	#IMPLIED	deprecated	Loose DTD
 		color of visited links
 	(generated)"
 
@@ -2390,7 +2374,7 @@ category: 'attributes'
 method: Html4Element
 vspace: anObject
 	"APPLET, IMG, OBJECT
-		%Pixels;	#IMPLIED	deprecated	Loose DTD		
+		%Pixels;	#IMPLIED	deprecated	Loose DTD
 		vertical gutter
 	(generated)"
 
@@ -2402,32 +2386,32 @@ category: 'attributes'
 method: Html4Element
 width: anObject
 	"HR
-		%Length;	#IMPLIED	deprecated	Loose DTD		
-		 
+		%Length;	#IMPLIED	deprecated	Loose DTD
+
 	IFRAME
-		%Length;	#IMPLIED		Loose DTD		
+		%Length;	#IMPLIED		Loose DTD
 		frame width
 	IMG, OBJECT
-		%Length;	#IMPLIED				
+		%Length;	#IMPLIED
 		override width
 	TABLE
-		%Length;	#IMPLIED				
+		%Length;	#IMPLIED
 		table width
 	TD, TH
-		%Length;	#IMPLIED	deprecated	Loose DTD		
+		%Length;	#IMPLIED	deprecated	Loose DTD
 		width for cell
 	APPLET
-		%Length;	#REQUIRED	deprecated	Loose DTD		
+		%Length;	#REQUIRED	deprecated	Loose DTD
 		initial width
 	COL
-		%MultiLength;	#IMPLIED				
+		%MultiLength;	#IMPLIED
 		column width specification
 	COLGROUP
-		%MultiLength;	#IMPLIED				
+		%MultiLength;	#IMPLIED
 		default width for enclosed COLs
 	PRE
-		NUMBER	#IMPLIED	deprecated	Loose DTD		
-		
+		NUMBER	#IMPLIED	deprecated	Loose DTD
+
 	(generated)"
 
 	anObject
@@ -2566,7 +2550,7 @@ abbrElement: aBlock
 category: 'elements'
 method: Html4Element
 acronym
-	" 
+	"
 	(generated method)"
 
 	^self newChildWithTag: 'acronym'.
@@ -3665,7 +3649,7 @@ sup: aBlock
 category: 'elements'
 method: Html4Element
 table
-	" 
+	"
 	(generated method)"
 
 	^self newChildWithTag: 'table'.
@@ -3914,11 +3898,11 @@ category: 'other'
 method: Html4Element
 content: anObject
 	"META
-		CDATA	#REQUIRED				
+		CDATA	#REQUIRED
 		associated information
 	otherwise, element content"
 
-	tag = 'meta' 
+	tag = 'meta'
 		ifFalse: [self addChild: anObject asString]
 		ifTrue: [anObject
 			ifNil: [attributes removeKey: 'content' otherwise: nil]
@@ -3935,8 +3919,8 @@ category: 'other'
 method: Html4Element
 id
 
-	^attributes 
-		at: 'id' 
+	^attributes
+		at: 'id'
 		ifAbsentPut: ['id' , self asOop printString].
 %
 category: 'other'
@@ -3949,7 +3933,7 @@ category: 'other'
 method: Html4Element
 if: aBoolean then: trueBlock else: falseBlock
 
-	aBoolean 
+	aBoolean
 		ifTrue: trueBlock
 		ifFalse: falseBlock.
 %
@@ -4001,7 +3985,7 @@ scriptForFunctionNamed: aString
 	string := aString.
 	(index := string indexOf: $( ) == 0 ifTrue: [string := aString , '()'. index := aString size + 1].
 	name := string copyFrom: 1 to: index - 1.
-	child := children 
+	child := children
 		detect: [:each | (each key copyFrom: 1 to: (each key size min: name size)) = name]
 		ifNone: [children add: string -> String new].
 	child key = string ifFalse: [self error: 'Function argument names are inconsistent: ' , child key printString , ' vs. ' , string printString , '!'].
@@ -4013,7 +3997,7 @@ scriptForVariables
 
 	| child |
 	tag = 'script' ifFalse: [self error: 'Should only be called on a <script> element'].
-	child := children 
+	child := children
 		detect: [:each | each key = '']
 		ifNone: [children add: '' -> String new].
 	^child value.
@@ -4083,7 +4067,7 @@ printOn: aStream level: anInteger
 		nextPut: $<;
 		nextPutAll: tag;
 		yourself.
-	attributes keysAndValuesDo: [:key :value | 
+	attributes keysAndValuesDo: [:key :value |
 		(value notNil and: [value notEmpty]) ifTrue: [
 			(value isKindOf: String) ifFalse: [self error: 'Key ' , key printString , ' has value of ' , value printString , ' instead of a String'].
 			aStream
@@ -4105,7 +4089,7 @@ printOn: aStream level: anInteger
 	]."
 	aStream nextPut: $>.
 	tag = 'style' ifTrue: [
-		children do: [:each | 
+		children do: [:each |
 			self prettyPrintOn: aStream level: anInteger.
 			aStream nextPutAll: each
 		].	"should only be strings, and don't bother encoding"
@@ -4121,7 +4105,7 @@ printOn: aStream level: anInteger
 		each printOn: aStream level: nextLevel]]].
 	].
 	self prettyPrintOn: aStream level: anInteger.
-	aStream 
+	aStream
 		nextPutAll: '</';
 		nextPutAll: tag;
 		nextPut: $>;
@@ -4133,7 +4117,7 @@ printScriptOn: aStream level: anInteger
 
 	self prettyPrintOn: aStream level: anInteger.
 	aStream nextPutAll: '<script type="text/javascript"><!--'; lf.
-	children do: [:each | 
+	children do: [:each |
 		each key = '' ifTrue: [
 			aStream nextPutAll: each value.
 		] ifFalse: [
@@ -4156,7 +4140,7 @@ printString
 
 	| ws str |
 	str := String new.
-	ws := PrintStream printingOn: str maxSize: 1000000.  
+	ws := PrintStream printingOn: str maxSize: 1000000.
 	self printOn: ws.
 	^ ws _collection
 %
@@ -4200,14 +4184,14 @@ method: Html4Element
 printStyleOn: aStream
 
 	aStream nextPutAll: '<style type="text/css">'; lf.
-	children do: [:each | 
+	children do: [:each |
 		aStream nextPutAll: each; lf.
 	].
 	aStream nextPutAll: '</style>'.
 %
 
 ! ------------------- Remove existing behavior from HtmlElement
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
 HtmlElement removeAllMethods.
 HtmlElement class removeAllMethods.
@@ -4252,8 +4236,8 @@ labelWithContent: aString
 	| addSpaceFlag |
 	aString isNil ifTrue: [^self].
 	addSpaceFlag := false.
-	^self label: [:label |  
-		aString subStrings do: [:each | 
+	^self label: [:label |
+		aString subStrings do: [:each |
 			addSpaceFlag ifTrue: [label space].
 			label content: each.
 			addSpaceFlag := true.
@@ -4369,9 +4353,9 @@ method: HtmlElement
 optionWithValue: valueString isSelected: aBoolean content: textString
 
 	^self
-		optionWithValue: valueString 
-		isSelected: aBoolean 
-		isDisabled: false 
+		optionWithValue: valueString
+		isSelected: aBoolean
+		isDisabled: false
 		content: textString.
 %
 category: 'Children-Form-Input'
@@ -4472,14 +4456,14 @@ method: HtmlElement
 textInputNamed: nameString class: classString value: valueString
 
 	^(self
-		textInputNamed: nameString 
+		textInputNamed: nameString
 		class: classString)
 		value: valueString;
 		yourself.
 %
 
 ! ------------------- Remove existing behavior from HttpRequest
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
 HttpRequest removeAllMethods.
 HttpRequest class removeAllMethods.
@@ -4503,7 +4487,7 @@ category: 'other'
 classmethod: HttpRequest
 fromBytes: aByteArray
 	"Used exclusively by tests"
- 
+
 	| listener server client string request |
 	listener := GsSocket new.
 	(listener makeServer: 1) ifNil: [
@@ -4512,7 +4496,7 @@ fromBytes: aByteArray
 		listener error: string.
 	].
 	client := GsSocket new.	"browser sending the request"
-	(client connectTo: listener port on: 'localhost') ifFalse: [ 
+	(client connectTo: listener port on: 'localhost') ifFalse: [
 		string := client lastErrorString.
 		client close.
 		client error: string.
@@ -4530,7 +4514,7 @@ fromBytes: aByteArray
 	].
 	listener close.
 	[:socket :bytes |
-		1 to: bytes size by: 4000 do: [:i | 
+		1 to: bytes size by: 4000 do: [:i |
 			(socket writeWillNotBlockWithin: 1000) ifTrue: [
 				socket write: (bytes copyFrom: i to: (i + 3999 min: bytes size)).
 			] ifFalse: [
@@ -4556,9 +4540,9 @@ installContentTypeHandlers
 	" I set a dictionary with all configured Content-type handlers.
 	  Handlers are blocks that take a httpRequest and a string as arguments. "
 
-	contentTypeHandlers := Dictionary new 
+	contentTypeHandlers := Dictionary new
 		at: 'application/x-www-form-urlencoded' put:  [ :httpReq :str | httpReq readArgumentsFrom: str ];
-		at: 'application/json' put: [ :httpReq :str | httpReq parseContentsFrom: str interpreterClassName: #JSONReader action: #fromJSON:  ];
+		"at: 'application/json' put: [ :httpReq :str | httpReq parseContentsFrom: str interpreterClassName: #JSONReader action: #fromJSON:  ];"
 	yourself
 %
 category: 'other'
@@ -4635,7 +4619,7 @@ cookies
 	| cookie string |
 	cookie := Dictionary new.
 	string := headers at: 'Cookie' ifAbsent: [^cookie].
-	(string subStrings: $;) do: [:each | 
+	(string subStrings: $;) do: [:each |
 		| pieces |
 		pieces := each subStrings: $=.
 		cookie at: pieces first trimSeparators put: pieces last trimSeparators.
@@ -4711,7 +4695,7 @@ category: 'other'
 method: HttpRequest
 closeSocket
 
-	self _socket ifNotNil: [:socket | 
+	self _socket ifNotNil: [:socket |
 		socket close.
 		self _socket: nil.
 	].
@@ -4793,7 +4777,7 @@ category: 'other'
 method: HttpRequest
 readArgumentsFrom: aString
 
-	(aString subStrings: $&) do: [:each | 
+	(aString subStrings: $&) do: [:each |
 		| index key value values |
 		index := each indexOf: $=.
 		key := each copyFrom: 1 to: index - 1.
@@ -4823,11 +4807,11 @@ category: 'other'
 method: HttpRequest
 readContents
 
-	" Read and parse the content itself. 
+	" Read and parse the content itself.
 	  In GET method there are interpreted as arguments.
 	  For POST methos how I handle contents depends on Content-Type value.
-	  For each Content-Type supported must be a handler configured. 
-	  If none, the original string contents is saved. 
+	  For each Content-Type supported must be a handler configured.
+	  If none, the original string contents is saved.
 	  For handlers configuration see class method #contentTypeHandlers.  "
 
 	| string pieces handler |
@@ -4835,17 +4819,17 @@ readContents
 	method = 'GET' ifTrue: [
 		pieces := uri subStrings: $?.
 		path := pieces at: 1.
-		string := 1 < pieces size 
+		string := 1 < pieces size
 			ifTrue: [pieces at: 2]
 			ifFalse: [''].
 		^self readArgumentsFrom: string
 	].
 	string := self upToEnd.
 	method = 'POST' ifTrue: [
-		handler := self class contentTypeHandlers 
-			at: (headers at: 'Content-Type') 
+		handler := self class contentTypeHandlers
+			at: (headers at: 'Content-Type')
 			ifAbsent: [ nil ].
-		handler isNil ifTrue: [ 
+		handler isNil ifTrue: [
 			" No handler for current Content-Type, just set the string as bodyContents "
 			bodyContents := string.
 			^self
@@ -4884,7 +4868,7 @@ readLine1
 
 	method := [
 		self upToSpace asString.
-	] on: EndOfStream do: [:ex | 
+	] on: EndOfStream do: [:ex |
 		ex return: ''.
 	].
 	HttpServer log: #'debug' string: 'HttpRequest>>readLine1 got method of ' , method printString.
@@ -5043,7 +5027,7 @@ upToNextPartDo: aOneArgumentBlock
 			bytes addAll: stream upToEnd.
 			self _fillStream.		"we could get an EndOfStream here"
 			bytes addAll: stream upToEnd.
-		] on: Error do: [:ex | 
+		] on: Error do: [:ex |
 			(ex isKindOf: EndOfStream) ifTrue: [ex return].
 			ex pass.
 		].
@@ -5107,12 +5091,12 @@ _fillStream
 		HttpServer log: #'debug' string: 'HttpRequest>>_fillStream - 2 - bytesRead = ' , bytesRead printString.
 		bytesRead == 0 ifTrue: [
 			| errors |
-			self _socket fetchLastIoErrorString ifNotNil: [:value | 
+			self _socket fetchLastIoErrorString ifNotNil: [:value |
 				HttpServer log: #'error' string: value.
 				EndOfStream signal: value.
 			].
 			(errors := self _socket class fetchErrorStringArray) notEmpty ifTrue: [
-				errors do: [:each | 
+				errors do: [:each |
 					((each subStrings: $:) copyFrom: 1 to: 6) = #('error' '1410E114' 'SSL routines' 'SSL_peek' 'uninitialized' 'ssl/ssl_lib.c') ifTrue: [
 						HttpServer log: #'warn' string: each.
 					] ifFalse: [
@@ -5131,12 +5115,12 @@ _fillStream
 			^self
 		].
 	].
-	EndOfStream signal: 'Read ' , bytes size printString , ' bytes but wanted ' , 
+	EndOfStream signal: 'Read ' , bytes size printString , ' bytes but wanted ' ,
 		(sizeLeft ifNil: ['a line'] ifNotNil: [sizeLeft printString]).
 %
 
 ! ------------------- Remove existing behavior from HttpResponse
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
 HttpResponse removeAllMethods.
 HttpResponse class removeAllMethods.
@@ -5208,7 +5192,7 @@ method: HttpResponse
 beNoCache
 
 	headers
-		at: 'Cache-Control'			
+		at: 'Cache-Control'
 		put: 'no-cache'.
 %
 category: 'other'
@@ -5251,7 +5235,7 @@ contentLength: anInteger
 
 	(anInteger isKindOf: Integer) ifFalse: [self error: anInteger printString , ' is a(n) ' , anInteger class name].
 	headers
-		at: 'Content-Length'			
+		at: 'Content-Length'
 		put: anInteger printString.
 %
 category: 'other'
@@ -5322,7 +5306,7 @@ method: HttpResponse
 maxAge: anInteger
 
 	headers
-		at: 'Cache-Control'			
+		at: 'Cache-Control'
 		put: 'max-age=' , anInteger printString.
 %
 category: 'other'
@@ -5349,8 +5333,8 @@ printAllExceptContentOn: aStream
 		nextPutAll: self reasonPhrase;
 		nextPutAll: crlf;
 		yourself.
-	headers keys asSortedCollection do: [:each | 
-		aStream 
+	headers keys asSortedCollection do: [:each |
+		aStream
 			nextPutAll: each;
 			nextPutAll: ': ';
 			nextPutAll: (headers at: each);
@@ -5367,7 +5351,7 @@ printOn: aStream
 	crlf := Character cr asString , Character lf asString.
 	self printAllExceptContentOn: aStream.
 	aStream
-		nextPutAll: (content ifNil: [''] ifNotNil: [content asUnicodeString]); 
+		nextPutAll: (content ifNil: [''] ifNotNil: [content asUnicodeString]);
 		nextPutAll: crlf;
 		yourself.
 %
@@ -5414,7 +5398,7 @@ sendResponseOn: aSocket
 
 	stream := WriteStream on: String new.
 	self printAllExceptContentOn: stream.		"Headers, etc."
-	string := stream contents. 
+	string := stream contents.
 	count := aSocket write: string.
 	count isNil ifTrue: [self error: aSocket lastErrorString].
 	count < string size ifTrue: [self error: 'Tried to write ' , string size printString , ', but wrote ' , count printString].
@@ -5442,8 +5426,8 @@ serverError: anException
 		(anException isKindOf: LockError) ifFalse: [
 			| stackReport |
 			stackReport := anException stackReport ifNil: [GsProcess stackReportToLevel: 100].
-			(stackReport subStrings: Character lf) do: [:each | 
-				html body 
+			(stackReport subStrings: Character lf) do: [:each |
+				html body
 					content: each;
 					br.
 			].
@@ -5463,22 +5447,22 @@ method: HttpResponse
 setCookie: keyString value: valueString
 
 	self
-		setCookie: keyString 
-		value: valueString 
-		path: nil 
+		setCookie: keyString
+		value: valueString
+		path: nil
 		maxAge: 365 * 24 * 60 * 60		"usually one year"
-		secure: false 
-		serverOnly: false 
+		secure: false
+		serverOnly: false
 		sameSite: false.
 %
 category: 'other'
 method: HttpResponse
-setCookie: keyString 
-	value: valueString 
-	path: pathString 
-	maxAge: secondsInteger 
-	secure: secureBoolean 
-	serverOnly: serverBoolean 
+setCookie: keyString
+	value: valueString
+	path: pathString
+	maxAge: secondsInteger
+	secure: secureBoolean
+	serverOnly: serverBoolean
 	sameSite: sameSiteBoolean
 
 	| string |
@@ -5495,8 +5479,8 @@ category: 'other'
 method: HttpResponse
 setDate
 
-	headers 
-		at: 'Date' 
+	headers
+		at: 'Date'
 		put: (HttpResponse webStringForDateTime: DateTime now).
 %
 category: 'other'
@@ -5507,7 +5491,7 @@ _content
 %
 
 ! ------------------- Remove existing behavior from HttpServer
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
 HttpServer removeAllMethods.
 HttpServer class removeAllMethods.
@@ -5561,7 +5545,7 @@ classmethod: HttpServer
 mutex
 	"In case anyone persists an instance of HttpServer, we don't want the mutex to prevent the commit!"
 
-	^SessionTemps current 
+	^SessionTemps current
 		at: #'WebServer_mutex'
 		ifAbsentPut: [Semaphore forMutualExclusion].
 %
@@ -5581,8 +5565,8 @@ log: aSymbol string: aString
 			].
 		] ifFalse: [
 			GsFile gciLogServer: 	"stdout for linked topaz"
-				DateAndTime now printStringWithRoundedSeconds , 
-				' - ' , Processor activeProcess asOop printString , 
+				DateAndTime now printStringWithRoundedSeconds ,
+				' - ' , Processor activeProcess asOop printString ,
 				' - ' , aString.
 		]
 	].
@@ -5591,7 +5575,7 @@ category: 'logging'
 classmethod: HttpServer
 logName
 
-	^SessionTemps current 
+	^SessionTemps current
 			at: #'WebServer_logName'
 			ifAbsentPut: [ (System performOnServer: 'pwd') trimSeparators, '/webServer.log' ]
 %
@@ -5599,7 +5583,7 @@ category: 'logging'
 classmethod: HttpServer
 logName: aString
 
-	SessionTemps current 
+	SessionTemps current
 			at: #'WebServer_logName'
 			put: aString
 %
@@ -5607,7 +5591,7 @@ category: 'logging'
 classmethod: HttpServer
 supportedLogTypes
 
-	^SessionTemps current 
+	^SessionTemps current
 			at: #'WebServer_logTypes'
 			ifAbsentPut: [ #(#'startup' " #'debug' #'warning' " #'error') ]
 %
@@ -5615,7 +5599,7 @@ category: 'logging'
 classmethod: HttpServer
 supportedLogTypes: anArray
 
-	SessionTemps current 
+	SessionTemps current
 			at: #'WebServer_logTypes'
 			put: anArray
 %
@@ -5640,10 +5624,10 @@ askDelegate: aDelegate toHandleLogEntry: aLogEntry
 		aDelegate postSendAction.
 	] on: Error , Admonition do: [:ex1 |
 		[
-			System abort. 
+			System abort.
 			aLogEntry value: ex1.
 			System commit.
-		] on: Error do: [:ex2 | 
+		] on: Error do: [:ex2 |
 			self log: #'error' string: ex1 printString , Character lf asString , ex2 printString , Character lf asString , (GsProcess stackReportToLevel: 50).
 			ex2 return: nil.
 		].
@@ -5660,8 +5644,8 @@ classmethod: HttpServer
 serveOnPort: anInteger delegate: aWebApp
 
 	self
-		serveOnPort: anInteger 
-		delegate: aWebApp 
+		serveOnPort: anInteger
+		delegate: aWebApp
 		withWorkerGemCount: aWebApp workerCount.
 %
 category: 'running'
@@ -5680,11 +5664,11 @@ serveOnPort: aPortNumber
 		logFileName: aFileNameString
 		supportedLogTypes: anArray
 
-	self 
+	self
 		supportedLogTypes: anArray;
 		logName: aFileNameString;
-		serveOnPort: aPortNumber 
-			delegate: aWebApp 
+		serveOnPort: aPortNumber
+			delegate: aWebApp
 			withWorkerGemCount: workerGemCountNumber
 %
 ! ------------------- Instance methods for HttpServer
@@ -5698,7 +5682,7 @@ initializeDelegate: aDelegate withWorkerGemCount: anInteger
 	System commit.
 	GsSocket closeAll.	"debugging could have left some open sockets"
 	System 		"some extra overhead, but we want to get exception stacks"
-		gemConfigurationAt: #GemExceptionSignalCapturesStack 
+		gemConfigurationAt: #GemExceptionSignalCapturesStack
 		put: true.
 	self loginSessions: anInteger.
 %
@@ -5736,12 +5720,12 @@ handleRequestForFile: pathString on: aSocket method: methodString
 			contentType: (self class contentTypeFor: path);
 			yourself.
 		methodString = 'HEAD' ifFalse: [	"A HEAD request has the file size and type but not the contents."
-			response sendContentsBlock: [:socket | 
+			response sendContentsBlock: [:socket |
 				[gsFile atEnd not] whileTrue: [socket write: (gsFile next: 32000)].
 			].
 		].
-		self 
-			sendResponse: response 
+		self
+			sendResponse: response
 			on: aSocket.
 	] ensure: [
 		gsFile close.
@@ -5767,9 +5751,9 @@ handleRequestOn: aSocket
 		response := logEntry value.
 		response ifNil: [		"no dynamic content available, try static content"
 			self critical: [logEntry value: request path].
-			self 
-				handleRequestForFile: request path 
-				on: aSocket 
+			self
+				handleRequestForFile: request path
+				on: aSocket
 				method: request method.
 		] ifNotNil: [
 			(response isKindOf: Exception) ifTrue: [
@@ -5781,10 +5765,10 @@ handleRequestOn: aSocket
 	] on: Error , Admonition do: [:ex1 |
 		[
 			self critical: [System abort. logEntry value: ex1].
-		] on: Error do: [:ex2 | 
-			self class log: #'error' string: 
-				ex1 printString , Character lf asString , 
-				ex2 printString , Character lf asString , 
+		] on: Error do: [:ex2 |
+			self class log: #'error' string:
+				ex1 printString , Character lf asString ,
+				ex2 printString , Character lf asString ,
 				(GsProcess stackReportToLevel: 50).
 			ex2 return: nil.
 		].
@@ -5799,7 +5783,7 @@ category: 'Request Handler'
 method: HttpServer
 newWebLogEntry
 	"A weblog entry is an association. Its contents indicates a status:
-		timestamp -> nil 
+		timestamp -> nil
 			we have accepted a connection, but not read the request; if this is the result, then the request was likely empty
 		anHttpRequest -> nil
 			we have read the request, but have not generated a response; this should only be work-in-progress
@@ -5822,7 +5806,7 @@ respondToRequestInLogEntry: aLogEntry
 	In either case, we call HttpServer class>>askDelegate:toHandleLogEntry: to do the work."
 
 	| session useLocalGem |
-	useLocalGem := aLogEntry key isMultiPart		"We need the local socket to read request" 
+	useLocalGem := aLogEntry key isMultiPart		"We need the local socket to read request"
 		or: [(session := self getSession) isNil]. 	"No worker gem available"
 	useLocalGem ifTrue: [		"Handle request in this process"
 		HttpServer askDelegate: delegate toHandleLogEntry: aLogEntry.	"<- work is done either here"
@@ -5832,7 +5816,7 @@ respondToRequestInLogEntry: aLogEntry
 			session
 				executeBlock: [System abort];	"so it can see the new logEntry"
 				send: #'askDelegate:toHandleLogEntry:' 							"<- or work is done here"
-					to: HttpServer asOop 
+					to: HttpServer asOop
 					withArguments: (Array with: delegate with: aLogEntry);
 				yourself.
 		] ensure: [
@@ -5847,7 +5831,7 @@ sendResponse: anHttpResponse on: aSocket
 	[
 		anHttpResponse sendResponseOn: aSocket.
 		self class log: #'debug' string: 'Response sent to socket: ', aSocket asOop asString, ' fDesc: ' , aSocket fileDescriptor printString
-	] on: Error do: [:ex | 
+	] on: Error do: [:ex |
 		self class log: #'error' string: ex description , ' - socket: ', aSocket asOop asString,  Character lf asString , (GsProcess stackReportToLevel: 40).
 	].
 %
@@ -5858,7 +5842,7 @@ abortIdleSessions
 
 	self critical: [	"so no other process changes a session state"
 		System abort.
-		self sessions do: [:each | 
+		self sessions do: [:each |
 			each value ifTrue: [		"session is available (idle)"
 				each key executeBlock: [		"block evaluated in remote (worker) process"
 					(Delay forMilliseconds: 100) wait. 	"Allow background processes to run"
@@ -5877,7 +5861,7 @@ getSession
 	(sessions := self sessions) isEmpty ifTrue: [^nil].
 	[
 		self critical: [
-			assoc := sessions 
+			assoc := sessions
 				detect: [:each | each value] 		"session is available"
 				ifNone: [nil].
 			assoc ifNotNil: [assoc value: false].		"session is not available"
@@ -5898,7 +5882,7 @@ loginSessions: anInteger
 	anInteger timesRepeat: [
 		sessions add: delegate externalSession -> true.		"logged-in session is available"
 	].
-	sessions do: [:each | 
+	sessions do: [:each |
 		each key executeBlock: [System gemConfigurationAt: #GemExceptionSignalCapturesStack put: true].
 	].
 %
@@ -5921,7 +5905,7 @@ sessions
 		value: aBoolean indicating whether session is available
 	In case anyone persists an instance of HttpServer, we don't want the sessions to prevent the commit!"
 
-	^SessionTemps current 
+	^SessionTemps current
 		at: #'WebServer_sessions'
 		ifAbsentPut: [IdentitySet new].
 %
@@ -5943,7 +5927,7 @@ method: HttpServer
 listeningSocket: aSocket
 	"In case anyone persists an instance of HttpServer, we don't want the socket to prevent the commit!"
 
-	SessionTemps current 
+	SessionTemps current
 		at: #'WebServer_listeningSocket'
 		put: aSocket.
 %
@@ -5977,9 +5961,9 @@ mainLoop
 		[flag] whileTrue: [
 			self log: #'debug' string: 'received connection request'.
 			self critical: [ socket := self acceptSocket ].
-			socket isNil 
+			socket isNil
 				ifTrue: [ self class log: #'warning' string: 'ReadWillNotBlock but accept failed!' ]
-				ifFalse: [ 
+				ifFalse: [
 					self class log: #'debug' string: 'accepted serverSocket ' , socket asOop asString, ' fileDesc: ' , socket fileDescriptor printString.
 					self serveClientSocket: socket.
 				].
@@ -6012,14 +5996,14 @@ category: 'Web Server'
 method: HttpServer
 serveClientSocket: aSocket
 
-	" Serve the request on the client socket in a forked process. 
+	" Serve the request on the client socket in a forked process.
 	  Extract from mainLoop due temp variables conflict (wrong socket closed!). "
 
 	[
-		[ aSocket isConnected 
+		[ aSocket isConnected
 			ifTrue: [ self handleRequestOn: aSocket ]		"<- work is done here"
 			ifFalse: [ self class log: #'warning' string: 'Socket is not connected: ' , aSocket asOop asString ].
-		] ensure: [ 
+		] ensure: [
 			aSocket close.
 		].
 		System commit.
@@ -6032,7 +6016,7 @@ startOnPort: anInteger
 	"primary entry point; called immediately after initialization"
 
 	self reportServerUrlOn: anInteger.
-	[ 
+	[
 		self listenOn: anInteger.
 		self mainLoop.		"<- work is done here"
 	] ensure: [
@@ -6042,7 +6026,7 @@ startOnPort: anInteger
 %
 
 ! ------------------- Remove existing behavior from HttpsServer
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
 HttpsServer removeAllMethods.
 HttpsServer class removeAllMethods.
@@ -6055,7 +6039,7 @@ serveOnPort: portInteger delegate: anObject withWorkerGemCount: sessionCountInte
 
 	| password |
 	password := GsSecureSocket getPasswordFromFile: '$GEMSTONE/examples/openssl/private/server_1_server_passwd.txt'.
-	GsSecureSocket 
+	GsSecureSocket
 		useServerCertificateFile: '$GEMSTONE/examples/openssl/certs/server_1_servercert.pem'
 		withPrivateKeyFile: '$GEMSTONE/examples/openssl/private/server_1_serverkey.pem'
 		privateKeyPassphrase: password.
@@ -6068,8 +6052,8 @@ serveOnPort: portInteger delegate: anObject withWorkerGemCount: sessionCountInte
 
 	self log: #'debug' string: 'specified certificate, private key, and password'.
 	super
-		serveOnPort: portInteger 
-		delegate: anObject 
+		serveOnPort: portInteger
+		delegate: anObject
 		withWorkerGemCount: sessionCountInteger
 %
 ! ------------------- Instance methods for HttpsServer
@@ -6083,7 +6067,7 @@ acceptSocket
 	self log: #'debug' string: 'accepted normal connection on ' , socket printString.
 	[
 		socket secureAccept.
-	] on: SocketError do: [:ex | 
+	] on: SocketError do: [:ex |
 		self log: #'error' string: ex description.
 		socket close.
 		^nil
@@ -6104,91 +6088,8 @@ protocol
 	^'https'
 %
 
-! ------------------- Remove existing behavior from HtmlElementTests
-expectvalue /Metaclass3       
-doit
-HtmlElementTests removeAllMethods.
-HtmlElementTests class removeAllMethods.
-%
-! ------------------- Class methods for HtmlElementTests
-! ------------------- Instance methods for HtmlElementTests
-set compile_env: 0
-category: 'other'
-method: HtmlElementTests
-testLisa01
-
-	| html paragraph string |
-	html := HtmlElement html.
-	paragraph := html body p.
-	paragraph h3 b i span
-		style: 'COLOR: rgb(0,0,153)';
-		text: 'GemStone/S 64 Bit Server';
-		br;
-		text: '32-bit client, RPC only';
-		yourself.
-	string := '<p><h3><b><i><span style="COLOR: rgb(0,0,153)">' , 
-		'GemStone/S 64 Bit Server<br />32-bit client, RPC only' , 
-		'</span></i></b></h3></p>'.
-	self assert: paragraph printString = string.
-%
-category: 'other'
-method: HtmlElementTests
-testLisa02
-
-	| paragraph string |
-	paragraph := HtmlElement withTag: 'p'.
-	paragraph h3: [:pElement | 
-		pElement b: [:bElement | 
-			bElement i: [:iElement | 
-				iElement span: [:sElement |
-					sElement
-						style: 'COLOR: rgb(0,0,153)';
-						text: 'GemStone/S 64 Bit Server';
-						br;
-						text: '32-bit client, RPC only';
-						yourself.
-				].
-			].
-		].
-	].
-	string := '<p><h3><b><i><span style="COLOR: rgb(0,0,153)">' , 
-		'GemStone/S 64 Bit Server<br />32-bit client, RPC only' , 
-		'</span></i></b></h3></p>'.
-	self assert: paragraph printString = string.
-%
-category: 'other'
-method: HtmlElementTests
-test_prettyPrintString
-
-	| html paragraph x y |
-	html := HtmlElement html.
-	paragraph := html body p.
-	paragraph h3 b i span
-		style: 'COLOR: rgb(0,0,153)';
-		text: 'GemStone/S 64 Bit Server';
-		br;
-		text: '32-bit client, RPC only';
-		yourself.
-	x := '
-<p>
-	<h3>
-		<b>
-			<i>
-				<span style="COLOR: rgb(0,0,153)">
-					GemStone/S 64 Bit Server
-					<br />
-					32-bit client, RPC only
-				</span>
-			</i>
-		</b>
-	</h3>
-</p>'.
-	y := paragraph prettyPrintString.
-	self assert: x = y.
-%
-
 ! ------------------- Remove existing behavior from WebApp
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
 WebApp removeAllMethods.
 WebApp class removeAllMethods.
@@ -6208,9 +6109,9 @@ purgeWebLogKeeping: anInteger
 
 	| webLog |
 	webLog := self log.
-	1 to: webLog size by: 500 do: [:i | 
+	1 to: webLog size by: 500 do: [:i |
 		[
-			0 to: 499 do: [:j | 
+			0 to: 499 do: [:j |
 				| k x |
 				k := i + j.
 				(k <= (webLog size - anInteger) and: [(x := webLog at: k) notNil and: [x key isKindOf: HttpRequest]]) ifTrue: [
@@ -6278,8 +6179,8 @@ category: 'startup'
 classmethod: WebApp
 externalSession
 
-	^WebExternalSession newDefault 
-		login; 
+	^WebExternalSession newDefault
+		login;
 		yourself
 "
 	^(WebExternalSession
@@ -6287,7 +6188,7 @@ externalSession
 		stoneNRS: GsNetworkResourceString defaultStoneNRSFromCurrent
 		username: System myUserProfile userId
 		password: 'swordfish'
-		hostUsername: 'gsadmin' 
+		hostUsername: 'gsadmin'
 		hostPassword: 'swordfish')
 		login;
 		executeBlock: [WebAppSample doLocalSessionInitialization];
@@ -6317,7 +6218,7 @@ method: WebApp
 buildResponse
 	"If you override this method, then you simply need to populate (or remove) the response object:
 
-		response 
+		response
 			content: self myObject asJson;
 			contentType: 'text/json';
 			yourself.
@@ -6331,11 +6232,11 @@ buildResponse
 	selector isEmpty ifTrue: [selector := self defaultSelector].
 	size := selector size.
 	(3 < size and: [(selector copyFrom: size - 2 to: size) = '.gs' and: [
-		self class canUnderstand: (newSelector := (selector copyFrom: 1 to: size - 3) , '_gs')]]) 
+		self class canUnderstand: (newSelector := (selector copyFrom: 1 to: size - 3) , '_gs')]])
 		ifTrue: [selector := newSelector]
 		ifFalse: [
 			(self pathExists: selector asString) ifFalse: [
-				response := nil. 
+				response := nil.
 				^self
 			].
 		].
@@ -6353,7 +6254,7 @@ buildResponse
 category: 'base'
 method: WebApp
 buildResponseFor: aString
-	"aString will contain the first directory in the path. In this implementation, 
+	"aString will contain the first directory in the path. In this implementation,
 	http://localhost:8888/foo/bar will automatically send #foo to self.
 
 	If you have portions of the page that are standard and don't depend on the request,
@@ -6401,7 +6302,7 @@ method: WebApp
 messageOnElement: anElement
 	"The actual implementation presents the message with a 'Back' button."
 
-	((request argumentsAt: 'message') subStrings: $\) do: [:each | 
+	((request argumentsAt: 'message') subStrings: $\) do: [:each |
 		anElement content: each; br.
 	].
 	anElement form: [:form | form
@@ -6446,7 +6347,7 @@ allowedSelectors
 category: 'selectors'
 method: WebApp
 pathExists: aString
-	"You could override this to answer true if you don't 
+	"You could override this to answer true if you don't
 	want to maintain the #allowedSelectors list."
 
 	^self allowedSelectors includes: aString
@@ -6466,7 +6367,7 @@ encode: aString
 			stream nextPutAll: (#('&quot;' '&amp;' '&#39;' '&lt;' '&gt;') at: index).
 		] ifFalse: [
 			((x := each codePoint) < 32 or: [127 < x]) ifTrue: [
-				stream nextPutAll: '&#'; print: x; nextPut: $;. 
+				stream nextPutAll: '&#'; print: x; nextPut: $;.
 			] ifFalse: [
 				stream nextPut: each.
 			].
@@ -6475,121 +6376,38 @@ encode: aString
 	^stream contents
 %
 
-! ------------------- Remove existing behavior from WebAppSample
-expectvalue /Metaclass3       
+! ------------------- Remove existing behavior from RestSample
+expectvalue /Metaclass3
 doit
-WebAppSample removeAllMethods.
-WebAppSample class removeAllMethods.
+RestSample removeAllMethods.
+RestSample class removeAllMethods.
 %
-! ------------------- Class methods for WebAppSample
+! ------------------- Class methods for RestSample
 set compile_env: 0
-category: 'startup'
-classmethod: WebAppSample
-httpServerClass
+category: 'required'
+classmethod: RestSample
+workerCount
 
-	^HttpsServer
+	^0
 %
-! ------------------- Instance methods for WebAppSample
+! ------------------- Instance methods for RestSample
 set compile_env: 0
-category: 'other'
-method: WebAppSample
-addCssLinksToHead
+category: 'REST API'
+method: RestSample
+add_gs
 
-	html head link: [:link | link rel: 'stylesheet'; type: 'text/css'; href: 'sample.css'].
-%
-category: 'other'
-method: WebAppSample
-addTrimFunctionToJavascript
-
-	html head addTo: 'load()' script: '
-	if (typeof String.prototype.trim != ''function'') { // detect native implementation
-		String.prototype.trim = function() {
-			return this.replace(/^\s+/, '').replace(/\s+$/, '');
-		};
-	}'.
-%
-category: 'other'
-method: WebAppSample
-buildResponseFor: aString
-
-	self
-		renderTop;
-		placeMain;
-		renderBottom;
-		perform: aString asSymbol;
-		hideOverlay;
+	| dict x y |
+	dict := JsonParser parse: request bodyContents.
+	x := dict at: 'x'.
+	y := dict at: 'y'.
+	dict := Dictionary new
+		at: 'sum' put: x + y;
 		yourself.
+	response content: dict asJson.
 %
-category: 'other'
-method: WebAppSample
-hideOverlay
-	"Hide entire page until CSS finishes loading"
+category: 'REST API'
+method: RestSample
+stone_gs
 
-	html head addTo: 'load()' script: '
-	document.getElementsByClassName("overlay")[0].style.display = "none";'.
-%
-category: 'other'
-method: WebAppSample
-index
-
-	main div: [:div | div
-		class: 'index';
-		content: 'Index';
-		yourself.
-	].
-%
-category: 'other'
-method: WebAppSample
-placeMain
-
-	main := html body div: [:div | div class: 'main'].
-%
-category: 'other'
-method: WebAppSample
-placeTop
-
-	top := html body div: [:div | div class: 'top'].
-%
-category: 'other'
-method: WebAppSample
-renderBottom
-
-	html body div: [:div | div
-		class: 'bottom';
-		content: 'Bottom of Page';
-		yourself.
-	].
-%
-category: 'other'
-method: WebAppSample
-renderOverlay
-	"Hide entire page until CSS finishes loading"
-
-	html body div: [:div | div 
-		class: 'overlay';
-		style: 'background-color:#333; position:absolute; top:0px; left:0px; width:100%; height:100%; z-index:2000;';
-		yourself.
-	].
-%
-category: 'other'
-method: WebAppSample
-renderTop
-
-	self 
-		renderOverlay;
-		placeTop;
-		addCssLinksToHead;
-		addTrimFunctionToJavascript;
-		renderWelcome;
-		yourself.
-%
-category: 'other'
-method: WebAppSample
-renderWelcome
-
-	top div: [:div | div 
-		class: 'welcome';
-		content: 'Welcome';
-		yourself.
-	].
+	response content: System stoneConfigurationReport asJson.
 %
