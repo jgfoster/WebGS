@@ -4,7 +4,7 @@ WebGS is a framework for building web applications in GemStone/S 64 Bit Smalltal
 ## Install
 One way to install WebGS is to use Topaz. Make sure that $GEMSTONE is set for your environment and that $GEMSTONE/bin is in your path. You can use .topazini and install.sh as models for your setup.
 
-Another way to install WebGS is from Jade. Open WebGS.gs in Jade (or copy its contents to a workspace). Select all the text, and from the context menu (right click), select 'File In'. Do the same for JSON.gs then commit (from the toolbar or menu). 
+Another way to install WebGS is from Jade. Open JSON.gs in Jade (or copy its contents to a workspace). Select all the text, and from the context menu (right click), select 'File In'. Do the same for WebGS.gs then commit (from the toolbar or menu). 
 
 ## Use
 The typical use is to subclass WebApp and override appropriate methods. 
