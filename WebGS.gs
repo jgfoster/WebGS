@@ -4919,7 +4919,7 @@ translate: aString
 			].
 		]
 	].
-	string := (Utf8 withAll: writeStream contents) asUnicodeString asString.
+	string := writeStream contents bytesIntoUnicode asString.
 	string = 'nil' ifTrue: [^nil].
 	string = 'null' ifTrue: [^nil].
 	string = 'true' ifTrue: [^true].
@@ -4940,7 +4940,7 @@ nextLine
 	(bytes notEmpty and: [bytes last == Character cr codePoint]) ifTrue: [
 		bytes size: bytes size - 1.
 	].
-	^(Utf8 withAll: bytes) asUnicodeString.
+	^bytes bytesIntoUnicode
 %
 category: 'stream'
 method: HttpRequest
@@ -5011,7 +5011,7 @@ upToNextPartAsUnicode
 	| bytes |
 	bytes := ByteArray new.
 	self upToNextPartDo: [:data | bytes addAll: data].
-	^(Utf8 withAll: bytes) asUnicodeString.
+	^bytes bytesIntoUnicode
 %
 category: 'stream'
 method: HttpRequest
@@ -5071,7 +5071,7 @@ upToSpace
 	bytes := self
 		upTo: Character space
 		ifNotFoundWaitMs: 20.
-	^(Utf8 withAll: bytes) asUnicodeString.
+	^bytes bytesIntoUnicode
 %
 category: 'stream'
 method: HttpRequest
