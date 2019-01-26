@@ -11,6 +11,7 @@ iferr 6 exit
 errorCount
 output push WebGS.out only
 errorCount
+fileformat utf8
 input ./JSON.gs
 input ./WebGS.gs
 output pop
