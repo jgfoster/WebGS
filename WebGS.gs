@@ -5706,10 +5706,8 @@ handleRequestForFile: pathString on: aSocket method: methodString
 	"The delegate returned nil, indicating that it didn't have a response to offer.
 	We will check to see if there is a static file available that matches the path."
 
-	| response path gsFile |
-	((path := delegate htdocs) isNil or: [	"does delegate offer static files?"
-		(pathString includesString: '../') or: [	"is request for a file below provided path?"
-		(gsFile := GsFile openReadOnServer: (path := path , pathString)) isNil]]) ifTrue: [	"does file exist?"
+	| response gsFile |
+	(gsFile := self openFile: pathString) ifNil: [	"does file exist?"
 			self sendResponse: (HttpResponse notFound: pathString) on: aSocket.
 			^self.
 	].
@@ -5717,7 +5715,7 @@ handleRequestForFile: pathString on: aSocket method: methodString
 		response := HttpResponse new
 			contentLength: gsFile fileSize;
 			lastModified: gsFile lastModified;
-			contentType: (self class contentTypeFor: path);
+			contentType: (self class contentTypeFor: gsFile pathName);
 			yourself.
 		methodString = 'HEAD' ifFalse: [	"A HEAD request has the file size and type but not the contents."
 			response sendContentsBlock: [:socket |
@@ -5799,6 +5797,19 @@ newWebLogEntry
 %
 category: 'Request Handler'
 method: HttpServer
+openFile: pathString
+	"We will check to see if there is a static file available that matches the path."
+
+	| file path |
+	file := pathString.
+	(path := delegate htdocs) ifNil: [^nil]. "Should we offer static files?"
+	(file includesString: '../') ifTrue: [^nil]. "Is request for a file below provided path?"
+	(file isEmpty or: [file = '/']) ifTrue: [file := '/index.html'].
+	^GsFile openReadOnServer: path , file
+%
+category: 'Request Handler'
+method: HttpServer
+%
 respondToRequestInLogEntry: aLogEntry
 	"We are in a forked process (thread) and aLogEntry.key contains anHttpRequest.
 	We put something in aLogEntry.value and return.
