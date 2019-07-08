@@ -5809,7 +5809,6 @@ openFile: pathString
 %
 category: 'Request Handler'
 method: HttpServer
-%
 respondToRequestInLogEntry: aLogEntry
 	"We are in a forked process (thread) and aLogEntry.key contains anHttpRequest.
 	We put something in aLogEntry.value and return.
