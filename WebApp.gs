@@ -187,8 +187,8 @@ buildResponseFor: aString
 
 	| size |
 	size := aString size.
-	((3 < size and: [(aString copyFrom: size - 3 to: size) = '_gs']) or: [
-		4 < size and: [(aString copyFrom: size - 4 to: size) = '_gs:']
+	((3 < size and: [(aString copyFrom: size - 2 to: size) = '_gs']) or: [
+		4 < size and: [(aString copyFrom: size - 3 to: size) = '_gs:']
 	]) ifFalse: [
 		self perform: aString asSymbol.
 	] ifTrue: [
