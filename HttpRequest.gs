@@ -1,14 +1,6 @@
-
-expectvalue /Class
-doit
-HttpRequest category: 'Model'
-%
 ! ------------------- Remove existing behavior from HttpRequest
-expectvalue /Metaclass3
-doit
-HttpRequest removeAllMethods.
-HttpRequest class removeAllMethods.
-%
+removeAllMethods HttpRequest
+removeAllClassMethods HttpRequest
 ! ------------------- Class methods for HttpRequest
 set compile_env: 0
 category: 'other'
@@ -112,6 +104,34 @@ unsetContentTypeHandlers
 set compile_env: 0
 category: 'Accessing'
 method: HttpRequest
+_sizeLeft
+
+	^sizeLeft.
+%
+category: 'Accessing'
+method: HttpRequest
+_socket
+
+	^(SessionTemps current at: #'HttpRequest_socket') at: Processor activeProcess.
+%
+category: 'Accessing'
+method: HttpRequest
+_socket: aSocket
+
+	| dict process |
+	dict := SessionTemps current at: #'HttpRequest_socket' ifAbsentPut: [Dictionary new].
+	dict copy keysAndValuesDo: [:eachProcess :eachSocket |
+		eachProcess _isTerminated ifTrue: [
+			eachSocket close.
+			dict removeKey: eachProcess.
+		].
+	].
+	process := Processor activeProcess.
+	(dict at: process otherwise: nil) ifNotNil: [:socket | dict removeKey: process].
+	aSocket ifNotNil: [dict at: process put: aSocket].
+%
+category: 'Accessing'
+method: HttpRequest
 arguments
 
    ^arguments
@@ -203,34 +223,6 @@ version
 
    ^version
 %
-category: 'Accessing'
-method: HttpRequest
-_sizeLeft
-
-	^sizeLeft.
-%
-category: 'Accessing'
-method: HttpRequest
-_socket
-
-	^(SessionTemps current at: #'HttpRequest_socket') at: Processor activeProcess.
-%
-category: 'Accessing'
-method: HttpRequest
-_socket: aSocket
-
-	| dict process |
-	dict := SessionTemps current at: #'HttpRequest_socket' ifAbsentPut: [Dictionary new].
-	dict copy keysAndValuesDo: [:eachProcess :eachSocket |
-		eachProcess _isTerminated ifTrue: [
-			eachSocket close.
-			dict removeKey: eachProcess.
-		].
-	].
-	process := Processor activeProcess.
-	(dict at: process otherwise: nil) ifNotNil: [:socket | dict removeKey: process].
-	aSocket ifNotNil: [dict at: process put: aSocket].
-%
 set compile_env: 0
 category: 'other'
 method: HttpRequest
@@ -292,6 +284,12 @@ isMultiPart
 	((string := pieces at: 2) copyFrom: 1 to: 10) = ' boundary=' ifFalse: [self error: 'Unrecognized field in multipart/form-data'].
 	multipartFormDataBoundary := '--' , (string copyFrom: 11 to: string size).
 	^true.
+%
+category: 'other'
+method: HttpRequest
+needsSocket
+
+	^self isMultiPart
 %
 category: 'other'
 method: HttpRequest
@@ -430,10 +428,9 @@ readRequest
 	self readLine1.
 	method isEmpty ifTrue: [^true].
 	self readHeaders.
-	self isMultiPart ifTrue: [^false].
+	self needsSocket ifTrue: [^false].
 	self readContents.
 	^true.
-
 %
 category: 'other'
 method: HttpRequest
@@ -470,6 +467,51 @@ translate: aString
 		with: Character lf asString.
 %
 set compile_env: 0
+category: 'stream'
+method: HttpRequest
+_fillStream
+
+	| bytes want |
+	(stream isNil or: [stream atEnd]) ifFalse: [^self].	"No need to get more yet"
+	bytes := ByteArray new.
+	want := sizeLeft ifNil: [4096].
+	4096 < want ifTrue: [want := 4096].
+	[
+		HttpServer log: #'debug' string: 'HttpRequest>>_fillStream - 1 - want = ' , want printString , '; have = ' , bytes size printString.
+		self _socket readWillNotBlockWithin: 1000.
+	] whileTrue: [
+		| bytesRead |
+		bytesRead := self _socket read: want into: bytes startingAt: bytes size + 1.
+		HttpServer log: #'debug' string: 'HttpRequest>>_fillStream - 2 - bytesRead = ' , bytesRead printString.
+		bytesRead == 0 ifTrue: [
+			| errors |
+			self _socket fetchLastIoErrorString ifNotNil: [:value |
+				HttpServer log: #'error' string: value.
+				EndOfStream signal: value.
+			].
+			(errors := self _socket class fetchErrorStringArray) notEmpty ifTrue: [
+				errors do: [:each |
+					((each subStrings: $:) copyFrom: 1 to: 6) = #('error' '1410E114' 'SSL routines' 'SSL_peek' 'uninitialized' 'ssl/ssl_lib.c') ifTrue: [
+						HttpServer log: #'warn' string: each.
+					] ifFalse: [
+						HttpServer log: #'error' string: each.
+					].
+				].
+				EndOfStream signal: errors.
+			].
+			HttpServer log: #'warning' string: 'nothing more to read'.
+			EndOfStream signal: 'nothing more to read'.
+		].
+		((sizeLeft notNil and: [sizeLeft <= bytes size]) or: [0 < (bytes indexOf: Character lf codePoint)]) ifTrue: [
+			stream := ReadStream on: bytes.
+			sizeLeft notNil ifTrue: [sizeLeft := sizeLeft - bytes size].
+			HttpServer log: #'debug' string: 'HttpRequest>>_fillStream - 4'.
+			^self
+		].
+	].
+	EndOfStream signal: 'Read ' , bytes size printString , ' bytes but wanted ' ,
+		(sizeLeft ifNil: ['a line'] ifNotNil: [sizeLeft printString]).
+%
 category: 'stream'
 method: HttpRequest
 nextLine
@@ -613,49 +655,4 @@ upToSpace
 		upTo: Character space
 		ifNotFoundWaitMs: 20.
 	^bytes bytesIntoUnicode
-%
-category: 'stream'
-method: HttpRequest
-_fillStream
-
-	| bytes want |
-	(stream isNil or: [stream atEnd]) ifFalse: [^self].	"No need to get more yet"
-	bytes := ByteArray new.
-	want := sizeLeft ifNil: [4096].
-	4096 < want ifTrue: [want := 4096].
-	[
-		HttpServer log: #'debug' string: 'HttpRequest>>_fillStream - 1 - want = ' , want printString , '; have = ' , bytes size printString.
-		self _socket readWillNotBlockWithin: 1000.
-	] whileTrue: [
-		| bytesRead |
-		bytesRead := self _socket read: want into: bytes startingAt: bytes size + 1.
-		HttpServer log: #'debug' string: 'HttpRequest>>_fillStream - 2 - bytesRead = ' , bytesRead printString.
-		bytesRead == 0 ifTrue: [
-			| errors |
-			self _socket fetchLastIoErrorString ifNotNil: [:value |
-				HttpServer log: #'error' string: value.
-				EndOfStream signal: value.
-			].
-			(errors := self _socket class fetchErrorStringArray) notEmpty ifTrue: [
-				errors do: [:each |
-					((each subStrings: $:) copyFrom: 1 to: 6) = #('error' '1410E114' 'SSL routines' 'SSL_peek' 'uninitialized' 'ssl/ssl_lib.c') ifTrue: [
-						HttpServer log: #'warn' string: each.
-					] ifFalse: [
-						HttpServer log: #'error' string: each.
-					].
-				].
-				EndOfStream signal: errors.
-			].
-			HttpServer log: #'warning' string: 'nothing more to read'.
-			EndOfStream signal: 'nothing more to read'.
-		].
-		((sizeLeft notNil and: [sizeLeft <= bytes size]) or: [0 < (bytes indexOf: Character lf codePoint)]) ifTrue: [
-			stream := ReadStream on: bytes.
-			sizeLeft notNil ifTrue: [sizeLeft := sizeLeft - bytes size].
-			HttpServer log: #'debug' string: 'HttpRequest>>_fillStream - 4'.
-			^self
-		].
-	].
-	EndOfStream signal: 'Read ' , bytes size printString , ' bytes but wanted ' ,
-		(sizeLeft ifNil: ['a line'] ifNotNil: [sizeLeft printString]).
 %

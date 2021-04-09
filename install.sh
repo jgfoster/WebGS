@@ -1,7 +1,7 @@
 echo "This will reload your WebGS code."
 echo "Make sure you have saved all your edits!"
 read -n 1 -s -r -p "Press any key to continue"
-topaz -l << EOF
+topaz -lq << EOF
 iferr 1 stk
 iferr 2 output pop
 iferr 3 stk

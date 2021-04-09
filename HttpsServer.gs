@@ -1,15 +1,6 @@
-
-expectvalue /Class
-doit
-HttpsServer category: 'User Interface'
-%
-
 ! ------------------- Remove existing behavior from HttpsServer
-expectvalue /Metaclass3
-doit
-HttpsServer removeAllMethods.
-HttpsServer class removeAllMethods.
-%
+removeAllMethods HttpsServer
+removeAllClassMethods HttpsServer
 ! ------------------- Class methods for HttpsServer
 set compile_env: 0
 category: 'other'

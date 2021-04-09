@@ -1,14 +1,6 @@
-
-expectvalue /Class
-doit
-HttpServer category: 'User Interface'
-%
 ! ------------------- Remove existing behavior from HttpServer
-expectvalue /Metaclass3
-doit
-HttpServer removeAllMethods.
-HttpServer class removeAllMethods.
-%
+removeAllMethods HttpServer
+removeAllClassMethods HttpServer
 ! ------------------- Class methods for HttpServer
 set compile_env: 0
 category: 'constants'
@@ -111,7 +103,9 @@ supportedLogTypes
 category: 'logging'
 classmethod: HttpServer
 supportedLogTypes: anArray
-
+"
+	HttpServer supportedLogTypes: #(#'startup' #'debug' #'warning' #'error').
+"
 	SessionTemps current
 			at: #'WebServer_logTypes'
 			put: anArray
@@ -329,8 +323,8 @@ respondToRequestInLogEntry: aLogEntry
 	In either case, we call HttpServer class>>askDelegate:toHandleLogEntry: to do the work."
 
 	| session useLocalGem |
-	useLocalGem := aLogEntry key isMultiPart		"We need the local socket to read request"
-		or: [(session := self getSession) isNil]. 	"No worker gem available"
+	useLocalGem := aLogEntry key needsSocket		"We need the local socket to read request"
+		or: [(session := self getSession) isNil]. 		"No worker gem available"
 	useLocalGem ifTrue: [		"Handle request in this process"
 		HttpServer askDelegate: delegate toHandleLogEntry: aLogEntry.	"<- work is done either here"
 	] ifFalse: [						"Let a worker gem handle the request"
@@ -484,6 +478,7 @@ mainLoop
 		[flag] whileTrue: [
 			self log: #'debug' string: 'received connection request'.
 			self critical: [ socket := self acceptSocket ].
+			self log: #'debug' string: 'accepted connection request'.
 			socket isNil
 				ifTrue: [ self class log: #'warning' string: 'ReadWillNotBlock but accept failed!' ]
 				ifFalse: [

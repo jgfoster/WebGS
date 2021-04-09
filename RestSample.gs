@@ -1,24 +1,6 @@
-
-expectvalue /Class
-doit
-RestSample comment:
-'No class-specific documentation for WebAppSample, hierarchy is:
-Object
-  WebApp( begin end exception html request response)
-    WebAppSample( main)
-'
-%
-expectvalue /Class
-doit
-RestSample category: 'User Interface'
-%
-
 ! ------------------- Remove existing behavior from RestSample
-expectvalue /Metaclass3
-doit
-RestSample removeAllMethods.
-RestSample class removeAllMethods.
-%
+removeAllMethods RestSample
+removeAllClassMethods RestSample
 ! ------------------- Class methods for RestSample
 set compile_env: 0
 category: 'required'
