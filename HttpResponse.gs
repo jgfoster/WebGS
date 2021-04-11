@@ -1,6 +1,9 @@
 ! ------------------- Remove existing behavior from HttpResponse
-removeAllMethods HttpResponse
-removeAllClassMethods HttpResponse
+expectvalue /Metaclass3       
+doit
+HttpResponse removeAllMethods.
+HttpResponse class removeAllMethods.
+%
 ! ------------------- Class methods for HttpResponse
 set compile_env: 0
 category: 'other'

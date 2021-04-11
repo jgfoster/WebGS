@@ -1,6 +1,9 @@
 ! ------------------- Remove existing behavior from WebExternalSession
-removeAllMethods WebExternalSession
-removeAllClassMethods WebExternalSession
+expectvalue /Metaclass3       
+doit
+WebExternalSession removeAllMethods.
+WebExternalSession class removeAllMethods.
+%
 ! ------------------- Class methods for WebExternalSession
 ! ------------------- Instance methods for WebExternalSession
 set compile_env: 0
@@ -59,4 +62,14 @@ _isOnMyStone
 	"GemStone has a bug in this method and we are always on the current stone!"
 
 	^true
+%
+category: 'other'
+method: WebExternalSession
+_signalIfError
+
+	(GsExternalSession canUnderstand: #'_signalIfError') ifTrue: [	"3.6.0 and later"
+		super _signalIfError.
+	] ifFalse: [
+		self _signalIfError: self _gciLibrary.
+	].
 %

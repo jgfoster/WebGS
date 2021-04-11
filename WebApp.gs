@@ -1,6 +1,9 @@
 ! ------------------- Remove existing behavior from WebApp
-removeAllMethods WebApp
-removeAllClassMethods WebApp
+expectvalue /Metaclass3       
+doit
+WebApp removeAllMethods.
+WebApp class removeAllMethods.
+%
 ! ------------------- Class methods for WebApp
 set compile_env: 0
 category: 'logging'
@@ -127,6 +130,28 @@ run
 %
 ! ------------------- Instance methods for WebApp
 set compile_env: 0
+category: 'Accessing'
+method: WebApp
+_socket
+
+	^(SessionTemps current at: #'HttpRequest_socket') at: Processor activeProcess.
+%
+category: 'Accessing'
+method: WebApp
+_socket: aSocket
+
+	| dict process |
+	dict := SessionTemps current at: #'HttpRequest_socket' ifAbsentPut: [Dictionary new].
+	dict copy keysAndValuesDo: [:eachProcess :eachSocket |
+		eachProcess _isTerminated ifTrue: [
+			eachSocket close.
+			dict removeKey: eachProcess.
+		].
+	].
+	process := Processor activeProcess.
+	(dict at: process otherwise: nil) ifNotNil: [:socket | dict removeKey: process].
+	aSocket ifNotNil: [dict at: process put: aSocket].
+%
 set compile_env: 0
 category: 'base'
 method: WebApp
@@ -205,6 +230,9 @@ responseForRequest: anHttpRequest
 
 	self log: #'debug' string: 'WebApp>>responseForRequest:'.
 	request := anHttpRequest.
+	anHttpRequest isWebSocketUpgrade ifTrue: [
+		^self wsLoop
+	].
 	response := HttpResponse new.
 	html := HtmlElement html.
 	self buildResponse.
@@ -327,4 +355,94 @@ method: WebApp
 log: aSymbol string: aString
 
 	self class log: aSymbol string: aString
+%
+set compile_env: 0
+category: 'WebSockets'
+method: WebApp
+upgradeToWebsocket
+
+	| count crlf key socket version |
+	version := request headers at: 'Sec-WebSocket-Version' ifAbsent: ['0'].
+	version asNumber < 13 ifTrue: [
+		self error: 'WebSocketSample requires at least version 13!'.
+	].
+	crlf := Character cr asString , Character lf asString.
+	key := request headers at: 'Sec-WebSocket-Key' ifAbsent: [''].
+	key := self wsSecureResponseFor: key.
+	response := 'HTTP/1.1 101 Switching Protocols' , crlf ,
+		'Upgrade: websocket' , crlf ,
+		'Connection: Upgrade' , crlf ,
+		'Sec-WebSocket-Accept: ' , key , crlf , crlf.
+	socket := self _socket.
+	count := socket write: response.
+	count == response size ifFalse: [self error: 'Unable to write response!'].
+%
+category: 'WebSockets'
+method: WebApp
+wsEvent
+
+	| frame socket |
+	socket := self _socket.
+	(socket readWillNotBlockWithin: self wsReadTimeoutMS) ifFalse: [
+		^self wsOnIdle
+	].
+	frame := WebSocketDataFrame fromSocket: socket.
+	frame isPing ifTrue: [
+		WebSocketDataFrame sendPongData: frame data onSocket: socket.
+		^self
+	].
+	frame isText ifTrue: [
+		^self wsOnText: frame data
+	].
+	frame isDisconnect ifTrue: [
+		WebSocketDataFrame sendPongData: frame data onSocket: socket.
+		socket close.
+		self _socket: nil.
+		Processor activeProcess terminate.	"There isn't really anything to return!"
+	].
+	self error: 'Unrecognized frame'.
+%
+category: 'WebSockets'
+method: WebApp
+wsLoop
+
+	self upgradeToWebsocket.
+	[self _socket isConnected] whileTrue: [
+		self wsEvent.
+	].
+	self error: 'Client did not send proper disconnect message!'.
+%
+category: 'WebSockets'
+method: WebApp
+wsSecureResponseFor: aKey
+	"If the Key is 'dGhlIHNhbXBsZSBub25jZQ==', the response is 's3pPLMBiTxaQ9kYGzzhZRbK+xOo='."
+
+	| bytes key sha1 stream |
+	key := aKey , '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'.
+	sha1 := key asSha1String.
+	stream := ReadStream on: sha1.
+	bytes := ByteArray new.
+	[stream atEnd not] whileTrue: [
+		bytes add: ('16r' , stream next asString , stream next asString) asNumber.
+	].
+	^bytes asBase64String
+%
+set compile_env: 0
+category: 'WebSockets Overrides'
+method: WebApp
+wsOnIdle
+
+	self subclassResponsibility.
+%
+category: 'WebSockets Overrides'
+method: WebApp
+wsOnText: bytes
+
+	self subclassResponsibility.
+%
+category: 'WebSockets Overrides'
+method: WebApp
+wsReadTimeoutMS
+
+	self subclassResponsibility.
 %

@@ -1,6 +1,9 @@
 ! ------------------- Remove existing behavior from Html4Element
-removeAllMethods Html4Element
-removeAllClassMethods Html4Element
+expectvalue /Metaclass3       
+doit
+Html4Element removeAllMethods.
+Html4Element class removeAllMethods.
+%
 ! ------------------- Class methods for Html4Element
 set compile_env: 0
 category: 'code generation'

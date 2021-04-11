@@ -1,6 +1,9 @@
 ! ------------------- Remove existing behavior from HttpsServer
-removeAllMethods HttpsServer
-removeAllClassMethods HttpsServer
+expectvalue /Metaclass3       
+doit
+HttpsServer removeAllMethods.
+HttpsServer class removeAllMethods.
+%
 ! ------------------- Class methods for HttpsServer
 set compile_env: 0
 category: 'other'

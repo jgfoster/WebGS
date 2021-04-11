@@ -1,6 +1,9 @@
 ! ------------------- Remove existing behavior from RestSample
-removeAllMethods RestSample
-removeAllClassMethods RestSample
+expectvalue /Metaclass3       
+doit
+RestSample removeAllMethods.
+RestSample class removeAllMethods.
+%
 ! ------------------- Class methods for RestSample
 set compile_env: 0
 category: 'required'
