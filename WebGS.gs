@@ -158,7 +158,7 @@ expectvalue /Class
 doit
 Object subclass: 'HttpServer'
   instVarNames: #( delegate)
-  classVars: #()
+  classVars: #( Debug)
   classInstVars: #()
   poolDictionaries: #()
   inDictionary: WebGS
@@ -252,7 +252,58 @@ WebApp subclass: 'WebSocketSample'
 %
 expectvalue /Class
 doit
+WebSocketSample comment: 
+'HttpServer debug: true.
+HttpServer supportedLogTypes: #(#''startup'' #''debug'' #''warning'' #''error'').
+WebSocketSample run.
+https://www.websocket.org/echo.html
+wss://localhost:8888/'
+%
+expectvalue /Class
+doit
 WebSocketSample category: 'User Interface'
+%
+set compile_env: 0
+! ------------------- Class definition for WebSocketDataFrame
+expectvalue /Class
+doit
+Object subclass: 'WebSocketDataFrame'
+  instVarNames: #( fin rsv1 rsv2
+                    rsv3 opcode data)
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #()
+
+%
+expectvalue /Class
+doit
+WebSocketDataFrame comment: 
+'Frame format (best viewed with a fixed-width font!):
+
+      0                   1                   2                   3
+      0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+     +-+-+-+-+-------+-+-------------+-------------------------------+
+     |F|R|R|R| opcode|M| Payload len |    Extended payload length    |
+     |I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
+     |N|V|V|V|       |S|             |   (if payload len==126/127)   |
+     | |1|2|3|       |K|             |                               |
+     +-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
+     |     Extended payload length continued, if payload len == 127  |
+     + - - - - - - - - - - - - - - - +-------------------------------+
+     |                               |Masking-key, if MASK set to 1  |
+     +-------------------------------+-------------------------------+
+     | Masking-key (continued)       |          Payload Data         |
+     +-------------------------------- - - - - - - - - - - - - - - - +
+     :                     Payload Data continued ...                :
+     + - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+     |                     Payload Data continued ...                |
+     +---------------------------------------------------------------+'
+%
+expectvalue /Class
+doit
+WebSocketDataFrame category: 'Model'
 %
 
 input Html4Element.gs
@@ -264,4 +315,5 @@ input HttpsServer.gs
 input RestSample.gs
 input WebApp.gs
 input WebExternalSession.gs
+input WebSocketDataFrame.gs
 input WebSocketSample.gs

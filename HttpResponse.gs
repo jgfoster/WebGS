@@ -37,12 +37,6 @@ webStringForDateTime: aDateTime
 set compile_env: 0
 category: 'other'
 method: HttpResponse
-_content
-
-	^content.
-%
-category: 'other'
-method: HttpResponse
 accessControlAllowHeaders: aStringOrNil
 
 	aStringOrNil ifNil: [
@@ -94,7 +88,7 @@ method: HttpResponse
 content: aString
 
 	content := aString.
-	self isUTF8 ifTrue: [content := content encodeAsUTF8].
+	self isUTF8 ifFalse: [content := content encodeAsUTF8].
 	self contentLength: content size.
 %
 category: 'other'
@@ -364,4 +358,10 @@ setDate
 	headers
 		at: 'Date'
 		put: (HttpResponse webStringForDateTime: DateTime now).
+%
+category: 'other'
+method: HttpResponse
+_content
+
+	^content.
 %

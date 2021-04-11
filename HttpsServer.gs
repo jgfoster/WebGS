@@ -31,15 +31,20 @@ set compile_env: 0
 category: 'Web Server'
 method: HttpsServer
 acceptSocket
+	"in critical section"
 
-	| socket |
-	(socket := self listeningSocket accept) ifNil: [^nil].
-	self log: #'debug' string: 'accepted normal connection on ' , socket printString.
+	| socket exception |
 	[
-		socket secureAccept.
+		(socket := self listeningSocket accept) ifNil: [^nil].
+		self log: #'debug' string: 'accepted normal connection on ' , socket printString.
+		self critical: [socket secureAccept].
 	] on: SocketError do: [:ex |
-		self log: #'error' string: ex description.
-		socket close.
+		HttpServer debug ifTrue: [self halt].
+		exception := ex.
+	].
+	exception ifNotNil: [
+		self log: #'error' string: exception description.
+		socket ifNotNil: [socket close].
 		^nil
 	].
 	self log: #'debug' string: 'established secure connection on ' , socket printString.

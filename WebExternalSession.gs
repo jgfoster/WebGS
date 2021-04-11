@@ -53,3 +53,10 @@ password: aString
 
 	password := aString copy
 %
+category: 'other'
+method: WebExternalSession
+_isOnMyStone
+	"GemStone has a bug in this method and we are always on the current stone!"
+
+	^true
+%

@@ -9,6 +9,13 @@ workerCount
 	"Do everything in one Gem"
 	^0
 %
+set compile_env: 0
+category: 'startup'
+classmethod: RestSample
+httpServerClass
+
+	^HttpsServer
+%
 ! ------------------- Instance methods for RestSample
 set compile_env: 0
 category: 'REST API'

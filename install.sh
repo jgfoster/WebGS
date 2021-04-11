@@ -29,5 +29,5 @@ errorCount
 commit
 iferr 1 stk
 iferr 2 exit
-send RestSample run
+send WebApp run
 EOF

@@ -5,6 +5,12 @@ removeAllClassMethods WebApp
 set compile_env: 0
 category: 'logging'
 classmethod: WebApp
+log: aSymbol string: aString
+
+	HttpServer log: aSymbol string: aString
+%
+category: 'logging'
+classmethod: WebApp
 purgeWebLog
 
 	^self purgeWebLogKeeping: 500.
@@ -67,6 +73,7 @@ category: 'required'
 classmethod: WebApp
 responseForRequest: anHttpRequest
 
+	self log: #'debug' string: 'WebApp class>>responseForRequest:'.
 	^self new responseForRequest: anHttpRequest.
 %
 category: 'required'
@@ -119,6 +126,7 @@ run
 		delegate: self.
 %
 ! ------------------- Instance methods for WebApp
+set compile_env: 0
 set compile_env: 0
 category: 'base'
 method: WebApp
@@ -195,6 +203,7 @@ responseForRequest: anHttpRequest
 	"This is called from the required class-side method with the same name
 	and simply populates the local instance variables."
 
+	self log: #'debug' string: 'WebApp>>responseForRequest:'.
 	request := anHttpRequest.
 	response := HttpResponse new.
 	html := HtmlElement html.
@@ -255,6 +264,18 @@ defaultSelector
 %
 category: 'override options'
 method: WebApp
+index
+
+	response content: '<html>
+ <head>
+ </head>
+ <body>
+   <h1>WebApp is running!<h1>
+ </body>
+</html>'.
+%
+category: 'override options'
+method: WebApp
 maxAge
 	"This result can be cached and reused for this many seconds."
 
@@ -300,4 +321,10 @@ encode: aString
 		].
 	].
 	^stream contents
+%
+category: 'utilities'
+method: WebApp
+log: aSymbol string: aString
+
+	self class log: aSymbol string: aString
 %
