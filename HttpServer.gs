@@ -1,10 +1,5 @@
-
-expectvalue /Class
-doit
-HttpServer category: 'User Interface'
-%
 ! ------------------- Remove existing behavior from HttpServer
-expectvalue /Metaclass3
+expectvalue /Metaclass3       
 doit
 HttpServer removeAllMethods.
 HttpServer class removeAllMethods.
@@ -35,6 +30,18 @@ contentTypes
 		at: 'json'	put: 'text/json';
 		at: 'png'		put: 'image/png';
 		yourself.
+%
+category: 'constants'
+classmethod: HttpServer
+debug
+
+	^Debug == true	"it could be nil!"
+%
+category: 'constants'
+classmethod: HttpServer
+debug: aBoolean
+
+	Debug := aBoolean.
 %
 set compile_env: 0
 category: 'critical'
@@ -111,7 +118,9 @@ supportedLogTypes
 category: 'logging'
 classmethod: HttpServer
 supportedLogTypes: anArray
-
+"
+	HttpServer supportedLogTypes: #(#'startup' #'debug' #'warning' #'error').
+"
 	SessionTemps current
 			at: #'WebServer_logTypes'
 			put: anArray
@@ -130,12 +139,14 @@ askDelegate: aDelegate toHandleLogEntry: aLogEntry
 		| request response |
 		AlmostOutOfMemory enable.
 		request := aLogEntry key.
+		self log: #'debug' string: 'askDelegate: ' , aDelegate printString , ' toHandleLogEntry: ' , aLogEntry printString.
 		response := aDelegate responseForRequest: request.		"<- work is done here"
 		response ifNotNil: [response setDate].
 		aLogEntry value: response.
 		System commit.
 		aDelegate postSendAction.
 	] on: Error , Admonition do: [:ex1 |
+		HttpServer debug ifTrue: [self halt].
 		[
 			System abort.
 			aLogEntry value: ex1.
@@ -185,6 +196,13 @@ serveOnPort: aPortNumber
 			withWorkerGemCount: workerGemCountNumber
 %
 ! ------------------- Instance methods for HttpServer
+set compile_env: 0
+category: 'Accessing'
+method: HttpServer
+_socket
+
+	^(SessionTemps current at: #'HttpRequest_socket') at: Processor activeProcess.
+%
 set compile_env: 0
 category: 'Initializing'
 method: HttpServer
@@ -274,6 +292,7 @@ handleRequestOn: aSocket
 			].
 		].
 	] on: Error , Admonition do: [:ex1 |
+		HttpServer debug ifTrue: [self halt].
 		[
 			self critical: [System abort. logEntry value: ex1].
 		] on: Error do: [:ex2 |
@@ -329,12 +348,12 @@ respondToRequestInLogEntry: aLogEntry
 	In either case, we call HttpServer class>>askDelegate:toHandleLogEntry: to do the work."
 
 	| session useLocalGem |
-	useLocalGem := aLogEntry key isMultiPart		"We need the local socket to read request"
-		or: [(session := self getSession) isNil]. 	"No worker gem available"
+	useLocalGem := aLogEntry key needsSocket		"We need the local socket to read request"
+		or: [(session := self getSession) isNil]. 		"No worker gem available"
 	useLocalGem ifTrue: [		"Handle request in this process"
 		HttpServer askDelegate: delegate toHandleLogEntry: aLogEntry.	"<- work is done either here"
 	] ifFalse: [						"Let a worker gem handle the request"
-		self class log: #'debug' string: 'sending task to ' , session printString.
+		self log: #'debug' string: 'sending task to ' , session printString.
 		[
 			session
 				executeBlock: [System abort];	"so it can see the new logEntry"
@@ -355,6 +374,7 @@ sendResponse: anHttpResponse on: aSocket
 		anHttpResponse sendResponseOn: aSocket.
 		self class log: #'debug' string: 'Response sent to socket: ', aSocket asOop asString, ' fDesc: ' , aSocket fileDescriptor printString
 	] on: Error do: [:ex |
+		HttpServer debug ifTrue: [self halt].
 		self class log: #'error' string: ex description , ' - socket: ', aSocket asOop asString,  Character lf asString , (GsProcess stackReportToLevel: 40).
 	].
 %
@@ -437,7 +457,19 @@ category: 'Web Server'
 method: HttpServer
 acceptSocket
 
-	^self listeningSocket accept
+	| exception socket |
+	[
+		self critical: [socket := self listeningSocket accept].
+	] on: SocketError do: [:ex |
+		exception := ex.
+		HttpServer debug ifTrue: [self halt].
+	].
+	exception ifNotNil: [
+		self log: #'error' string: exception description.
+		socket close.
+		^nil
+	].
+	^socket
 %
 category: 'Web Server'
 method: HttpServer
@@ -483,14 +515,16 @@ mainLoop
 		flag := self listeningSocket readWillNotBlockWithin: 60000. 	"60,000 milliseconds = 60 seconds"
 		[flag] whileTrue: [
 			self log: #'debug' string: 'received connection request'.
-			self critical: [ socket := self acceptSocket ].
-			socket isNil
-				ifTrue: [ self class log: #'warning' string: 'ReadWillNotBlock but accept failed!' ]
-				ifFalse: [
-					self class log: #'debug' string: 'accepted serverSocket ' , socket asOop asString, ' fileDesc: ' , socket fileDescriptor printString.
-					self serveClientSocket: socket.
-				].
-			flag := self listeningSocket readWillNotBlock.
+			socket := self acceptSocket.
+			self log: #'debug' string: 'accepted connection request'.
+			socket isNil ifTrue: [ 
+				self class log: #'warning' string: 'ReadWillNotBlock but accept failed!'.
+				flag := false.
+			] ifFalse: [
+				self class log: #'debug' string: 'accepted serverSocket ' , socket asOop asString, ' fileDesc: ' , socket fileDescriptor printString.
+				self serveClientSocket: socket.
+				flag := self listeningSocket readWillNotBlock.
+			].
 		].
 	].
 %
@@ -525,7 +559,7 @@ serveClientSocket: aSocket
 	[
 		[ aSocket isConnected
 			ifTrue: [ self handleRequestOn: aSocket ]		"<- work is done here"
-			ifFalse: [ self class log: #'warning' string: 'Socket is not connected: ' , aSocket asOop asString ].
+			ifFalse: [ self log: #'warning' string: 'Socket is not connected: ' , aSocket asOop asString ].
 		] ensure: [
 			aSocket close.
 		].

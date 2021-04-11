@@ -1,10 +1,5 @@
-
-expectvalue /Class
-doit
-HttpRequest category: 'Model'
-%
 ! ------------------- Remove existing behavior from HttpRequest
-expectvalue /Metaclass3
+expectvalue /Metaclass3       
 doit
 HttpRequest removeAllMethods.
 HttpRequest class removeAllMethods.
@@ -295,6 +290,21 @@ isMultiPart
 %
 category: 'other'
 method: HttpRequest
+isWebSocketUpgrade
+
+	| connection upgrade |
+	connection := headers at: 'Connection' ifAbsent: [''].
+	upgrade := headers at: 'Upgrade' ifAbsent: [''].
+	^connection = 'Upgrade'  and: [upgrade = 'websocket']
+%
+category: 'other'
+method: HttpRequest
+needsSocket
+
+	^self isMultiPart or: [self isWebSocketUpgrade]
+%
+category: 'other'
+method: HttpRequest
 parseContentsFrom: aString interpreterClassName: aClassName action: aSelector
 
 	" I resolve the interpreter class and send it aSelector, the result is saved in bodyContents attribute. "
@@ -410,6 +420,7 @@ readLine1
 	method := [
 		self upToSpace asString.
 	] on: EndOfStream do: [:ex |
+		HttpServer debug ifTrue: [self halt].
 		ex return: ''.
 	].
 	HttpServer log: #'debug' string: 'HttpRequest>>readLine1 got method of ' , method printString.
@@ -430,10 +441,9 @@ readRequest
 	self readLine1.
 	method isEmpty ifTrue: [^true].
 	self readHeaders.
-	self isMultiPart ifTrue: [^false].
+	self needsSocket ifTrue: [^false].
 	self readContents.
 	^true.
-
 %
 category: 'other'
 method: HttpRequest
@@ -569,6 +579,7 @@ upToNextPartDo: aOneArgumentBlock
 			self _fillStream.		"we could get an EndOfStream here"
 			bytes addAll: stream upToEnd.
 		] on: Error do: [:ex |
+			HttpServer debug ifTrue: [self halt].
 			(ex isKindOf: EndOfStream) ifTrue: [ex return].
 			ex pass.
 		].

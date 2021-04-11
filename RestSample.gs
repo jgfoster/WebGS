@@ -1,20 +1,5 @@
-
-expectvalue /Class
-doit
-RestSample comment:
-'No class-specific documentation for WebAppSample, hierarchy is:
-Object
-  WebApp( begin end exception html request response)
-    WebAppSample( main)
-'
-%
-expectvalue /Class
-doit
-RestSample category: 'User Interface'
-%
-
 ! ------------------- Remove existing behavior from RestSample
-expectvalue /Metaclass3
+expectvalue /Metaclass3       
 doit
 RestSample removeAllMethods.
 RestSample class removeAllMethods.
@@ -26,6 +11,13 @@ classmethod: RestSample
 workerCount
 	"Do everything in one Gem"
 	^0
+%
+set compile_env: 0
+category: 'startup'
+classmethod: RestSample
+httpServerClass
+
+	^HttpsServer
 %
 ! ------------------- Instance methods for RestSample
 set compile_env: 0

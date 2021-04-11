@@ -1,35 +1,5 @@
-
-expectvalue /Class
-doit
-Html4Element comment:
-'This class represents an HTML Element. To learn more see books about HTML or on-line resources, including the following:
-	http://en.wikipedia.org/wiki/HTML_element
-	http://www.w3schools.com/html/html_elements.asp
-
-Although you can get a new instance using the class-side #''new'' method, the typical approach is to send the #''html'' message to get a new HTML document (an element with the tag ''html''). This top-level element is initialized with two child elements, a <head> <meta charset="utf-8" />
-and a <body>, accessed with the #''head'' and #''body'' messages respectively.
-
-You can set attributes using messages based on the attribute name (e.g., the #''class:'' message will set the element''s class attribute).
-
-You can create additional elements inside the head and/or body by sending messages based on the child element''s tag (e.g., the #''div'' message will create a <div> element). The basic way of creating a child element is based on a unary selector that returns the element. For example, the following creates a <b> element and add to it some text:
-	HtmlElement html body bold text: ''Name''.
-
-Most child elements can also be created with a keyword selector that takes a single argument, a one-argument block that receives the new element as an argument. This is useful for setting additional attributes or defining children of the new element (e.g., a <select> element typically has <option> elements as its children). For example:
-	HtmlElement html body bold: [:bold | bold text: ''Name''].
-
-Several of the elements also have multi-argument keyword selectors that handle common use-cases. For example:
-	HtmlElement html body boldWithText: ''Name''.
-
-The advantage of the last two examples is that they allow cascades to send additional messages to the <body> element while the first example would send additional messages to the <b> element.
-
-Sending #''printString'' to an element shows you how it will be rendered.'
-%
-expectvalue /Class
-doit
-Html4Element category: 'Model'
-%
 ! ------------------- Remove existing behavior from Html4Element
-expectvalue /Metaclass3
+expectvalue /Metaclass3       
 doit
 Html4Element removeAllMethods.
 Html4Element class removeAllMethods.

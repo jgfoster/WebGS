@@ -1,10 +1,5 @@
-
-expectvalue /Class
-doit
-HttpResponse category: 'Model'
-%
 ! ------------------- Remove existing behavior from HttpResponse
-expectvalue /Metaclass3
+expectvalue /Metaclass3       
 doit
 HttpResponse removeAllMethods.
 HttpResponse class removeAllMethods.
@@ -96,7 +91,7 @@ method: HttpResponse
 content: aString
 
 	content := aString.
-	self isUTF8 ifTrue: [content := content encodeAsUTF8].
+	self isUTF8 ifFalse: [content := content encodeAsUTF8].
 	self contentLength: content size.
 %
 category: 'other'

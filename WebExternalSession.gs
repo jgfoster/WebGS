@@ -1,15 +1,5 @@
-
-expectvalue /Class
-doit
-WebExternalSession comment:
-'It seems that GsExternalSession does not properly handle hostPassword encryption (see HR9764 and http://kermit.gemtalksystems.com/bug?bug=47308).'
-%
-expectvalue /Class
-doit
-WebExternalSession category: 'User Interface'
-%
 ! ------------------- Remove existing behavior from WebExternalSession
-expectvalue /Metaclass3
+expectvalue /Metaclass3       
 doit
 WebExternalSession removeAllMethods.
 WebExternalSession class removeAllMethods.
@@ -65,4 +55,21 @@ method: WebExternalSession
 password: aString
 
 	password := aString copy
+%
+category: 'other'
+method: WebExternalSession
+_isOnMyStone
+	"GemStone has a bug in this method and we are always on the current stone!"
+
+	^true
+%
+category: 'other'
+method: WebExternalSession
+_signalIfError
+
+	(GsExternalSession canUnderstand: #'_signalIfError') ifTrue: [	"3.6.0 and later"
+		super _signalIfError.
+	] ifFalse: [
+		self _signalIfError: self _gciLibrary.
+	].
 %
