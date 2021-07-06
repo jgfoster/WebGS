@@ -1,5 +1,5 @@
 ! ------------------- Remove existing behavior from HttpRequest
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
 HttpRequest removeAllMethods.
 HttpRequest class removeAllMethods.
@@ -10,7 +10,7 @@ category: 'other'
 classmethod: HttpRequest
 contentTypeHandlers
 
-	" I return a dictionary with all configured Content-type handlers.
+	" I return a dictionary with all configured Content-Type handlers.
 	  Handlers are blocks that take a httpRequest and a string as arguments. "
 
 	contentTypeHandlers isNil ifTrue: [
@@ -73,7 +73,7 @@ category: 'other'
 classmethod: HttpRequest
 installContentTypeHandlers
 
-	" I set a dictionary with all configured Content-type handlers.
+	" I set a dictionary with all configured Content-Type handlers.
 	  Handlers are blocks that take a httpRequest and a string as arguments. "
 
 	contentTypeHandlers := Dictionary new
@@ -378,7 +378,7 @@ readContents
 	string := self upToEnd.
 	method = 'POST' ifTrue: [
 		handler := self class contentTypeHandlers
-			at: (headers at: 'Content-Type')
+			at: (headers at: 'Content-Type' ifAbsent: [ nil ])
 			ifAbsent: [ nil ].
 		handler isNil ifTrue: [
 			" No handler for current Content-Type, just set the string as bodyContents "

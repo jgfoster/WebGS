@@ -12,18 +12,7 @@ errorCount
 output push WebGS.out only
 errorCount
 fileformat utf8
-! JsonParser is included in 3.5.0
-! input ./JSON.gs
 input ./WebGS.gs
-input ./Html4Element.gs
-input ./HtmlElement.gs
-input ./HttpRequest.gs
-input ./HttpResponse.gs
-input ./HttpServer.gs
-input ./HttpsServer.gs
-input ./RestSample.gs
-input ./WebApp.gs
-input ./WebExternalSession.gs
 output pop
 errorCount
 commit

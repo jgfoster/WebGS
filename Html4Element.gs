@@ -1,5 +1,5 @@
 ! ------------------- Remove existing behavior from Html4Element
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
 Html4Element removeAllMethods.
 Html4Element class removeAllMethods.
@@ -3667,7 +3667,7 @@ initializeAsHtml
 		yourself.
 	(self newChildWithTag: 'head')
 		addTo: 'load()' script: '';
-		meta: [:meta | meta httpEquiv: 'Content-type'; content: 'text/html;charset=UTF-8'; yourself];
+		meta: [:meta | meta httpEquiv: 'Content-Type'; content: 'text/html;charset=UTF-8'; yourself];
 		yourself.
 	(self newChildWithTag: 'body')
 		onload: 'load()';

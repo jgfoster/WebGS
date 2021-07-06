@@ -1,5 +1,5 @@
 ! ------------------- Remove existing behavior from HttpServer
-expectvalue /Metaclass3       
+expectvalue /Metaclass3
 doit
 HttpServer removeAllMethods.
 HttpServer class removeAllMethods.
@@ -517,7 +517,7 @@ mainLoop
 			self log: #'debug' string: 'received connection request'.
 			socket := self acceptSocket.
 			self log: #'debug' string: 'accepted connection request'.
-			socket isNil ifTrue: [ 
+			socket isNil ifTrue: [
 				self class log: #'warning' string: 'ReadWillNotBlock but accept failed!'.
 				flag := false.
 			] ifFalse: [
@@ -553,8 +553,7 @@ category: 'Web Server'
 method: HttpServer
 serveClientSocket: aSocket
 
-	" Serve the request on the client socket in a forked process.
-	  Extract from mainLoop due temp variables conflict (wrong socket closed!). "
+	"Serve the request on the client socket in a forked process."
 
 	[
 		[ aSocket isConnected
