@@ -170,23 +170,6 @@ doit
 HttpServer category: 'User Interface'
 %
 set compile_env: 0
-! ------------------- Class definition for HttpsServer
-expectvalue /Class
-doit
-HttpServer subclass: 'HttpsServer'
-  instVarNames: #()
-  classVars: #()
-  classInstVars: #()
-  poolDictionaries: #()
-  inDictionary: WebGS
-  options: #()
-
-%
-expectvalue /Class
-doit
-HttpsServer category: 'User Interface'
-%
-set compile_env: 0
 ! ------------------- Class definition for WebApp
 expectvalue /Class
 doit
@@ -311,7 +294,6 @@ input HtmlElement.gs
 input HttpRequest.gs
 input HttpResponse.gs
 input HttpServer.gs
-input HttpsServer.gs
 input RestSample.gs
 input WebApp.gs
 input WebExternalSession.gs

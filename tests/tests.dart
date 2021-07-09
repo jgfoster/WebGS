@@ -1,11 +1,11 @@
-import 'dart:math';
-
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 
+const String PROTOCOL = 'http';
+
 void main() {
   test('WebGS', () async {
-    var url = Uri.parse('http://localhost:8888');
+    var url = Uri.parse(PROTOCOL + '://localhost:8888');
     var response = await http.get(url);
     expect(response.statusCode, equals(200));
     expect(

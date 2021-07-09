@@ -67,6 +67,17 @@ mutex
 		ifAbsentPut: [Semaphore forMutualExclusion].
 %
 set compile_env: 0
+category: 'https'
+classmethod: HttpServer
+serveHttpsOnPort: portInteger delegate: aWebApp withWorkerGemCount: sessionCountInteger
+
+	self basicNew
+		initialize;
+		delegate: aWebApp;
+		loginSessions: sessionCountInteger;
+		startHttpsServerOnPort: portInteger.
+%
+set compile_env: 0
 category: 'logging'
 classmethod: HttpServer
 log: aSymbol string: aString
@@ -156,9 +167,33 @@ askDelegate: aDelegate toHandleLogEntry: aLogEntry
 %
 category: 'running'
 classmethod: HttpServer
+logoutSessions
+"
+	HttpServer logoutSessions.
+"
+	self critical: [	"so no other process changes a session state"
+		System abort.
+		self sessions do: [:each |
+			each key forceLogout.
+		].
+		self sessions removeAll: self sessions copy.
+	].
+%
+category: 'running'
+classmethod: HttpServer
 new
 
 	self error: 'Use #serveOnPort:delegate:*'
+%
+category: 'running'
+classmethod: HttpServer
+serveHttpOnPort: portInteger delegate: aWebApp withWorkerGemCount: sessionCountInteger
+
+	self basicNew
+		initialize;
+		delegate: aWebApp;
+		loginSessions: sessionCountInteger;
+		startHttpServerOnPort: portInteger.
 %
 category: 'running'
 classmethod: HttpServer
@@ -174,8 +209,10 @@ classmethod: HttpServer
 serveOnPort: portInteger delegate: aWebApp withWorkerGemCount: sessionCountInteger
 
 	self basicNew
-		initializeDelegate: aWebApp withWorkerGemCount: sessionCountInteger;
-		startOnPort: portInteger.
+		initialize;
+		delegate: aWebApp;
+		loginSessions: sessionCountInteger;
+		startHttpServerOnPort: portInteger.
 %
 category: 'running'
 classmethod: HttpServer
@@ -192,8 +229,28 @@ serveOnPort: aPortNumber
 			delegate: aWebApp
 			withWorkerGemCount: workerGemCountNumber
 %
+category: 'running'
+classmethod: HttpServer
+sessions
+	"Collection of Association instances
+		key: GsExternalSession
+		value: aBoolean indicating whether session is available
+	In case anyone persists an instance of HttpServer, we don't want the sessions to prevent the commit!"
+
+	^SessionTemps current
+		at: #'WebServer_sessions'
+		ifAbsentPut: [IdentitySet new].
+%
 ! ------------------- Instance methods for HttpServer
 set compile_env: 0
+category: 'Accessing'
+method: HttpServer
+delegate: aWebApp
+
+	delegate := aWebApp.
+	delegate log.	"to ensure that it exists; create now and commit"
+	System commit.
+%
 category: 'Accessing'
 method: HttpServer
 _socket
@@ -201,6 +258,15 @@ _socket
 	^(SessionTemps current at: #'HttpRequest_socket') at: Processor activeProcess.
 %
 set compile_env: 0
+category: 'Initializing'
+method: HttpServer
+initialize
+
+	GsSocket closeAll.	"debugging could have left some open sockets"
+	System 		"some extra overhead, but we want to get exception stacks"
+		gemConfigurationAt: #GemExceptionSignalCapturesStack
+		put: true.
+%
 category: 'Initializing'
 method: HttpServer
 initializeDelegate: aDelegate withWorkerGemCount: anInteger
@@ -452,11 +518,11 @@ sessions
 set compile_env: 0
 category: 'Web Server'
 method: HttpServer
-acceptSocket
+acceptUsing: aBlock
 
 	| exception socket |
 	[
-		self critical: [socket := self listeningSocket accept].
+		self critical: [socket := aBlock value: self listeningSocket].
 	] on: SocketError do: [:ex |
 		exception := ex.
 		HttpServer debug ifTrue: [self halt].
@@ -467,6 +533,39 @@ acceptSocket
 		^nil
 	].
 	^socket
+%
+category: 'Web Server'
+method: HttpServer
+configureCertificates
+
+	| password |
+	password := GsSecureSocket getPasswordFromFile: '$GEMSTONE/examples/openssl/private/server_1_server_passwd.txt'.
+	GsSecureSocket
+		useServerCertificateFile: '$GEMSTONE/examples/openssl/certs/server_1_servercert.pem'
+		withPrivateKeyFile: '$GEMSTONE/examples/openssl/private/server_1_serverkey.pem'
+		privateKeyPassphrase: password.
+
+	"Don't request a certificate from the client. This is typical."
+	GsSecureSocket disableCertificateVerificationOnServer.
+
+	"Use all ciphers except NULL ciphers and anonymous Diffie-Hellman and sort by strength."
+	GsSecureSocket setServerCipherListFromString: 'ALL:!ADH:@STRENGTH'.
+
+	self log: #'debug' string: 'specified certificate, private key, and password'.
+%
+category: 'Web Server'
+method: HttpServer
+createListener: aSocket onPort: anInteger
+	"set up the listening socket"
+
+	(aSocket makeServer: self sessions size * 2 atPort: anInteger) isNil ifTrue: [
+		| string |
+		string := aSocket lastErrorString.
+		aSocket close.
+		self error: string.
+	].
+	self listeningSocket: aSocket.
+	self class log: #'debug' string: 'listening on a' , aSocket class name , '(' , aSocket asOop printString , ')'.
 %
 category: 'Web Server'
 method: HttpServer
@@ -485,24 +584,21 @@ listeningSocket: aSocket
 %
 category: 'Web Server'
 method: HttpServer
-listenOn: anInteger
+listenOn: aSocket
 	"set up the listening socket"
 
-	| listenerSocket |
-	listenerSocket := self newServerSocket.
-	(listenerSocket makeServer: self sessions size * 2 atPort: anInteger) isNil ifTrue: [
+	(aSocket makeServer: self sessions size * 2 atPort: aSocket port) isNil ifTrue: [
 		| string |
-		string := listenerSocket lastErrorString.
-		listenerSocket close.
+		string := aSocket lastErrorString.
+		aSocket close.
 		self error: string.
 	].
-	listenerSocket port == anInteger ifFalse: [self error: 'Asked for port ' , anInteger printString , ' but got ' , listenerSocket port printString].
-	self listeningSocket: listenerSocket.
-	self class log: #'debug' string: 'listening on a' , listenerSocket class name , '(' , listenerSocket asOop printString , ')'.
+	self listeningSocket: aSocket.
+	self class log: #'debug' string: 'listening on a' , aSocket class name , '(' , aSocket asOop printString , ')'.
 %
 category: 'Web Server'
 method: HttpServer
-mainLoop
+mainLoopWithAccept: aBlock
 
 	[
 		self abortIdleSessions.	"this does an abort/commit in the current gem as well"
@@ -512,7 +608,7 @@ mainLoop
 		flag := self listeningSocket readWillNotBlockWithin: 60000. 	"60,000 milliseconds = 60 seconds"
 		[flag] whileTrue: [
 			self log: #'debug' string: 'received connection request'.
-			socket := self acceptSocket.
+			socket := self acceptUsing: aBlock.
 			self log: #'debug' string: 'accepted connection request'.
 			socket isNil ifTrue: [
 				self class log: #'warning' string: 'ReadWillNotBlock but accept failed!'.
@@ -527,23 +623,11 @@ mainLoop
 %
 category: 'Web Server'
 method: HttpServer
-newServerSocket
-
-	^GsSocket new
-%
-category: 'Web Server'
-method: HttpServer
-protocol
-
-	^'http'
-%
-category: 'Web Server'
-method: HttpServer
-reportServerUrlOn: anInteger
+report: protocolString serverUrlOn: anInteger
 	"log some startup information"
 
 	| serverURL |
-	serverURL := self protocol , '://' , (GsSocket getHostNameByAddress: ((System descriptionOfSession: System session) at: 11)) , ':' , anInteger printString , '/'.
+	serverURL := protocolString , '://' , (GsSocket getHostNameByAddress: ((System descriptionOfSession: System session) at: 11)) , ':' , anInteger printString , '/'.
 	self class log: #'startup' string: serverURL.
 %
 category: 'Web Server'
@@ -565,13 +649,41 @@ serveClientSocket: aSocket
 %
 category: 'Web Server'
 method: HttpServer
-startOnPort: anInteger
+startHttpServerOnPort: anInteger
+
+	self 
+		report: 'http' serverUrlOn: anInteger;
+		startServerOnSocket: GsSignalingSocket new
+		port: anInteger
+		acceptBlock: [:aSocket | aSocket accept].
+%
+category: 'Web Server'
+method: HttpServer
+startHttpsServerOnPort: anInteger
+
+	self 
+		configureCertificates;
+		report: 'https' serverUrlOn: anInteger;
+		startServerOnSocket: GsSecureSocket newServer
+		port: anInteger
+		acceptBlock: [:listener | 
+			| server | 
+			server := listener accept. 
+			server secureAccept ifTrue: [
+				server.
+			] ifFalse: [
+				self error: server lastErrorString.
+			].
+		].
+%
+category: 'Web Server'
+method: HttpServer
+startServerOnSocket: aSocket port: anInteger acceptBlock: aBlock
 	"primary entry point; called immediately after initialization"
 
-	self reportServerUrlOn: anInteger.
 	[
-		self listenOn: anInteger.
-		self mainLoop.		"<- work is done here"
+		self createListener: aSocket onPort: anInteger.
+		self mainLoopWithAccept: aBlock.		"<- work is done here"
 	] ensure: [
 		self listeningSocket close.
 		self sessions do: [:each | each key forceLogout].
