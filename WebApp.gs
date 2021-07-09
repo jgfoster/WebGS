@@ -1,9 +1,6 @@
 ! ------------------- Remove existing behavior from WebApp
-expectvalue /Metaclass3       
-doit
-WebApp removeAllMethods.
-WebApp class removeAllMethods.
-%
+removeAllMethods WebApp
+removeAllClassMethods WebApp
 ! ------------------- Class methods for WebApp
 set compile_env: 0
 category: 'logging'

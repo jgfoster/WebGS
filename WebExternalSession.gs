@@ -1,9 +1,6 @@
 ! ------------------- Remove existing behavior from WebExternalSession
-expectvalue /Metaclass3       
-doit
-WebExternalSession removeAllMethods.
-WebExternalSession class removeAllMethods.
-%
+removeAllMethods WebExternalSession
+removeAllClassMethods WebExternalSession
 ! ------------------- Class methods for WebExternalSession
 ! ------------------- Instance methods for WebExternalSession
 set compile_env: 0

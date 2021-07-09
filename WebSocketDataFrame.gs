@@ -1,9 +1,6 @@
 ! ------------------- Remove existing behavior from WebSocketDataFrame
-expectvalue /Metaclass3       
-doit
-WebSocketDataFrame removeAllMethods.
-WebSocketDataFrame class removeAllMethods.
-%
+removeAllMethods WebSocketDataFrame
+removeAllClassMethods WebSocketDataFrame
 ! ------------------- Class methods for WebSocketDataFrame
 set compile_env: 0
 category: 'other'

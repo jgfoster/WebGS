@@ -1,9 +1,6 @@
 ! ------------------- Remove existing behavior from HttpRequest
-expectvalue /Metaclass3
-doit
-HttpRequest removeAllMethods.
-HttpRequest class removeAllMethods.
-%
+removeAllMethods HttpRequest
+removeAllClassMethods HttpRequest
 ! ------------------- Class methods for HttpRequest
 set compile_env: 0
 category: 'other'
