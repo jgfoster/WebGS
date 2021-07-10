@@ -3,51 +3,6 @@ removeAllMethods WebApp
 removeAllClassMethods WebApp
 ! ------------------- Class methods for WebApp
 set compile_env: 0
-category: 'logging'
-classmethod: WebApp
-log: aSymbol string: aString
-
-	HttpServer log: aSymbol string: aString
-%
-category: 'logging'
-classmethod: WebApp
-purgeWebLog
-
-	^self purgeWebLogKeeping: 500.
-%
-category: 'logging'
-classmethod: WebApp
-purgeWebLogKeeping: anInteger
-	"Delete everything the most recent anInteger entries"
-
-	| webLog |
-	webLog := self log.
-	1 to: webLog size by: 500 do: [:i |
-		[
-			0 to: 499 do: [:j |
-				| k x |
-				k := i + j.
-				(k <= (webLog size - anInteger) and: [(x := webLog at: k) notNil and: [x key isKindOf: HttpRequest]]) ifTrue: [
-					webLog at: k put: nil.
-				].
-			].
-			System commitTransaction.
-		] whileFalse: [
-			System abort.
-		].
-	].
-	System commit.
-	webLog := webLog reject: [:each | each isNil].
-	UserGlobals at: #'WebLog' put: webLog.
-	System commit.
-%
-category: 'logging'
-classmethod: WebApp
-resetLog
-
-	log := Array new
-%
-set compile_env: 0
 category: 'required'
 classmethod: WebApp
 htdocs
@@ -57,73 +12,19 @@ htdocs
 %
 category: 'required'
 classmethod: WebApp
-log
-
-	^log ifNil: [log := Array new]
-%
-category: 'required'
-classmethod: WebApp
-postSendAction
-	"The application has an opportunity to do any post-response action.
-	For example, one application sends an email after the commit.
-
-		(Delay forMilliseconds: 20) wait."
-%
-category: 'required'
-classmethod: WebApp
 responseForRequest: anHttpRequest
 
 	self log: #'debug' string: 'WebApp class>>responseForRequest:'.
 	^self new responseForRequest: anHttpRequest.
 %
-category: 'required'
-classmethod: WebApp
-workerCount
-
-	^2
-%
 set compile_env: 0
-category: 'startup'
-classmethod: WebApp
-defaultPort
-
-	^8888
-%
-category: 'startup'
-classmethod: WebApp
-externalSession
-
-	^WebExternalSession newDefault
-		login;
-		yourself
-"
-	^(WebExternalSession
-		gemNRS: GsNetworkResourceString defaultGemNRSFromCurrent
-		stoneNRS: GsNetworkResourceString defaultStoneNRSFromCurrent
-		username: System myUserProfile userId
-		password: 'swordfish'
-		hostUsername: 'gsadmin'
-		hostPassword: 'swordfish')
-		login;
-		executeBlock: [WebAppSample doLocalSessionInitialization];
-		yourself
-"
-%
-category: 'startup'
-classmethod: WebApp
-httpServerClass
-
-	^HttpServer
-%
 category: 'startup'
 classmethod: WebApp
 run
 "
 	WebApp run.
 "
-	self httpServerClass
-		serveOnPort: self defaultPort
-		delegate: self.
+	self serveHttpOnPort: self defaultPort
 %
 ! ------------------- Instance methods for WebApp
 set compile_env: 0
@@ -146,7 +47,7 @@ _socket: aSocket
 		].
 	].
 	process := Processor activeProcess.
-	(dict at: process otherwise: nil) ifNotNil: [:socket | dict removeKey: process].
+	(dict at: process otherwise: nil) ifNotNil: [:_socket | dict removeKey: process].
 	aSocket ifNotNil: [dict at: process put: aSocket].
 %
 set compile_env: 0
@@ -347,18 +248,12 @@ encode: aString
 	].
 	^stream contents
 %
-category: 'utilities'
-method: WebApp
-log: aSymbol string: aString
-
-	self class log: aSymbol string: aString
-%
 set compile_env: 0
 category: 'WebSockets'
 method: WebApp
 upgradeToWebsocket
 
-	| count crlf key socket version |
+	| count crlf key version |
 	version := request headers at: 'Sec-WebSocket-Version' ifAbsent: ['0'].
 	version asNumber < 13 ifTrue: [
 		self error: 'WebSocketSample requires at least version 13!'.
@@ -370,7 +265,6 @@ upgradeToWebsocket
 		'Upgrade: websocket' , crlf ,
 		'Connection: Upgrade' , crlf ,
 		'Sec-WebSocket-Accept: ' , key , crlf , crlf.
-	socket := self _socket.
 	count := socket write: response.
 	count == response size ifFalse: [self error: 'Unable to write response!'].
 %
@@ -378,8 +272,7 @@ category: 'WebSockets'
 method: WebApp
 wsEvent
 
-	| frame socket |
-	socket := self _socket.
+	| frame  |
 	(socket readWillNotBlockWithin: self wsReadTimeoutMS) ifFalse: [
 		^self wsOnIdle
 	].
@@ -394,7 +287,7 @@ wsEvent
 	frame isDisconnect ifTrue: [
 		WebSocketDataFrame sendPongData: frame data onSocket: socket.
 		socket close.
-		self _socket: nil.
+		socket := nil.
 		Processor activeProcess terminate.	"There isn't really anything to return!"
 	].
 	self error: 'Unrecognized frame'.
@@ -404,7 +297,7 @@ method: WebApp
 wsLoop
 
 	self upgradeToWebsocket.
-	[self _socket isConnected] whileTrue: [
+	[socket isConnected] whileTrue: [
 		self wsEvent.
 	].
 	self error: 'Client did not send proper disconnect message!'.

@@ -157,8 +157,31 @@ set compile_env: 0
 expectvalue /Class
 doit
 Object subclass: 'HttpServer'
-  instVarNames: #( delegate)
-  classVars: #( Debug)
+  instVarNames: #( acceptBlock listenBacklog port
+                    socket)
+  classVars: #()
+  classInstVars: #( requestLog)
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #()
+
+%
+expectvalue /Class
+doit
+HttpServer comment: 
+'WebApp new startHttpServer.'
+%
+expectvalue /Class
+doit
+HttpServer category: 'User Interface'
+%
+set compile_env: 0
+! ------------------- Class definition for HttpConcurrentServer
+expectvalue /Class
+doit
+HttpServer subclass: 'HttpConcurrentServer'
+  instVarNames: #( gemCount sessions)
+  classVars: #()
   classInstVars: #()
   poolDictionaries: #()
   inDictionary: WebGS
@@ -167,17 +190,25 @@ Object subclass: 'HttpServer'
 %
 expectvalue /Class
 doit
-HttpServer category: 'User Interface'
+HttpConcurrentServer comment: 
+'sessions:
+	A collection of Association instances
+		key: GsExternalSession
+		value: aBoolean indicating whether session is available'
+%
+expectvalue /Class
+doit
+HttpConcurrentServer category: 'User Interface'
 %
 set compile_env: 0
 ! ------------------- Class definition for WebApp
 expectvalue /Class
 doit
-Object subclass: 'WebApp'
+HttpServer subclass: 'WebApp'
   instVarNames: #( begin end exception
                     html request response)
   classVars: #()
-  classInstVars: #( log)
+  classInstVars: #()
   poolDictionaries: #()
   inDictionary: WebGS
   options: #()
@@ -195,10 +226,10 @@ doit
 WebApp category: 'User Interface'
 %
 set compile_env: 0
-! ------------------- Class definition for RestSample
+! ------------------- Class definition for WebAppSample
 expectvalue /Class
 doit
-WebApp subclass: 'RestSample'
+WebApp subclass: 'WebAppSample'
   instVarNames: #()
   classVars: #()
   classInstVars: #()
@@ -209,7 +240,7 @@ WebApp subclass: 'RestSample'
 %
 expectvalue /Class
 doit
-RestSample comment: 
+WebAppSample comment: 
 'No class-specific documentation for WebAppSample, hierarchy is:
 Object
   WebApp( begin end exception html request response)
@@ -218,33 +249,7 @@ Object
 %
 expectvalue /Class
 doit
-RestSample category: 'User Interface'
-%
-set compile_env: 0
-! ------------------- Class definition for WebSocketSample
-expectvalue /Class
-doit
-WebApp subclass: 'WebSocketSample'
-  instVarNames: #()
-  classVars: #()
-  classInstVars: #()
-  poolDictionaries: #()
-  inDictionary: WebGS
-  options: #()
-
-%
-expectvalue /Class
-doit
-WebSocketSample comment: 
-'HttpServer debug: true.
-HttpServer supportedLogTypes: #(#''startup'' #''debug'' #''warning'' #''error'').
-WebSocketSample run.
-https://www.websocket.org/echo.html
-wss://localhost:8888/'
-%
-expectvalue /Class
-doit
-WebSocketSample category: 'User Interface'
+WebAppSample category: 'User Interface'
 %
 set compile_env: 0
 ! ------------------- Class definition for WebSocketDataFrame
@@ -291,11 +296,11 @@ WebSocketDataFrame category: 'Model'
 
 input Html4Element.gs
 input HtmlElement.gs
+input HttpConcurrentServer.gs
 input HttpRequest.gs
 input HttpResponse.gs
 input HttpServer.gs
-input RestSample.gs
 input WebApp.gs
+input WebAppSample.gs
 input WebExternalSession.gs
 input WebSocketDataFrame.gs
-input WebSocketSample.gs

@@ -32,13 +32,19 @@ category: 'constants'
 classmethod: HttpServer
 debug
 
-	^Debug == true	"it could be nil!"
+	"Share the mutex across all processes in this gem"
+
+	^SessionTemps current
+		at: #'HttpServer_debug'
+		ifAbsent: [false].
 %
 category: 'constants'
 classmethod: HttpServer
 debug: aBoolean
 
-	Debug := aBoolean.
+	^SessionTemps current
+		at: #'HttpServer_debug'
+		put: aBoolean
 %
 set compile_env: 0
 category: 'critical'
@@ -60,22 +66,11 @@ critical: aBlock
 category: 'critical'
 classmethod: HttpServer
 mutex
-	"In case anyone persists an instance of HttpServer, we don't want the mutex to prevent the commit!"
+	"Share the mutex across all processes in this gem"
 
 	^SessionTemps current
-		at: #'WebServer_mutex'
+		at: #'HttpServer_mutex'
 		ifAbsentPut: [Semaphore forMutualExclusion].
-%
-set compile_env: 0
-category: 'https'
-classmethod: HttpServer
-serveHttpsOnPort: portInteger delegate: aWebApp withWorkerGemCount: sessionCountInteger
-
-	self basicNew
-		initialize;
-		delegate: aWebApp;
-		loginSessions: sessionCountInteger;
-		startHttpsServerOnPort: portInteger.
 %
 set compile_env: 0
 category: 'logging'
@@ -104,7 +99,7 @@ classmethod: HttpServer
 logName
 
 	^SessionTemps current
-			at: #'WebServer_logName'
+			at: #'HttpServer_logName'
 			ifAbsentPut: [ (System performOnServer: 'pwd') trimSeparators, '/webServer.log' ]
 %
 category: 'logging'
@@ -112,7 +107,7 @@ classmethod: HttpServer
 logName: aString
 
 	SessionTemps current
-			at: #'WebServer_logName'
+			at: #'HttpServer_logName'
 			put: aString
 %
 category: 'logging'
@@ -136,9 +131,9 @@ supportedLogTypes: anArray
 set compile_env: 0
 category: 'running'
 classmethod: HttpServer
-askDelegate: aDelegate toHandleLogEntry: aLogEntry
+handleRequestLogEntry: aLogEntry
 	"This is called from the Gem that handles the socket and
-	is typically run in a separate gem to allow for parallel requests.
+	may be run in a separate gem (see HttpConcurrentServer).
 	aLogEntry.key contains anHttpRequest and the role of this method
 	is to end with aLogEntry.value containing either anHttpResponse or
 	anException."
@@ -147,12 +142,12 @@ askDelegate: aDelegate toHandleLogEntry: aLogEntry
 		| request response |
 		AlmostOutOfMemory enable.
 		request := aLogEntry key.
-		self log: #'debug' string: 'askDelegate: ' , aDelegate printString , ' toHandleLogEntry: ' , aLogEntry printString.
-		response := aDelegate responseForRequest: request.		"<- work is done here"
+		self log: #'debug' string: 'askDelegate: ' , self printString , ' toHandleLogEntry: ' , aLogEntry printString.
+		response := self responseForRequest: request.		"<- work is done here"
 		response ifNotNil: [response setDate].
 		aLogEntry value: response.
 		System commit.
-		aDelegate postSendAction.
+		self postCommitAction.
 	] on: Error , Admonition do: [:ex1 |
 		HttpServer debug ifTrue: [self halt].
 		[
@@ -167,120 +162,91 @@ askDelegate: aDelegate toHandleLogEntry: aLogEntry
 %
 category: 'running'
 classmethod: HttpServer
-logoutSessions
-"
-	HttpServer logoutSessions.
-"
-	self critical: [	"so no other process changes a session state"
-		System abort.
-		self sessions do: [:each |
-			each key forceLogout.
-		].
-		self sessions removeAll: self sessions copy.
-	].
-%
-category: 'running'
-classmethod: HttpServer
 new
 
-	self error: 'Use #serveOnPort:delegate:*'
-%
-category: 'running'
-classmethod: HttpServer
-serveHttpOnPort: portInteger delegate: aWebApp withWorkerGemCount: sessionCountInteger
-
-	self basicNew
+	^self basicNew
 		initialize;
-		delegate: aWebApp;
-		loginSessions: sessionCountInteger;
-		startHttpServerOnPort: portInteger.
+		yourself
 %
 category: 'running'
 classmethod: HttpServer
-serveOnPort: anInteger delegate: aWebApp
+postCommitAction
+	"The application has an opportunity to do any post-response action.
+	For example, one application sends an email after the commit.
 
-	self
-		serveOnPort: anInteger
-		delegate: aWebApp
-		withWorkerGemCount: aWebApp workerCount.
+		(Delay forMilliseconds: 20) wait."
 %
 category: 'running'
 classmethod: HttpServer
-serveOnPort: portInteger delegate: aWebApp withWorkerGemCount: sessionCountInteger
+purgeRequestLog
 
-	self basicNew
-		initialize;
-		delegate: aWebApp;
-		loginSessions: sessionCountInteger;
-		startHttpServerOnPort: portInteger.
+	^self purgeRequestLogKeeping: 500.
 %
 category: 'running'
 classmethod: HttpServer
-serveOnPort: aPortNumber
-		delegate: aWebApp
-		withWorkerGemCount: workerGemCountNumber
-		logFileName: aFileNameString
-		supportedLogTypes: anArray
+purgeRequestLogKeeping: anInteger
+	"Delete everything the most recent anInteger entries"
 
-	self
-		supportedLogTypes: anArray;
-		logName: aFileNameString;
-		serveOnPort: aPortNumber
-			delegate: aWebApp
-			withWorkerGemCount: workerGemCountNumber
+	1 to: requestLog size by: 500 do: [:i |
+		[
+			0 to: 499 do: [:j |
+				| k x |
+				k := i + j.
+				(k <= (requestLog size - anInteger) and: [(x := requestLog at: k) notNil and: [x key isKindOf: HttpRequest]]) ifTrue: [
+					requestLog at: k put: nil.
+				].
+			].
+			System commitTransaction.
+		] whileFalse: [
+			System abort.
+		].
+	].
+	System commit.
+	requestLog := requestLog reject: [:each | each isNil].
+	System commit.
 %
 category: 'running'
 classmethod: HttpServer
-sessions
-	"Collection of Association instances
-		key: GsExternalSession
-		value: aBoolean indicating whether session is available
-	In case anyone persists an instance of HttpServer, we don't want the sessions to prevent the commit!"
+requestLog
 
-	^SessionTemps current
-		at: #'WebServer_sessions'
-		ifAbsentPut: [IdentitySet new].
+	^requestLog ifNil: [requestLog := Array new]
+%
+category: 'running'
+classmethod: HttpServer
+resetRequestLog
+
+	requestLog := Array new.
 %
 ! ------------------- Instance methods for HttpServer
 set compile_env: 0
 category: 'Accessing'
 method: HttpServer
-delegate: aWebApp
+ listenBacklog: anInteger
 
-	delegate := aWebApp.
-	delegate log.	"to ensure that it exists; create now and commit"
-	System commit.
+	listenBacklog := anInteger.
 %
 category: 'Accessing'
 method: HttpServer
-_socket
+port: anInteger
 
-	^(SessionTemps current at: #'HttpRequest_socket') at: Processor activeProcess.
+	port := anInteger.
 %
 set compile_env: 0
 category: 'Initializing'
 method: HttpServer
 initialize
 
+	listenBacklog := 5.
+	port := 8888.
 	GsSocket closeAll.	"debugging could have left some open sockets"
 	System 		"some extra overhead, but we want to get exception stacks"
 		gemConfigurationAt: #GemExceptionSignalCapturesStack
 		put: true.
-%
-category: 'Initializing'
-method: HttpServer
-initializeDelegate: aDelegate withWorkerGemCount: anInteger
-
-	delegate := aDelegate.
-	delegate log.	"to ensure that it exists; create now and commit"
+	self class requestLog.	"to ensure that it exists; create now and commit"
 	System commit.
-	GsSocket closeAll.	"debugging could have left some open sockets"
-	System 		"some extra overhead, but we want to get exception stacks"
-		gemConfigurationAt: #GemExceptionSignalCapturesStack
-		put: true.
-	self loginSessions: anInteger.
 %
-category: 'Initializing'
+set compile_env: 0
+category: 'Logging'
 method: HttpServer
 log: aSymbol string: aString
 
@@ -312,8 +278,8 @@ handleRequestForFile: pathString on: aSocket method: methodString
 			contentType: (self class contentTypeFor: gsFile pathName);
 			yourself.
 		methodString = 'HEAD' ifFalse: [	"A HEAD request has the file size and type but not the contents."
-			response sendContentsBlock: [:socket |
-				[gsFile atEnd not] whileTrue: [socket write: (gsFile next: 32000)].
+			response sendContentsBlock: [:_socket |
+				[gsFile atEnd not] whileTrue: [_socket write: (gsFile next: 32000)].
 			].
 		].
 		self
@@ -334,15 +300,15 @@ handleRequestOn: aSocket
 		self log: #'debug' string: 'handleRequestOn: ' , aSocket printString , ' - a'.
 		request := HttpRequest readFromSocket: aSocket.
 		self log: #'debug' string: 'handleRequestOn: ' , aSocket printString , ' - b'.
-		self critical: [logEntry key: request].
+		logEntry key: request.
 		request method isEmpty ifTrue: [
-			self class log: #'warning' string: 'Got an empty request'.
+			self log: #'warning' string: 'Got an empty request'.
 			^self.
 		].
 		self respondToRequestInLogEntry: logEntry.		"<- work is done here for dynamic content"
 		response := logEntry value.
 		response ifNil: [		"no dynamic content available, try static content"
-			self critical: [logEntry value: request path].
+			logEntry value: request path.
 			self
 				handleRequestForFile: request path
 				on: aSocket
@@ -388,7 +354,7 @@ newWebLogEntry
 			dynamic content was generated
 "
 
-	^self critical: [delegate log add: DateTime now -> nil].
+	^self critical: [self class requestLog add: DateTime now -> nil].
 %
 category: 'Request Handler'
 method: HttpServer
@@ -397,7 +363,7 @@ openFile: pathString
 
 	| file path |
 	file := pathString.
-	(path := delegate htdocs) ifNil: [^nil]. "Should we offer static files?"
+	(path := self class htdocs) ifNil: [^nil]. "Should we offer static files?"
 	(file includesString: '../') ifTrue: [^nil]. "Is request for a file below provided path?"
 	(file isEmpty or: [file = '/']) ifTrue: [file := '/index.html'].
 	^GsFile openReadOnServer: path , file
@@ -407,27 +373,9 @@ method: HttpServer
 respondToRequestInLogEntry: aLogEntry
 	"We are in a forked process (thread) and aLogEntry.key contains anHttpRequest.
 	We put something in aLogEntry.value and return.
-	The action might be done in our Gem or in a remote (worker) Gem.
-	In either case, we call HttpServer class>>askDelegate:toHandleLogEntry: to do the work."
+	The action might be done in our Gem or in a remote (worker) Gem."
 
-	| session useLocalGem |
-	useLocalGem := aLogEntry key needsSocket		"We need the local socket to read request"
-		or: [(session := self getSession) isNil]. 		"No worker gem available"
-	useLocalGem ifTrue: [		"Handle request in this process"
-		HttpServer askDelegate: delegate toHandleLogEntry: aLogEntry.	"<- work is done either here"
-	] ifFalse: [						"Let a worker gem handle the request"
-		self log: #'debug' string: 'sending task to ' , session printString.
-		[
-			session
-				executeBlock: [System abort];	"so it can see the new logEntry"
-				send: #'askDelegate:toHandleLogEntry:' 							"<- or work is done here"
-					to: HttpServer asOop
-					withArguments: (Array with: delegate with: aLogEntry);
-				yourself.
-		] ensure: [
-			self returnSession: session.
-		].
-	].
+	self class handleRequestLogEntry: aLogEntry.	"<- work is done either here"
 %
 category: 'Request Handler'
 method: HttpServer
@@ -442,97 +390,11 @@ sendResponse: anHttpResponse on: aSocket
 	].
 %
 set compile_env: 0
-category: 'Sessions'
-method: HttpServer
-abortIdleSessions
-
-	self critical: [	"so no other process changes a session state"
-		System abort.
-		self sessions do: [:each |
-			each value ifTrue: [		"session is available (idle)"
-				each key executeBlock: [		"block evaluated in remote (worker) process"
-					(Delay forMilliseconds: 100) wait. 	"Allow background processes to run"
-					System abort.								"Avoid CR backlog"
-				].
-			].
-		].
-	].
-%
-category: 'Sessions'
-method: HttpServer
-getSession
-	"Returns a GciExternalSession that is idle and can be used to build an HttpResponse"
-
-	| assoc sessions |
-	(sessions := self sessions) isEmpty ifTrue: [^nil].
-	[
-		self critical: [
-			assoc := sessions
-				detect: [:each | each value] 		"session is available"
-				ifNone: [nil].
-			assoc ifNotNil: [assoc value: false].		"session is not available"
-		].
-		assoc isNil.
-	] whileTrue: [
-		(Delay forMilliseconds: 10) wait. 			"wait to see if something becomes available"
-	].
-	^assoc key
-%
-category: 'Sessions'
-method: HttpServer
-loginSessions: anInteger
-	"part of the initialization sequence"
-
-	| sessions |
-	sessions := self sessions.	"starts as an empty IdentitySet"
-	anInteger timesRepeat: [
-		sessions add: delegate externalSession -> true.		"logged-in session is available"
-	].
-	sessions do: [:each |
-		each key executeBlock: [System gemConfigurationAt: #GemExceptionSignalCapturesStack put: true].
-	].
-%
-category: 'Sessions'
-method: HttpServer
-returnSession: aGciSession
-	"all done using this remote, worker, Gem"
-
-	self critical: [
-		| assoc |
-		assoc := self sessions detect: [:each | each key == aGciSession].
-		assoc value: true.
-	].
-%
-category: 'Sessions'
-method: HttpServer
-sessions
-	"Collection of Association instances
-		key: GsExternalSession
-		value: aBoolean indicating whether session is available
-	In case anyone persists an instance of HttpServer, we don't want the sessions to prevent the commit!"
-
-	^SessionTemps current
-		at: #'WebServer_sessions'
-		ifAbsentPut: [IdentitySet new].
-%
-set compile_env: 0
 category: 'Web Server'
 method: HttpServer
-acceptUsing: aBlock
+accept
 
-	| exception socket |
-	[
-		self critical: [socket := aBlock value: self listeningSocket].
-	] on: SocketError do: [:ex |
-		exception := ex.
-		HttpServer debug ifTrue: [self halt].
-	].
-	exception ifNotNil: [
-		self log: #'error' string: exception description.
-		socket close.
-		^nil
-	].
-	^socket
+	^socket accept
 %
 category: 'Web Server'
 method: HttpServer
@@ -555,91 +417,69 @@ configureCertificates
 %
 category: 'Web Server'
 method: HttpServer
-createListener: aSocket onPort: anInteger
+createListener
 	"set up the listening socket"
 
-	(aSocket makeServer: self sessions size * 2 atPort: anInteger) isNil ifTrue: [
+	(socket makeServer: listenBacklog atPort: port) ifNil: [
 		| string |
-		string := aSocket lastErrorString.
-		aSocket close.
+		string := socket lastErrorString.
+		socket close.
+		socket := nil.
 		self error: string.
 	].
-	self listeningSocket: aSocket.
-	self class log: #'debug' string: 'listening on a' , aSocket class name , '(' , aSocket asOop printString , ')'.
+	self class log: #'debug' string: 'listening on a' , socket class name , '(' , socket asOop printString , ')'.
 %
 category: 'Web Server'
 method: HttpServer
-listeningSocket
-
-	^SessionTemps current at: #'WebServer_listeningSocket'.
-%
-category: 'Web Server'
-method: HttpServer
-listeningSocket: aSocket
-	"In case anyone persists an instance of HttpServer, we don't want the socket to prevent the commit!"
-
-	SessionTemps current
-		at: #'WebServer_listeningSocket'
-		put: aSocket.
-%
-category: 'Web Server'
-method: HttpServer
-listenOn: aSocket
-	"set up the listening socket"
-
-	(aSocket makeServer: self sessions size * 2 atPort: aSocket port) isNil ifTrue: [
-		| string |
-		string := aSocket lastErrorString.
-		aSocket close.
-		self error: string.
-	].
-	self listeningSocket: aSocket.
-	self class log: #'debug' string: 'listening on a' , aSocket class name , '(' , aSocket asOop printString , ')'.
-%
-category: 'Web Server'
-method: HttpServer
-mainLoopWithAccept: aBlock
+mainLoop
 
 	[
-		self abortIdleSessions.	"this does an abort/commit in the current gem as well"
-		true.
+		self shouldKeepRunning.
 	] whileTrue: [
-		| flag socket |
-		flag := self listeningSocket readWillNotBlockWithin: 60000. 	"60,000 milliseconds = 60 seconds"
+		| flag newSocket |
+		flag := socket readWillNotBlockWithin: 60000. 	"60,000 milliseconds = 60 seconds"
 		[flag] whileTrue: [
 			self log: #'debug' string: 'received connection request'.
-			socket := self acceptUsing: aBlock.
+			newSocket := acceptBlock value.
 			self log: #'debug' string: 'accepted connection request'.
-			socket isNil ifTrue: [
+			newSocket isNil ifTrue: [
 				self class log: #'warning' string: 'ReadWillNotBlock but accept failed!'.
 				flag := false.
 			] ifFalse: [
-				self class log: #'debug' string: 'accepted serverSocket ' , socket asOop asString, ' fileDesc: ' , socket fileDescriptor printString.
-				self serveClientSocket: socket.
-				flag := self listeningSocket readWillNotBlock.
+				self class log: #'debug' string: 'accepted serverSocket ' , newSocket asOop asString, ' fileDesc: ' , newSocket fileDescriptor printString.
+				self serveClientSocket: newSocket.
+				flag := socket readWillNotBlock.
 			].
 		].
 	].
 %
 category: 'Web Server'
 method: HttpServer
-report: protocolString serverUrlOn: anInteger
+reportUrlWithProtocol: aString
 	"log some startup information"
 
 	| serverURL |
-	serverURL := protocolString , '://' , (GsSocket getHostNameByAddress: ((System descriptionOfSession: System session) at: 11)) , ':' , anInteger printString , '/'.
+	serverURL := aString , '://' , (GsSocket getHostNameByAddress: ((System descriptionOfSession: System session) at: 11)) , ':' , port printString , '/'.
 	self class log: #'startup' string: serverURL.
 %
 category: 'Web Server'
 method: HttpServer
-serveClientSocket: aSocket
+seccureAccept
 
+	| newSocket | 
+	newSocket := socket accept. 
+	newSocket secureAccept ifTrue: [^newSocket].
+	self error: newSocket lastErrorString.
+%
+category: 'Web Server'
+method: HttpServer
+serveClientSocket: aSocket
 	"Serve the request on the client socket in a forked process."
 
 	[
-		[ aSocket isConnected
-			ifTrue: [ self handleRequestOn: aSocket ]		"<- work is done here"
-			ifFalse: [ self log: #'warning' string: 'Socket is not connected: ' , aSocket asOop asString ].
+		[aSocket isConnected
+			ifTrue: [self handleRequestOn: aSocket]		"<- work is done here"
+			ifFalse: [self log: #'warning' string: 'Socket is not connected: ' , aSocket asOop asString].
 		] ensure: [
 			aSocket close.
 		].
@@ -649,43 +489,41 @@ serveClientSocket: aSocket
 %
 category: 'Web Server'
 method: HttpServer
-startHttpServerOnPort: anInteger
+shouldKeepRunning
 
-	self 
-		report: 'http' serverUrlOn: anInteger;
-		startServerOnSocket: GsSignalingSocket new
-		port: anInteger
-		acceptBlock: [:aSocket | aSocket accept].
+	^System commitTransaction
 %
 category: 'Web Server'
 method: HttpServer
-startHttpsServerOnPort: anInteger
+startHttpServer
 
+	socket := GsSignalingSocket new.
+	acceptBlock := [self accept].
+	self 
+		reportUrlWithProtocol: 'http';
+		startServer.
+%
+category: 'Web Server'
+method: HttpServer
+startHttpsServer
+
+	socket := GsSecureSocket newServer.
+	acceptBlock := [self secureAccept].
 	self 
 		configureCertificates;
-		report: 'https' serverUrlOn: anInteger;
-		startServerOnSocket: GsSecureSocket newServer
-		port: anInteger
-		acceptBlock: [:listener | 
-			| server | 
-			server := listener accept. 
-			server secureAccept ifTrue: [
-				server.
-			] ifFalse: [
-				self error: server lastErrorString.
-			].
-		].
+		reportUrlWithProtocol: 'https';
+		startServer.
 %
 category: 'Web Server'
 method: HttpServer
-startServerOnSocket: aSocket port: anInteger acceptBlock: aBlock
+startServer
 	"primary entry point; called immediately after initialization"
 
 	[
-		self createListener: aSocket onPort: anInteger.
-		self mainLoopWithAccept: aBlock.		"<- work is done here"
+		self createListener.
+		self mainLoop.		"<- work is done here"
 	] ensure: [
-		self listeningSocket close.
-		self sessions do: [:each | each key forceLogout].
+		socket close.
+		socket := nil.
 	].
 %

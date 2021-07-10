@@ -3,6 +3,11 @@ import 'package:http/http.dart' as http;
 
 const String PROTOCOL = 'http';
 
+/*
+HttpServer supportedLogTypes: #(#'startup' #'debug' #'warning' #'error').
+WebApp run.
+*/
+
 void main() {
   test('WebGS', () async {
     var url = Uri.parse(PROTOCOL + '://localhost:8888');
