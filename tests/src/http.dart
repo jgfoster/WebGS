@@ -5,6 +5,7 @@ const String PROTOCOL = 'http';
 
 /*
 HttpServer supportedLogTypes: #(#'startup' #'debug' #'warning' #'error').
+HttpServer debug: true.
 WebApp run.
 */
 
