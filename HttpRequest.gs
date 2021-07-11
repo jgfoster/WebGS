@@ -201,43 +201,21 @@ _sizeLeft
 
 	^sizeLeft.
 %
-category: 'Accessing'
-method: HttpRequest
-_socket
-
-	^(SessionTemps current at: #'HttpRequest_socket') at: Processor activeProcess.
-%
-category: 'Accessing'
-method: HttpRequest
-_socket: aSocket
-
-	| dict process |
-	dict := SessionTemps current at: #'HttpRequest_socket' ifAbsentPut: [Dictionary new].
-	dict copy keysAndValuesDo: [:eachProcess :eachSocket |
-		eachProcess _isTerminated ifTrue: [
-			eachSocket close.
-			dict removeKey: eachProcess.
-		].
-	].
-	process := Processor activeProcess.
-	(dict at: process otherwise: nil) ifNotNil: [:socket | dict removeKey: process].
-	aSocket ifNotNil: [dict at: process put: aSocket].
-%
 set compile_env: 0
 category: 'other'
 method: HttpRequest
 closeSocket
 
-	self _socket ifNotNil: [:socket |
+	socket ifNotNil: [
 		socket close.
-		self _socket: nil.
+		socket := nil.
 	].
 %
 category: 'other'
 method: HttpRequest
 initializeWithSocket: aSocket
 
-	self _socket: aSocket.
+	socket := aSocket.
 	arguments := Dictionary new.
 	headers := Dictionary new
 		at: 'X-Date' 				put: (HttpResponse webStringForDateTime: DateTime now);
@@ -245,7 +223,7 @@ initializeWithSocket: aSocket
 		at: 'X-Peer-Address' 	put: aSocket peerAddress;
 		at: 'X-Peer-Port' 			put: aSocket peerPort asString;
 		yourself.
-	self readRequest ifTrue: [self _socket: nil].	"did the read finish?"
+	self readRequest ifTrue: [socket := nil].	"did the read finish?"
 %
 category: 'other'
 method: HttpRequest
@@ -633,14 +611,14 @@ _fillStream
 	4096 < want ifTrue: [want := 4096].
 	[
 		HttpServer log: #'debug' string: 'HttpRequest>>_fillStream - 1 - want = ' , want printString , '; have = ' , bytes size printString.
-		self _socket readWillNotBlockWithin: 1000.
+		socket readWillNotBlockWithin: 1000.
 	] whileTrue: [
 		| bytesRead |
-		bytesRead := self _socket read: want into: bytes startingAt: bytes size + 1.
+		bytesRead := socket read: want into: bytes startingAt: bytes size + 1.
 		HttpServer log: #'debug' string: 'HttpRequest>>_fillStream - 2 - bytesRead = ' , bytesRead printString.
 		bytesRead == 0 ifTrue: [
 			| errors |
-			self _socket fetchLastIoErrorString ifNotNil: [:value |
+			socket fetchLastIoErrorString ifNotNil: [:value |
 				HttpServer log: #'error' string: value.
 				EndOfStream signal: value.
 			].

@@ -21,15 +21,15 @@ accept
 %
 category: 'default'
 method: HttpListener
-protocol
+newSocket
 
-	^'http'
+	^GsSignalingSocket new
 %
 category: 'default'
 method: HttpListener
-socketClass
+protocol
 
-	^GsSignalingSocket
+	^'http'
 %
 set compile_env: 0
 category: 'Initializing'
@@ -66,7 +66,7 @@ method: HttpListener
 createListener
 	"set up the listening socket"
 
-	socket := self socketClass new.
+	socket := DbTransientSocket new: self newSocket.
 	(socket makeServer: listenBacklog atPort: port) ifNil: [
 		| string |
 		string := socket lastErrorString.
@@ -74,7 +74,7 @@ createListener
 		socket := nil.
 		self error: string.
 	].
-	HttpServer log: #'debug' string: 'listening on a' , socket class name , '(' , socket asOop asString, ' fileDesc: ' , socket fileDescriptor printString , ')'.
+	HttpServer log: #'debug' string: 'HttpListener>>createListener - ' , socket printString.
 %
 category: 'Web Server'
 method: HttpListener
@@ -92,8 +92,7 @@ mainLoop
 				HttpServer log: #'warning' string: 'GsSocket>>readWillNotBlock returned true but accept failed!'.
 			] ifFalse: [
 				[:aBlock :aSocket |
-					HttpServer log: #'debug' string: 'Accepted socket ' , aSocket asOop asString, 
-						' fileDesc: ' , aSocket fileDescriptor printString.
+					HttpServer log: #'debug' string: 'HttpListener>>mainLoop - accepted ' , aSocket printString , ' isConnected = ' , aSocket isConnected printString.
 					block value: aSocket.		"<== work is done here"
 				] forkWith: (Array with: block with: newSocket).
 			].

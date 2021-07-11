@@ -83,7 +83,7 @@ log: aSymbol string: aString
 		System clientIsRemote ifTrue: [
 			self critical: [
 				log := GsFile openAppendOnServer: self logName.
-				log log: '[', System gemProcessId printString ,'] - (', aSymbol , ') ' , (HttpResponse webStringForDateTime: DateTime now) , ' - ' , Processor activeProcess asOop printString , ' - ' , aString.
+				log log: DateAndTime now printStringWithRoundedSeconds , ' - ', System gemProcessId printString ,' - ', Processor activeProcess asOop printString , ' - ' , aSymbol  , ' - ' , aString.
 				log close.
 			].
 		] ifFalse: [
@@ -220,10 +220,10 @@ sendResponse
 
 	[
 		response sendResponseOn: socket.
-		HttpServer log: #'debug' string: 'Response sent to socket: ', socket asOop asString, ' fDesc: ' , socket fileDescriptor printString.
+		HttpServer log: #'debug' string: 'Response sent to socket: ', socket printString.
 	] on: Error do: [:ex |
 		HttpServer debug ifTrue: [self halt].
-		HttpServer log: #'error' string: ex description , ' - socket: ', socket asOop asString,  Character lf asString , (GsProcess stackReportToLevel: 40).
+		HttpServer log: #'error' string: ex description , ' - socket: ', socket printString,  Character lf asString , (GsProcess stackReportToLevel: 40).
 	].
 %
 category: 'Request Handler'
@@ -232,10 +232,10 @@ serveClientSocket: aSocket
 	"Serve the request in a forked process."
 
 	socket := aSocket.
-	HttpServer log: #'debug' string: 'HttpServer>>serveClientSocket: ' , socket asOop asString.
+	HttpServer log: #'debug' string: 'HttpServer>>serveClientSocket: ' , socket printString.
 	[socket isConnected
 		ifTrue: [self handleRequestWithErrorHandling]		"<- work is done here"
-		ifFalse: [HttpServer log: #'warning' string: 'Socket is not connected: ' , socket asOop asString].
+		ifFalse: [HttpServer log: #'warning' string: 'Socket is not connected: ' , socket printString].
 	] ensure: [
 		socket close.
 		socket := nil.

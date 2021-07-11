@@ -267,11 +267,6 @@ method: HttpResponse
 sendResponseOn: aSocket
 
 	| stream string count |
-
-	aSocket isActive ifFalse: [ self error: 'aSocket is not active. fDesc: ', aSocket fileDescriptor printString ].
-	aSocket isConnected ifFalse: [ self error: 'aSocket is not connected. fDesc: ', aSocket fileDescriptor printString ].
-	aSocket writeWillNotBlock ifFalse: [ self error: 'aSocket write will block. fDesc: ', aSocket fileDescriptor printString ].
-
 	stream := WriteStream on: String new.
 	self printAllExceptContentOn: stream.		"Headers, etc."
 	string := stream contents.

@@ -33,6 +33,23 @@ doit
 WebExternalSession category: 'User Interface'
 %
 set compile_env: 0
+! ------------------- Class definition for DbTransientSocket
+expectvalue /Class
+doit
+Object subclass: 'DbTransientSocket'
+  instVarNames: #( socket)
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #( dbTransient)
+
+%
+expectvalue /Class
+doit
+DbTransientSocket category: 'User Interface'
+%
+set compile_env: 0
 ! ------------------- Class definition for Html4Element
 expectvalue /Class
 doit
@@ -155,9 +172,9 @@ set compile_env: 0
 expectvalue /Class
 doit
 Object subclass: 'HttpRequest'
-  instVarNames: #( stream method uri
-                    path version headers arguments
-                    bodyContents sizeLeft multipartFormDataBoundary)
+  instVarNames: #( socket stream method
+                    uri path version headers
+                    arguments bodyContents sizeLeft multipartFormDataBoundary)
   classVars: #()
   classInstVars: #( contentTypeHandlers)
   poolDictionaries: #()
@@ -327,6 +344,7 @@ doit
 WebSocketDataFrame category: 'Model'
 %
 
+input DbTransientSocket.gs
 input Html4Element.gs
 input HtmlElement.gs
 input HttpConcurrentServer.gs

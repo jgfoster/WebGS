@@ -17,7 +17,7 @@ run
 "
 	WebApp run.
 "
-	HttpListener new
+	HttpsListener new
 		listenBacklog: 5;
 		port: 8888;
 		withSocketDo: [:aSocket | self new serveClientSocket: aSocket];
@@ -63,7 +63,7 @@ buildResponse
 
 	| newSelector pieces selector size |
 	html := HtmlElement html.
-	HttpServer log: #'debug' string: 'WebApp>>buildResponse - a'.
+	HttpServer log: #'debug' string: 'WebApp>>buildResponse'.
 	pieces := request path subStrings: $/.
 	selector := pieces at: 2.
 	selector isEmpty ifTrue: [selector := self defaultSelector].
@@ -83,14 +83,12 @@ buildResponse
 	According to the standard, we SHOULD provide the length, but that is optional
 	(versus SHALL which would be required)."
 	request method = 'HEAD' ifFalse: [
-		HttpServer log: #'debug' string: 'WebApp>>buildResponse - b'.
 		self buildResponseFor: selector.
 		response hasContent ifFalse: [
 			response content: html printString.
 		].
 	].
 	response maxAge: self maxAge.
-	HttpServer log: #'debug' string: 'WebApp>>buildResponse - c'.
 %
 category: 'base'
 method: WebApp
@@ -121,7 +119,6 @@ buildResponseFor: aString
 			response content: dict asJson.
 		].
 	].
-	HttpServer log: #'debug' string: 'WebApp>>buildResponseFor:  returning response'.
 %
 set compile_env: 0
 category: 'convenience'

@@ -22,15 +22,15 @@ initialize
 %
 category: 'other'
 method: HttpsListener
-protocol
+newSocket
 
-	^'https'
+	^GsSecureSocket newServer
 %
 category: 'other'
 method: HttpsListener
-socketClass
+protocol
 
-	^GsSecureSocket
+	^'https'
 %
 set compile_env: 0
 category: 'Web Server'
@@ -38,6 +38,7 @@ method: HttpsListener
 configureCertificates
 
 	| password |
+	HttpServer log: #'debug' string: 'HttpsListener>>configureCertificates'.
 	password := GsSecureSocket getPasswordFromFile: '$GEMSTONE/examples/openssl/private/server_1_server_passwd.txt'.
 	GsSecureSocket
 		useServerCertificateFile: '$GEMSTONE/examples/openssl/certs/server_1_servercert.pem'
@@ -49,6 +50,4 @@ configureCertificates
 
 	"Use all ciphers except NULL ciphers and anonymous Diffie-Hellman and sort by strength."
 	GsSecureSocket setServerCipherListFromString: 'ALL:!ADH:@STRENGTH'.
-
-	self log: #'debug' string: 'specified certificate, private key, and password'.
 %

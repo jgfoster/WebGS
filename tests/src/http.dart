@@ -1,7 +1,7 @@
 import 'package:test/test.dart';
 import 'package:http/http.dart' as http;
 
-const String PROTOCOL = 'http';
+const String PROTOCOL = 'https';
 
 /*
 HttpServer supportedLogTypes: #(#'startup' #'debug' #'warning' #'error').
