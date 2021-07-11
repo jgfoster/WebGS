@@ -17,7 +17,11 @@ run
 "
 	WebApp run.
 "
-	self new startHttpServer.
+	HttpListener new
+		listenBacklog: 5;
+		port: 8888;
+		withSocketDo: [:aSocket | self new serveClientSocket: aSocket];
+		run.
 %
 ! ------------------- Instance methods for WebApp
 set compile_env: 0
@@ -59,7 +63,7 @@ buildResponse
 
 	| newSelector pieces selector size |
 	html := HtmlElement html.
-	self log: #'debug' string: 'WebApp>>buildResponse - a'.
+	HttpServer log: #'debug' string: 'WebApp>>buildResponse - a'.
 	pieces := request path subStrings: $/.
 	selector := pieces at: 2.
 	selector isEmpty ifTrue: [selector := self defaultSelector].
@@ -79,14 +83,14 @@ buildResponse
 	According to the standard, we SHOULD provide the length, but that is optional
 	(versus SHALL which would be required)."
 	request method = 'HEAD' ifFalse: [
-		self log: #'debug' string: 'WebApp>>buildResponse - b'.
+		HttpServer log: #'debug' string: 'WebApp>>buildResponse - b'.
 		self buildResponseFor: selector.
 		response hasContent ifFalse: [
 			response content: html printString.
 		].
 	].
 	response maxAge: self maxAge.
-	self log: #'debug' string: 'WebApp>>buildResponse - c'.
+	HttpServer log: #'debug' string: 'WebApp>>buildResponse - c'.
 %
 category: 'base'
 method: WebApp
@@ -99,7 +103,7 @@ buildResponseFor: aString
 	a top section could come before and a bottom section could come after."
 
 	| size |
-	self log: #'debug' string: 'WebApp>>buildResponseFor: ' , aString printString.
+	HttpServer log: #'debug' string: 'WebApp>>buildResponseFor: ' , aString printString.
 	size := aString size.
 	((3 < size and: [(aString copyFrom: size - 2 to: size) = '_gs']) or: [
 		4 < size and: [(aString copyFrom: size - 3 to: size) = '_gs:']
@@ -117,20 +121,7 @@ buildResponseFor: aString
 			response content: dict asJson.
 		].
 	].
-	self log: #'debug' string: 'WebApp>>buildResponseFor:  returning response'.
-%
-category: 'base'
-method: WebApp
-responseForRequest: anHttpRequest
-	"This is called from the required class-side method with the same name
-	and simply populates the local instance variables."
-
-	self error: 'do we get here?'.
-	request := anHttpRequest.
-	response := HttpResponse new.
-	html := HtmlElement html.
-	self buildResponse.
-	^response
+	HttpServer log: #'debug' string: 'WebApp>>buildResponseFor:  returning response'.
 %
 set compile_env: 0
 category: 'convenience'

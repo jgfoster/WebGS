@@ -120,7 +120,7 @@ set compile_env: 0
 expectvalue /Class
 doit
 Object subclass: 'HttpListener'
-  instVarNames: #( acceptBlock listenBacklog port
+  instVarNames: #( block listenBacklog port
                     socket)
   classVars: #()
   classInstVars: #()
@@ -134,11 +134,65 @@ doit
 HttpListener category: 'User Interface'
 %
 set compile_env: 0
+! ------------------- Class definition for HttpsListener
+expectvalue /Class
+doit
+HttpListener subclass: 'HttpsListener'
+  instVarNames: #()
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #()
+
+%
+expectvalue /Class
+doit
+HttpsListener category: 'User Interface'
+%
+set compile_env: 0
+! ------------------- Class definition for HttpRequest
+expectvalue /Class
+doit
+Object subclass: 'HttpRequest'
+  instVarNames: #( stream method uri
+                    path version headers arguments
+                    bodyContents sizeLeft multipartFormDataBoundary)
+  classVars: #()
+  classInstVars: #( contentTypeHandlers)
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #()
+
+%
+expectvalue /Class
+doit
+HttpRequest category: 'Model'
+%
+set compile_env: 0
+! ------------------- Class definition for HttpResponse
+expectvalue /Class
+doit
+Object subclass: 'HttpResponse'
+  instVarNames: #( code headers content
+                    sendContentsBlock)
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #()
+
+%
+expectvalue /Class
+doit
+HttpResponse category: 'Model'
+%
+set compile_env: 0
 ! ------------------- Class definition for HttpServer
 expectvalue /Class
 doit
-HttpListener subclass: 'HttpServer'
-  instVarNames: #( request response)
+Object subclass: 'HttpServer'
+  instVarNames: #( request response socket)
   classVars: #()
   classInstVars: #()
   poolDictionaries: #()
@@ -231,43 +285,6 @@ doit
 WebAppSample category: 'User Interface'
 %
 set compile_env: 0
-! ------------------- Class definition for HttpRequest
-expectvalue /Class
-doit
-Object subclass: 'HttpRequest'
-  instVarNames: #( stream method uri
-                    path version headers arguments
-                    bodyContents sizeLeft multipartFormDataBoundary)
-  classVars: #()
-  classInstVars: #( contentTypeHandlers)
-  poolDictionaries: #()
-  inDictionary: WebGS
-  options: #()
-
-%
-expectvalue /Class
-doit
-HttpRequest category: 'Model'
-%
-set compile_env: 0
-! ------------------- Class definition for HttpResponse
-expectvalue /Class
-doit
-Object subclass: 'HttpResponse'
-  instVarNames: #( code headers content
-                    sendContentsBlock)
-  classVars: #()
-  classInstVars: #()
-  poolDictionaries: #()
-  inDictionary: WebGS
-  options: #()
-
-%
-expectvalue /Class
-doit
-HttpResponse category: 'Model'
-%
-set compile_env: 0
 ! ------------------- Class definition for WebSocketDataFrame
 expectvalue /Class
 doit
@@ -317,6 +334,7 @@ input HttpListener.gs
 input HttpRequest.gs
 input HttpResponse.gs
 input HttpServer.gs
+input HttpsListener.gs
 input WebApp.gs
 input WebAppSample.gs
 input WebExternalSession.gs
