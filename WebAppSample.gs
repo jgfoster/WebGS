@@ -47,9 +47,3 @@ wsOnText: bytes
 	].
 	WebSocketDataFrame sendText: result onSocket: socket.
 %
-category: 'WebSockets'
-method: WebAppSample
-wsReadTimeoutMS
-
-	^10000
-%

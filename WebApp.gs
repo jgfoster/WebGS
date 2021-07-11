@@ -10,13 +10,6 @@ htdocs
 
 	^nil
 %
-category: 'required'
-classmethod: WebApp
-responseForRequest: anHttpRequest
-
-	self log: #'debug' string: 'WebApp class>>responseForRequest:'.
-	^self new responseForRequest: anHttpRequest.
-%
 set compile_env: 0
 category: 'startup'
 classmethod: WebApp
@@ -24,7 +17,7 @@ run
 "
 	WebApp run.
 "
-	self serveHttpOnPort: self defaultPort
+	self new startHttpServer.
 %
 ! ------------------- Instance methods for WebApp
 set compile_env: 0
@@ -65,6 +58,8 @@ buildResponse
 	For example, 'http://localhost:8888/foo/bar' will build a response for 'foo'."
 
 	| newSelector pieces selector size |
+	html := HtmlElement html.
+	self log: #'debug' string: 'WebApp>>buildResponse - a'.
 	pieces := request path subStrings: $/.
 	selector := pieces at: 2.
 	selector isEmpty ifTrue: [selector := self defaultSelector].
@@ -84,12 +79,14 @@ buildResponse
 	According to the standard, we SHOULD provide the length, but that is optional
 	(versus SHALL which would be required)."
 	request method = 'HEAD' ifFalse: [
+		self log: #'debug' string: 'WebApp>>buildResponse - b'.
 		self buildResponseFor: selector.
 		response hasContent ifFalse: [
 			response content: html printString.
 		].
 	].
 	response maxAge: self maxAge.
+	self log: #'debug' string: 'WebApp>>buildResponse - c'.
 %
 category: 'base'
 method: WebApp
@@ -102,6 +99,7 @@ buildResponseFor: aString
 	a top section could come before and a bottom section could come after."
 
 	| size |
+	self log: #'debug' string: 'WebApp>>buildResponseFor: ' , aString printString.
 	size := aString size.
 	((3 < size and: [(aString copyFrom: size - 2 to: size) = '_gs']) or: [
 		4 < size and: [(aString copyFrom: size - 3 to: size) = '_gs:']
@@ -118,7 +116,8 @@ buildResponseFor: aString
 		(dict isKindOf: AbstractDictionary) ifTrue: [
 			response content: dict asJson.
 		].
-	]
+	].
+	self log: #'debug' string: 'WebApp>>buildResponseFor:  returning response'.
 %
 category: 'base'
 method: WebApp
@@ -126,11 +125,8 @@ responseForRequest: anHttpRequest
 	"This is called from the required class-side method with the same name
 	and simply populates the local instance variables."
 
-	self log: #'debug' string: 'WebApp>>responseForRequest:'.
+	self error: 'do we get here?'.
 	request := anHttpRequest.
-	anHttpRequest isWebSocketUpgrade ifTrue: [
-		^self wsLoop
-	].
 	response := HttpResponse new.
 	html := HtmlElement html.
 	self buildResponse.
@@ -251,53 +247,10 @@ encode: aString
 set compile_env: 0
 category: 'WebSockets'
 method: WebApp
-upgradeToWebsocket
-
-	| count crlf key version |
-	version := request headers at: 'Sec-WebSocket-Version' ifAbsent: ['0'].
-	version asNumber < 13 ifTrue: [
-		self error: 'WebSocketSample requires at least version 13!'.
-	].
-	crlf := Character cr asString , Character lf asString.
-	key := request headers at: 'Sec-WebSocket-Key' ifAbsent: [''].
-	key := self wsSecureResponseFor: key.
-	response := 'HTTP/1.1 101 Switching Protocols' , crlf ,
-		'Upgrade: websocket' , crlf ,
-		'Connection: Upgrade' , crlf ,
-		'Sec-WebSocket-Accept: ' , key , crlf , crlf.
-	count := socket write: response.
-	count == response size ifFalse: [self error: 'Unable to write response!'].
-%
-category: 'WebSockets'
-method: WebApp
-wsEvent
-
-	| frame  |
-	(socket readWillNotBlockWithin: self wsReadTimeoutMS) ifFalse: [
-		^self wsOnIdle
-	].
-	frame := WebSocketDataFrame fromSocket: socket.
-	frame isPing ifTrue: [
-		WebSocketDataFrame sendPongData: frame data onSocket: socket.
-		^self
-	].
-	frame isText ifTrue: [
-		^self wsOnText: frame data
-	].
-	frame isDisconnect ifTrue: [
-		WebSocketDataFrame sendPongData: frame data onSocket: socket.
-		socket close.
-		socket := nil.
-		Processor activeProcess terminate.	"There isn't really anything to return!"
-	].
-	self error: 'Unrecognized frame'.
-%
-category: 'WebSockets'
-method: WebApp
 wsLoop
 
 	self upgradeToWebsocket.
-	[socket isConnected] whileTrue: [
+	[self serverSocket isConnected] whileTrue: [
 		self wsEvent.
 	].
 	self error: 'Client did not send proper disconnect message!'.
@@ -316,23 +269,4 @@ wsSecureResponseFor: aKey
 		bytes add: ('16r' , stream next asString , stream next asString) asNumber.
 	].
 	^bytes asBase64String
-%
-set compile_env: 0
-category: 'WebSockets Overrides'
-method: WebApp
-wsOnIdle
-
-	self subclassResponsibility.
-%
-category: 'WebSockets Overrides'
-method: WebApp
-wsOnText: bytes
-
-	self subclassResponsibility.
-%
-category: 'WebSockets Overrides'
-method: WebApp
-wsReadTimeoutMS
-
-	self subclassResponsibility.
 %

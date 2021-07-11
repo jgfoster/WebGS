@@ -116,31 +116,12 @@ doit
 HtmlElement category: 'Model'
 %
 set compile_env: 0
-! ------------------- Class definition for HttpRequest
+! ------------------- Class definition for HttpListener
 expectvalue /Class
 doit
-Object subclass: 'HttpRequest'
-  instVarNames: #( stream method uri
-                    path version headers arguments
-                    bodyContents sizeLeft multipartFormDataBoundary)
-  classVars: #()
-  classInstVars: #( contentTypeHandlers)
-  poolDictionaries: #()
-  inDictionary: WebGS
-  options: #()
-
-%
-expectvalue /Class
-doit
-HttpRequest category: 'Model'
-%
-set compile_env: 0
-! ------------------- Class definition for HttpResponse
-expectvalue /Class
-doit
-Object subclass: 'HttpResponse'
-  instVarNames: #( code headers content
-                    sendContentsBlock)
+Object subclass: 'HttpListener'
+  instVarNames: #( acceptBlock listenBacklog port
+                    socket)
   classVars: #()
   classInstVars: #()
   poolDictionaries: #()
@@ -150,17 +131,16 @@ Object subclass: 'HttpResponse'
 %
 expectvalue /Class
 doit
-HttpResponse category: 'Model'
+HttpListener category: 'User Interface'
 %
 set compile_env: 0
 ! ------------------- Class definition for HttpServer
 expectvalue /Class
 doit
-Object subclass: 'HttpServer'
-  instVarNames: #( acceptBlock listenBacklog port
-                    socket)
+HttpListener subclass: 'HttpServer'
+  instVarNames: #( request response)
   classVars: #()
-  classInstVars: #( requestLog)
+  classInstVars: #()
   poolDictionaries: #()
   inDictionary: WebGS
   options: #()
@@ -182,7 +162,7 @@ doit
 HttpServer subclass: 'HttpConcurrentServer'
   instVarNames: #( gemCount sessions)
   classVars: #()
-  classInstVars: #()
+  classInstVars: #( requestLog)
   poolDictionaries: #()
   inDictionary: WebGS
   options: #()
@@ -205,8 +185,7 @@ set compile_env: 0
 expectvalue /Class
 doit
 HttpServer subclass: 'WebApp'
-  instVarNames: #( begin end exception
-                    html request response)
+  instVarNames: #( html)
   classVars: #()
   classInstVars: #()
   poolDictionaries: #()
@@ -250,6 +229,43 @@ Object
 expectvalue /Class
 doit
 WebAppSample category: 'User Interface'
+%
+set compile_env: 0
+! ------------------- Class definition for HttpRequest
+expectvalue /Class
+doit
+Object subclass: 'HttpRequest'
+  instVarNames: #( stream method uri
+                    path version headers arguments
+                    bodyContents sizeLeft multipartFormDataBoundary)
+  classVars: #()
+  classInstVars: #( contentTypeHandlers)
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #()
+
+%
+expectvalue /Class
+doit
+HttpRequest category: 'Model'
+%
+set compile_env: 0
+! ------------------- Class definition for HttpResponse
+expectvalue /Class
+doit
+Object subclass: 'HttpResponse'
+  instVarNames: #( code headers content
+                    sendContentsBlock)
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #()
+
+%
+expectvalue /Class
+doit
+HttpResponse category: 'Model'
 %
 set compile_env: 0
 ! ------------------- Class definition for WebSocketDataFrame
@@ -297,6 +313,7 @@ WebSocketDataFrame category: 'Model'
 input Html4Element.gs
 input HtmlElement.gs
 input HttpConcurrentServer.gs
+input HttpListener.gs
 input HttpRequest.gs
 input HttpResponse.gs
 input HttpServer.gs
