@@ -24,6 +24,12 @@ add_gs: args
 %
 category: 'REST API'
 method: WebAppSample
+echo_gs: args
+
+	^args
+%
+category: 'REST API'
+method: WebAppSample
 stone_gs
 
 	^System stoneConfigurationReport

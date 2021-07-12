@@ -86,18 +86,28 @@ mainLoop
 		| flag |
 		flag := socket readWillNotBlockWithin: 60000. 	"60 seconds"
 		[flag] whileTrue: [
-			| newSocket |
-			newSocket := self accept.
-			newSocket isNil ifTrue: [
-				HttpServer log: #'warning' string: 'GsSocket>>readWillNotBlock returned true but accept failed!'.
-			] ifFalse: [
-				[:aBlock :aSocket |
-					HttpServer log: #'debug' string: 'HttpListener>>mainLoop - accepted ' , aSocket printString , ' isConnected = ' , aSocket isConnected printString.
-					block value: aSocket.		"<== work is done here"
-				] forkWith: (Array with: block with: newSocket).
-			].
+			self mainLoopBody.
 			flag := socket readWillNotBlock.
 		].
+	].
+%
+category: 'Web Server'
+method: HttpListener
+mainLoopBody
+
+	[
+		| newSocket |
+		newSocket := self accept.
+		newSocket isNil ifTrue: [
+			HttpServer log: #'warning' string: 'GsSocket>>readWillNotBlock returned true but accept failed!'.
+		] ifFalse: [
+			[:aBlock :aSocket |
+				HttpServer log: #'debug' string: 'HttpListener>>mainLoop - accepted ' , aSocket printString , ' isConnected = ' , aSocket isConnected printString.
+				block value: aSocket.		"<== work is done here"
+			] forkWith: (Array with: block with: newSocket).
+		].
+	] on: Error do: [:ex | 
+		HttpServer log: #'error' string: ex description.
 	].
 %
 category: 'Web Server'

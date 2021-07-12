@@ -18,7 +18,7 @@ run
 	WebApp run.
 "
 	HttpsListener new
-		listenBacklog: 5;
+		listenBacklog: 100;
 		port: 8888;
 		withSocketDo: [:aSocket | self new serveClientSocket: aSocket];
 		run.
@@ -112,7 +112,12 @@ buildResponseFor: aString
 		(aString last == $:) ifFalse: [
 			dict := self perform: aString asSymbol.
 		] ifTrue: [
-			dict := JsonParser parse: request bodyContents.
+			request method = 'GET' ifTrue: [
+				dict := request arguments.
+			] ifFalse: [
+				dict := JsonParser parse: request bodyContents.
+				dict isPetitFailure ifTrue: [self error:dict message].
+			].
 			dict := self perform: aString asSymbol with: dict.
 		].
 		(dict isKindOf: AbstractDictionary) ifTrue: [
