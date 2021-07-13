@@ -1,9 +1,6 @@
 ! ------------------- Remove existing behavior from WebSocketSample
-expectvalue /Metaclass3       
-doit
-WebSocketSample removeAllMethods.
-WebSocketSample class removeAllMethods.
-%
+removeAllMethods WebSocketSample
+removeAllClassMethods WebSocketSample
 ! ------------------- Class methods for WebSocketSample
 set compile_env: 0
 category: 'required'

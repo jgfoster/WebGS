@@ -1,9 +1,6 @@
 ! ------------------- Remove existing behavior from HttpResponse
-expectvalue /Metaclass3       
-doit
-HttpResponse removeAllMethods.
-HttpResponse class removeAllMethods.
-%
+removeAllMethods HttpResponse
+removeAllClassMethods HttpResponse
 ! ------------------- Class methods for HttpResponse
 set compile_env: 0
 category: 'other'
@@ -153,7 +150,7 @@ initialize
 		at: 'Cache-Control'			put: 'no-cache';
 		at: 'Content-Encoding'		put: 'none';
 		at: 'Content-Language'		put: 'en';
-		at: 'Content-Type'			put: 'text/html; charset=utf-8';
+		at: 'Content-Type'			put: 'text/html; charset=UTF-8';
 		at: 'Server'						put: 'GemStone/S 64 Bit HttpServer';
 		yourself.
 	code := 200.
@@ -162,7 +159,7 @@ category: 'other'
 method: HttpResponse
 isUTF8
 
-	^(headers at: 'Content-Type') includesString: 'utf-8'.
+	^(headers at: 'Content-Type') asLowercase includesString: 'utf-8'.
 %
 category: 'other'
 method: HttpResponse
@@ -270,11 +267,6 @@ method: HttpResponse
 sendResponseOn: aSocket
 
 	| stream string count |
-
-	aSocket isActive ifFalse: [ self error: 'aSocket is not active. fDesc: ', aSocket fileDescriptor printString ].
-	aSocket isConnected ifFalse: [ self error: 'aSocket is not connected. fDesc: ', aSocket fileDescriptor printString ].
-	aSocket writeWillNotBlock ifFalse: [ self error: 'aSocket write will block. fDesc: ', aSocket fileDescriptor printString ].
-
 	stream := WriteStream on: String new.
 	self printAllExceptContentOn: stream.		"Headers, etc."
 	string := stream contents.

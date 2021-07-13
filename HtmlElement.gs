@@ -1,9 +1,6 @@
 ! ------------------- Remove existing behavior from HtmlElement
-expectvalue /Metaclass3       
-doit
-HtmlElement removeAllMethods.
-HtmlElement class removeAllMethods.
-%
+removeAllMethods HtmlElement
+removeAllClassMethods HtmlElement
 ! ------------------- Class methods for HtmlElement
 ! ------------------- Instance methods for HtmlElement
 set compile_env: 0

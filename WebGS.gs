@@ -15,7 +15,8 @@ set compile_env: 0
 expectvalue /Class
 doit
 GsExternalSession subclass: 'WebExternalSession'
-  instVarNames: #( hostPassword password)
+  instVarNames: #( hostPassword password isAvailable
+                    port)
   classVars: #()
   classInstVars: #()
   poolDictionaries: #()
@@ -31,6 +32,28 @@ WebExternalSession comment:
 expectvalue /Class
 doit
 WebExternalSession category: 'User Interface'
+%
+set compile_env: 0
+! ------------------- Class definition for DbTransientSocket
+expectvalue /Class
+doit
+Object subclass: 'DbTransientSocket'
+  instVarNames: #( socket)
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #( dbTransient)
+
+%
+expectvalue /Class
+doit
+DbTransientSocket comment: 
+'It is an error to try to persist a Socket so any object that references a Socket is similarly ineligible to be persisted. This class provides a wrapper for a Socket so the wrapper can be referenced.'
+%
+expectvalue /Class
+doit
+DbTransientSocket category: 'User Interface'
 %
 set compile_env: 0
 ! ------------------- Class definition for Html4Element
@@ -116,13 +139,74 @@ doit
 HtmlElement category: 'Model'
 %
 set compile_env: 0
+! ------------------- Class definition for HttpListener
+expectvalue /Class
+doit
+Object subclass: 'HttpListener'
+  instVarNames: #( listenBacklog port socket
+                    webApp)
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #()
+
+%
+expectvalue /Class
+doit
+HttpListener category: 'User Interface'
+%
+set compile_env: 0
+! ------------------- Class definition for HttpsListener
+expectvalue /Class
+doit
+HttpListener subclass: 'HttpsListener'
+  instVarNames: #()
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #()
+
+%
+expectvalue /Class
+doit
+HttpsListener category: 'User Interface'
+%
+set compile_env: 0
+! ------------------- Class definition for HttpLoadBalancer
+expectvalue /Class
+doit
+Object subclass: 'HttpLoadBalancer'
+  instVarNames: #( gemCount mutex sessions
+                    webAppClass)
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #( dbTransient)
+
+%
+expectvalue /Class
+doit
+HttpLoadBalancer comment: 
+'sessions:
+	A collection of Association instances
+		key: GsExternalSession
+		value: aBoolean indicating whether session is available'
+%
+expectvalue /Class
+doit
+HttpLoadBalancer category: 'User Interface'
+%
+set compile_env: 0
 ! ------------------- Class definition for HttpRequest
 expectvalue /Class
 doit
 Object subclass: 'HttpRequest'
-  instVarNames: #( stream method uri
-                    path version headers arguments
-                    bodyContents sizeLeft multipartFormDataBoundary)
+  instVarNames: #( socket stream method
+                    uri path version headers
+                    arguments bodyContents sizeLeft multipartFormDataBoundary)
   classVars: #()
   classInstVars: #( contentTypeHandlers)
   poolDictionaries: #()
@@ -157,44 +241,31 @@ set compile_env: 0
 expectvalue /Class
 doit
 Object subclass: 'HttpServer'
-  instVarNames: #( delegate)
-  classVars: #( Debug)
+  instVarNames: #( request response socket)
+  classVars: #()
   classInstVars: #()
   poolDictionaries: #()
   inDictionary: WebGS
   options: #()
 
+%
+expectvalue /Class
+doit
+HttpServer comment: 
+'WebApp new startHttpServer.'
 %
 expectvalue /Class
 doit
 HttpServer category: 'User Interface'
 %
 set compile_env: 0
-! ------------------- Class definition for HttpsServer
-expectvalue /Class
-doit
-HttpServer subclass: 'HttpsServer'
-  instVarNames: #()
-  classVars: #()
-  classInstVars: #()
-  poolDictionaries: #()
-  inDictionary: WebGS
-  options: #()
-
-%
-expectvalue /Class
-doit
-HttpsServer category: 'User Interface'
-%
-set compile_env: 0
 ! ------------------- Class definition for WebApp
 expectvalue /Class
 doit
-Object subclass: 'WebApp'
-  instVarNames: #( begin end exception
-                    html request response)
+HttpServer subclass: 'WebApp'
+  instVarNames: #( html)
   classVars: #()
-  classInstVars: #( log)
+  classInstVars: #()
   poolDictionaries: #()
   inDictionary: WebGS
   options: #()
@@ -212,10 +283,10 @@ doit
 WebApp category: 'User Interface'
 %
 set compile_env: 0
-! ------------------- Class definition for RestSample
+! ------------------- Class definition for WebAppSample
 expectvalue /Class
 doit
-WebApp subclass: 'RestSample'
+WebApp subclass: 'WebAppSample'
   instVarNames: #()
   classVars: #()
   classInstVars: #()
@@ -226,7 +297,7 @@ WebApp subclass: 'RestSample'
 %
 expectvalue /Class
 doit
-RestSample comment: 
+WebAppSample comment: 
 'No class-specific documentation for WebAppSample, hierarchy is:
 Object
   WebApp( begin end exception html request response)
@@ -235,16 +306,16 @@ Object
 %
 expectvalue /Class
 doit
-RestSample category: 'User Interface'
+WebAppSample category: 'User Interface'
 %
 set compile_env: 0
-! ------------------- Class definition for WebSocketSample
+! ------------------- Class definition for Log
 expectvalue /Class
 doit
-WebApp subclass: 'WebSocketSample'
-  instVarNames: #()
+Object subclass: 'Log'
+  instVarNames: #( haltOnError logFileName logTypes)
   classVars: #()
-  classInstVars: #()
+  classInstVars: #( instance)
   poolDictionaries: #()
   inDictionary: WebGS
   options: #()
@@ -252,16 +323,7 @@ WebApp subclass: 'WebSocketSample'
 %
 expectvalue /Class
 doit
-WebSocketSample comment: 
-'HttpServer debug: true.
-HttpServer supportedLogTypes: #(#''startup'' #''debug'' #''warning'' #''error'').
-WebSocketSample run.
-https://www.websocket.org/echo.html
-wss://localhost:8888/'
-%
-expectvalue /Class
-doit
-WebSocketSample category: 'User Interface'
+Log category: 'User Interface'
 %
 set compile_env: 0
 ! ------------------- Class definition for WebSocketDataFrame
@@ -306,14 +368,17 @@ doit
 WebSocketDataFrame category: 'Model'
 %
 
+input DbTransientSocket.gs
 input Html4Element.gs
 input HtmlElement.gs
+input HttpListener.gs
+input HttpLoadBalancer.gs
 input HttpRequest.gs
 input HttpResponse.gs
 input HttpServer.gs
-input HttpsServer.gs
-input RestSample.gs
+input HttpsListener.gs
+input Log.gs
 input WebApp.gs
+input WebAppSample.gs
 input WebExternalSession.gs
 input WebSocketDataFrame.gs
-input WebSocketSample.gs

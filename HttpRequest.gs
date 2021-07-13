@@ -1,9 +1,6 @@
 ! ------------------- Remove existing behavior from HttpRequest
-expectvalue /Metaclass3
-doit
-HttpRequest removeAllMethods.
-HttpRequest class removeAllMethods.
-%
+removeAllMethods HttpRequest
+removeAllClassMethods HttpRequest
 ! ------------------- Class methods for HttpRequest
 set compile_env: 0
 category: 'other'
@@ -140,7 +137,7 @@ category: 'Accessing'
 method: HttpRequest
 contentType
 
-   ^headers at: 'Content-Type' ifAbsent: nil
+   ^headers at: 'content-type' ifAbsent: nil
 %
 category: 'Accessing'
 method: HttpRequest
@@ -154,7 +151,7 @@ cookies
 
 	| cookie string |
 	cookie := Dictionary new.
-	string := headers at: 'Cookie' ifAbsent: [^cookie].
+	string := headers at: 'cookie' ifAbsent: [^cookie].
 	(string subStrings: $;) do: [:each |
 		| pieces |
 		pieces := each subStrings: $=.
@@ -204,43 +201,21 @@ _sizeLeft
 
 	^sizeLeft.
 %
-category: 'Accessing'
-method: HttpRequest
-_socket
-
-	^(SessionTemps current at: #'HttpRequest_socket') at: Processor activeProcess.
-%
-category: 'Accessing'
-method: HttpRequest
-_socket: aSocket
-
-	| dict process |
-	dict := SessionTemps current at: #'HttpRequest_socket' ifAbsentPut: [Dictionary new].
-	dict copy keysAndValuesDo: [:eachProcess :eachSocket |
-		eachProcess _isTerminated ifTrue: [
-			eachSocket close.
-			dict removeKey: eachProcess.
-		].
-	].
-	process := Processor activeProcess.
-	(dict at: process otherwise: nil) ifNotNil: [:socket | dict removeKey: process].
-	aSocket ifNotNil: [dict at: process put: aSocket].
-%
 set compile_env: 0
 category: 'other'
 method: HttpRequest
 closeSocket
 
-	self _socket ifNotNil: [:socket |
+	socket ifNotNil: [
 		socket close.
-		self _socket: nil.
+		socket := nil.
 	].
 %
 category: 'other'
 method: HttpRequest
 initializeWithSocket: aSocket
 
-	self _socket: aSocket.
+	socket := aSocket.
 	arguments := Dictionary new.
 	headers := Dictionary new
 		at: 'X-Date' 				put: (HttpResponse webStringForDateTime: DateTime now);
@@ -248,33 +223,33 @@ initializeWithSocket: aSocket
 		at: 'X-Peer-Address' 	put: aSocket peerAddress;
 		at: 'X-Peer-Port' 			put: aSocket peerPort asString;
 		yourself.
-	self readRequest ifTrue: [self _socket: nil].	"did the read finish?"
+	self readRequest ifTrue: [socket := nil].	"did the read finish?"
 %
 category: 'other'
 method: HttpRequest
 isClientChrome
 
-	^(headers at: 'User-Agent') includesString: 'Chrome'.
+	^(headers at: 'user-agent') includesString: 'Chrome'.
 %
 category: 'other'
 method: HttpRequest
 isClientFirefox
 
-	^(headers at: 'User-Agent') includesString: 'Firefox'.
+	^(headers at: 'user-agent') includesString: 'Firefox'.
 %
 category: 'other'
 method: HttpRequest
 isClientIE
 
 	| userAgent |
-	userAgent := headers at: 'User-Agent'.
+	userAgent := headers at: 'user-agent'.
 	^(userAgent includesString: 'MSIE') or: [userAgent includesString: 'Trident'].
 %
 category: 'other'
 method: HttpRequest
 isClientWindows
 
-	^(headers at: 'User-Agent') includesString: 'Windows'
+	^(headers at: 'user-agent') includesString: 'Windows'
 %
 category: 'other'
 method: HttpRequest
@@ -282,7 +257,7 @@ isMultiPart
 
 	| contentType pieces string |
 	multipartFormDataBoundary ifNotNil: [^true].
-	contentType := headers at: 'Content-Type' ifAbsent: [^false].
+	contentType := headers at: 'content-type' ifAbsent: [^false].
 	(pieces := contentType subStrings: $;) first = 'multipart/form-data' ifFalse: [^false].
 	((string := pieces at: 2) copyFrom: 1 to: 10) = ' boundary=' ifFalse: [self error: 'Unrecognized field in multipart/form-data'].
 	multipartFormDataBoundary := '--' , (string copyFrom: 11 to: string size).
@@ -293,9 +268,9 @@ method: HttpRequest
 isWebSocketUpgrade
 
 	| connection upgrade |
-	connection := headers at: 'Connection' ifAbsent: [''].
-	upgrade := headers at: 'Upgrade' ifAbsent: [''].
-	^connection = 'Upgrade'  and: [upgrade = 'websocket']
+	connection := headers at: 'connection' ifAbsent: [''].
+	upgrade := headers at: 'upgrade' ifAbsent: [''].
+	^connection asLowercase = 'upgrade'  and: [upgrade asLowercase = 'websocket']
 %
 category: 'other'
 method: HttpRequest
@@ -378,10 +353,10 @@ readContents
 	string := self upToEnd.
 	method = 'POST' ifTrue: [
 		handler := self class contentTypeHandlers
-			at: (headers at: 'Content-Type' ifAbsent: [ nil ])
+			at: (headers at: 'content-type' ifAbsent: [ nil ])
 			ifAbsent: [ nil ].
 		handler isNil ifTrue: [
-			" No handler for current Content-Type, just set the string as bodyContents "
+			" No handler for current content-type, just set the string as bodyContents "
 			bodyContents := string.
 			^self
 		].
@@ -400,12 +375,12 @@ readHeaders
 	] whileTrue: [
 		| index key value |
 		index := line indexOf: $:.
-		key := line copyFrom: 1 to: index - 1.
+		key := (line copyFrom: 1 to: index - 1) asLowercase.
 		value := (line copyFrom: index + 1 to: line size) trimBlanks.
 		key notEmpty ifTrue: [headers at: key asString put: value asString].
 	].
 
-	sizeLeft := headers at: 'Content-Length' ifAbsent: [nil].
+	sizeLeft := headers at: 'content-length' ifAbsent: [nil].
 	sizeLeft notNil ifTrue: [
 		| bytes |
 		bytes := stream upToEnd.
@@ -420,10 +395,10 @@ readLine1
 	method := [
 		self upToSpace asString.
 	] on: EndOfStream do: [:ex |
-		HttpServer debug ifTrue: [self halt].
+		Log instance haltIfRequested.
 		ex return: ''.
 	].
-	HttpServer log: #'debug' string: 'HttpRequest>>readLine1 got method of ' , method printString.
+	Log instance log: #'debug' string: 'HttpRequest>>readLine1 got method of ' , method printString.
 	method isEmpty ifTrue: [^self].
 	(#('GET' 'HEAD' 'OPTIONS' 'POST') includes: method) ifFalse: [
 		self error: 'Expected a GET, HEAD, OPTIONS, or POST but got ' , method printString , ' (' , method size printString , ' characters)'
@@ -431,7 +406,7 @@ readLine1
 	uri := self upToSpace asString.
 	path := uri.
 	version := self nextLine asString.
-	HttpServer log: #'debug' string: method , ' ' , (uri copyFrom: 1 to: (40 min: uri size)).
+	Log instance log: #'request' string: method , ' ' , (uri copyFrom: 1 to: (40 min: uri size)).
 %
 category: 'other'
 method: HttpRequest
@@ -579,7 +554,7 @@ upToNextPartDo: aOneArgumentBlock
 			self _fillStream.		"we could get an EndOfStream here"
 			bytes addAll: stream upToEnd.
 		] on: Error do: [:ex |
-			HttpServer debug ifTrue: [self halt].
+			Log instance haltIfRequested.
 			(ex isKindOf: EndOfStream) ifTrue: [ex return].
 			ex pass.
 		].
@@ -635,35 +610,35 @@ _fillStream
 	want := sizeLeft ifNil: [4096].
 	4096 < want ifTrue: [want := 4096].
 	[
-		HttpServer log: #'debug' string: 'HttpRequest>>_fillStream - 1 - want = ' , want printString , '; have = ' , bytes size printString.
-		self _socket readWillNotBlockWithin: 1000.
+		Log instance log: #'debug' string: 'HttpRequest>>_fillStream - 1 - want = ' , want printString , '; have = ' , bytes size printString.
+		0 < want and: [socket readWillNotBlockWithin: 1000].
 	] whileTrue: [
 		| bytesRead |
-		bytesRead := self _socket read: want into: bytes startingAt: bytes size + 1.
-		HttpServer log: #'debug' string: 'HttpRequest>>_fillStream - 2 - bytesRead = ' , bytesRead printString.
+		bytesRead := socket read: want into: bytes startingAt: bytes size + 1.
+		Log instance log: #'debug' string: 'HttpRequest>>_fillStream - 2 - bytesRead = ' , bytesRead printString.
 		bytesRead == 0 ifTrue: [
 			| errors |
-			self _socket fetchLastIoErrorString ifNotNil: [:value |
-				HttpServer log: #'error' string: value.
+			socket fetchLastIoErrorString ifNotNil: [:value |
+				Log instance log: #'error' string: value.
 				EndOfStream signal: value.
 			].
-			(errors := self _socket class fetchErrorStringArray) notEmpty ifTrue: [
+			(errors := socket class fetchErrorStringArray) notEmpty ifTrue: [
 				errors do: [:each |
 					((each subStrings: $:) copyFrom: 1 to: 6) = #('error' '1410E114' 'SSL routines' 'SSL_peek' 'uninitialized' 'ssl/ssl_lib.c') ifTrue: [
-						HttpServer log: #'warn' string: each.
+						Log instance log: #'warn' string: each.
 					] ifFalse: [
-						HttpServer log: #'error' string: each.
+						Log instance log: #'error' string: each.
 					].
 				].
 				EndOfStream signal: errors.
 			].
-			HttpServer log: #'warning' string: 'nothing more to read'.
+			Log instance log: #'warning' string: 'nothing more to read'.
 			EndOfStream signal: 'nothing more to read'.
 		].
 		((sizeLeft notNil and: [sizeLeft <= bytes size]) or: [0 < (bytes indexOf: Character lf codePoint)]) ifTrue: [
 			stream := ReadStream on: bytes.
 			sizeLeft notNil ifTrue: [sizeLeft := sizeLeft - bytes size].
-			HttpServer log: #'debug' string: 'HttpRequest>>_fillStream - 4'.
+			Log instance log: #'debug' string: 'HttpRequest>>_fillStream - 4'.
 			^self
 		].
 	].
