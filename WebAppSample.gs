@@ -45,8 +45,8 @@ category: 'REST API'
 method: WebAppSample
 echo_gs: args
 
-	"UserGlobals at: #'James' put: args."
-	System commit.
+	"UserGlobals at: #'James' put: args.
+	System commit."
 	^args
 %
 category: 'REST API'

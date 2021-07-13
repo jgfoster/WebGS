@@ -214,7 +214,7 @@ handleRequestWithErrorHandling
 	[
 		self handleRequest.
 	] on: Error , Admonition do: [:ex |
-		Log instance debug ifTrue: [self halt].
+		Log instance haltIfRequested.
 		Log instance log: #'error' string:
 			ex printString , Character lf asString ,
 			(GsProcess stackReportToLevel: 50).
@@ -331,12 +331,12 @@ method: HttpServer
 wsUpgradeRequest: aRequest socket: aSocket
 
 	| count crlf key version |
-	version := aRequest headers at: 'Sec-WebSocket-Version' ifAbsent: ['0'].
+	version := aRequest headers at: 'sec-webwocket-version' ifAbsent: ['0'].
 	version asNumber < 13 ifTrue: [
 		self error: 'WebSocketSample requires at least version 13!'.
 	].
 	crlf := Character cr asString , Character lf asString.
-	key := aRequest headers at: 'Sec-WebSocket-Key' ifAbsent: [''].
+	key := aRequest headers at: 'sec-webwocket-key' ifAbsent: [''].
 	key := self wsSecureResponseFor: key.
 	response := 'HTTP/1.1 101 Switching Protocols' , crlf ,
 		'Upgrade: websocket' , crlf ,

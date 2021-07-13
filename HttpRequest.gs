@@ -137,7 +137,7 @@ category: 'Accessing'
 method: HttpRequest
 contentType
 
-   ^headers at: 'Content-Type' ifAbsent: nil
+   ^headers at: 'content-type' ifAbsent: nil
 %
 category: 'Accessing'
 method: HttpRequest
@@ -151,7 +151,7 @@ cookies
 
 	| cookie string |
 	cookie := Dictionary new.
-	string := headers at: 'Cookie' ifAbsent: [^cookie].
+	string := headers at: 'cookie' ifAbsent: [^cookie].
 	(string subStrings: $;) do: [:each |
 		| pieces |
 		pieces := each subStrings: $=.
@@ -229,27 +229,27 @@ category: 'other'
 method: HttpRequest
 isClientChrome
 
-	^(headers at: 'User-Agent') includesString: 'Chrome'.
+	^(headers at: 'user-agent') includesString: 'Chrome'.
 %
 category: 'other'
 method: HttpRequest
 isClientFirefox
 
-	^(headers at: 'User-Agent') includesString: 'Firefox'.
+	^(headers at: 'user-agent') includesString: 'Firefox'.
 %
 category: 'other'
 method: HttpRequest
 isClientIE
 
 	| userAgent |
-	userAgent := headers at: 'User-Agent'.
+	userAgent := headers at: 'user-agent'.
 	^(userAgent includesString: 'MSIE') or: [userAgent includesString: 'Trident'].
 %
 category: 'other'
 method: HttpRequest
 isClientWindows
 
-	^(headers at: 'User-Agent') includesString: 'Windows'
+	^(headers at: 'user-agent') includesString: 'Windows'
 %
 category: 'other'
 method: HttpRequest
@@ -257,7 +257,7 @@ isMultiPart
 
 	| contentType pieces string |
 	multipartFormDataBoundary ifNotNil: [^true].
-	contentType := headers at: 'Content-Type' ifAbsent: [^false].
+	contentType := headers at: 'content-type' ifAbsent: [^false].
 	(pieces := contentType subStrings: $;) first = 'multipart/form-data' ifFalse: [^false].
 	((string := pieces at: 2) copyFrom: 1 to: 10) = ' boundary=' ifFalse: [self error: 'Unrecognized field in multipart/form-data'].
 	multipartFormDataBoundary := '--' , (string copyFrom: 11 to: string size).
@@ -268,9 +268,9 @@ method: HttpRequest
 isWebSocketUpgrade
 
 	| connection upgrade |
-	connection := headers at: 'Connection' ifAbsent: [''].
-	upgrade := headers at: 'Upgrade' ifAbsent: [''].
-	^connection = 'Upgrade'  and: [upgrade = 'websocket']
+	connection := headers at: 'connection' ifAbsent: [''].
+	upgrade := headers at: 'upgrade' ifAbsent: [''].
+	^connection = 'upgrade'  and: [upgrade = 'websocket']
 %
 category: 'other'
 method: HttpRequest
@@ -353,10 +353,10 @@ readContents
 	string := self upToEnd.
 	method = 'POST' ifTrue: [
 		handler := self class contentTypeHandlers
-			at: (headers at: 'Content-Type' ifAbsent: [ nil ])
+			at: (headers at: 'content-type' ifAbsent: [ nil ])
 			ifAbsent: [ nil ].
 		handler isNil ifTrue: [
-			" No handler for current Content-Type, just set the string as bodyContents "
+			" No handler for current content-type, just set the string as bodyContents "
 			bodyContents := string.
 			^self
 		].
@@ -375,12 +375,12 @@ readHeaders
 	] whileTrue: [
 		| index key value |
 		index := line indexOf: $:.
-		key := line copyFrom: 1 to: index - 1.
+		key := (line copyFrom: 1 to: index - 1) asLowercase.
 		value := (line copyFrom: index + 1 to: line size) trimBlanks.
 		key notEmpty ifTrue: [headers at: key asString put: value asString].
 	].
 
-	sizeLeft := headers at: 'Content-Length' ifAbsent: [nil].
+	sizeLeft := headers at: 'content-length' ifAbsent: [nil].
 	sizeLeft notNil ifTrue: [
 		| bytes |
 		bytes := stream upToEnd.
@@ -395,7 +395,7 @@ readLine1
 	method := [
 		self upToSpace asString.
 	] on: EndOfStream do: [:ex |
-		Log instance debug ifTrue: [self halt].
+		Log instance haltIfRequested.
 		ex return: ''.
 	].
 	Log instance log: #'debug' string: 'HttpRequest>>readLine1 got method of ' , method printString.
@@ -554,7 +554,7 @@ upToNextPartDo: aOneArgumentBlock
 			self _fillStream.		"we could get an EndOfStream here"
 			bytes addAll: stream upToEnd.
 		] on: Error do: [:ex |
-			Log instance debug ifTrue: [self halt].
+			Log instance haltIfRequested.
 			(ex isKindOf: EndOfStream) ifTrue: [ex return].
 			ex pass.
 		].

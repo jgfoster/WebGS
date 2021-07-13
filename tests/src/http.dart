@@ -61,6 +61,6 @@ void main() {
       await Future.delayed(Duration(milliseconds: 20));
     }
     var ms = timer.elapsed.inMilliseconds / sent;
-    print('$sent HTTPS requests at $ms ms each');
+    print('$sent $PROTOCOL requests at $ms ms each');
   });
 }
