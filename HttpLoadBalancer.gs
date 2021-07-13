@@ -45,7 +45,7 @@ initialize
 	super initialize.
 	gemCount := 2.
 	mutex := Semaphore forMutualExclusion.
-	proxies := IdentitySet new.
+	sessions := IdentitySet new.
 %
 category: 'Initializing'
 method: HttpLoadBalancer
@@ -54,7 +54,7 @@ loginSessions
 
 	Log instance log: #'debug' string: 'HttpLoadBalancer>>loginSessions'.
 	gemCount timesRepeat: [
-		proxies add: (HttpListenerProxy for: webAppClass).
+		sessions add: (WebExternalSession for: webAppClass).
 	].
 %
 category: 'Initializing'
@@ -73,17 +73,17 @@ critical: aBlock
 %
 category: 'other'
 method: HttpLoadBalancer
-getProxy
+getSession
 	"find a listener that is idle and can be called"
 
 	Log instance log: #'debug' string: 'HttpLoadBalancer>>getProxy'.
 	[true] whileTrue: [
 		mutex critical: [
-			| proxy |
-			proxy := proxies
+			| session |
+			session := sessions
 				detect: [:each | each isAvailable] 		"session is available"
 				ifNone: [nil].
-			proxy ifNotNil: [^proxy beNotAvailable].	"session is not available"
+			session ifNotNil: [^session beNotAvailable].	"session is not available"
 		].
 		(Delay forMilliseconds: 10) wait. 			"wait to see if something becomes available"
 	].
@@ -93,13 +93,13 @@ method: HttpLoadBalancer
 serveClientSocket: aSocket
 
 	Log instance log: #'debug' string: 'HttpLoadBalancer>>serveClientSocket: ' , aSocket printString.
- 	^self getProxy serveClientSocket: aSocket
+ 	^self getSession serveClientSocket: aSocket
 %
 category: 'other'
 method: HttpLoadBalancer
 shutdown
 
 	Log instance log: #'debug' string: 'HttpLoadBalancer>>shutdown'.
-	proxies do: [:each | each logout].
-	proxies := IdentitySet new.
+	sessions do: [:each | each forceLogout].
+	sessions := IdentitySet new.
 %

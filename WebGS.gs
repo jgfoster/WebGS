@@ -15,7 +15,8 @@ set compile_env: 0
 expectvalue /Class
 doit
 GsExternalSession subclass: 'WebExternalSession'
-  instVarNames: #( hostPassword password)
+  instVarNames: #( hostPassword password isAvailable
+                    port)
   classVars: #()
   classInstVars: #()
   poolDictionaries: #()
@@ -168,29 +169,11 @@ doit
 HttpsListener category: 'User Interface'
 %
 set compile_env: 0
-! ------------------- Class definition for HttpListenerProxy
-expectvalue /Class
-doit
-Object subclass: 'HttpListenerProxy'
-  instVarNames: #( host isAvailable port
-                    session)
-  classVars: #()
-  classInstVars: #()
-  poolDictionaries: #()
-  inDictionary: WebGS
-  options: #( dbTransient)
-
-%
-expectvalue /Class
-doit
-HttpListenerProxy category: 'User Interface'
-%
-set compile_env: 0
 ! ------------------- Class definition for HttpLoadBalancer
 expectvalue /Class
 doit
 Object subclass: 'HttpLoadBalancer'
-  instVarNames: #( gemCount mutex proxies
+  instVarNames: #( gemCount mutex sessions
                     webAppClass)
   classVars: #()
   classInstVars: #()
@@ -384,7 +367,6 @@ input DbTransientSocket.gs
 input Html4Element.gs
 input HtmlElement.gs
 input HttpListener.gs
-input HttpListenerProxy.gs
 input HttpLoadBalancer.gs
 input HttpRequest.gs
 input HttpResponse.gs
