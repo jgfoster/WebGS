@@ -137,8 +137,8 @@ set compile_env: 0
 expectvalue /Class
 doit
 Object subclass: 'HttpListener'
-  instVarNames: #( block listenBacklog port
-                    socket)
+  instVarNames: #( listenBacklog port socket
+                    webApp)
   classVars: #()
   classInstVars: #()
   poolDictionaries: #()
@@ -166,6 +166,50 @@ HttpListener subclass: 'HttpsListener'
 expectvalue /Class
 doit
 HttpsListener category: 'User Interface'
+%
+set compile_env: 0
+! ------------------- Class definition for HttpListenerProxy
+expectvalue /Class
+doit
+Object subclass: 'HttpListenerProxy'
+  instVarNames: #( host isAvailable port
+                    session)
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #( dbTransient)
+
+%
+expectvalue /Class
+doit
+HttpListenerProxy category: 'User Interface'
+%
+set compile_env: 0
+! ------------------- Class definition for HttpLoadBalancer
+expectvalue /Class
+doit
+Object subclass: 'HttpLoadBalancer'
+  instVarNames: #( gemCount mutex proxies
+                    webAppClass)
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #( dbTransient)
+
+%
+expectvalue /Class
+doit
+HttpLoadBalancer comment: 
+'sessions:
+	A collection of Association instances
+		key: GsExternalSession
+		value: aBoolean indicating whether session is available'
+%
+expectvalue /Class
+doit
+HttpLoadBalancer category: 'User Interface'
 %
 set compile_env: 0
 ! ------------------- Class definition for HttpRequest
@@ -227,31 +271,6 @@ doit
 HttpServer category: 'User Interface'
 %
 set compile_env: 0
-! ------------------- Class definition for HttpConcurrentServer
-expectvalue /Class
-doit
-HttpServer subclass: 'HttpConcurrentServer'
-  instVarNames: #( gemCount sessions)
-  classVars: #()
-  classInstVars: #( requestLog)
-  poolDictionaries: #()
-  inDictionary: WebGS
-  options: #()
-
-%
-expectvalue /Class
-doit
-HttpConcurrentServer comment: 
-'sessions:
-	A collection of Association instances
-		key: GsExternalSession
-		value: aBoolean indicating whether session is available'
-%
-expectvalue /Class
-doit
-HttpConcurrentServer category: 'User Interface'
-%
-set compile_env: 0
 ! ------------------- Class definition for WebApp
 expectvalue /Class
 doit
@@ -302,6 +321,23 @@ doit
 WebAppSample category: 'User Interface'
 %
 set compile_env: 0
+! ------------------- Class definition for Log
+expectvalue /Class
+doit
+Object subclass: 'Log'
+  instVarNames: #( haltOnError logFileName logTypes)
+  classVars: #()
+  classInstVars: #( instance)
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #()
+
+%
+expectvalue /Class
+doit
+Log category: 'User Interface'
+%
+set compile_env: 0
 ! ------------------- Class definition for WebSocketDataFrame
 expectvalue /Class
 doit
@@ -347,12 +383,14 @@ WebSocketDataFrame category: 'Model'
 input DbTransientSocket.gs
 input Html4Element.gs
 input HtmlElement.gs
-input HttpConcurrentServer.gs
 input HttpListener.gs
+input HttpListenerProxy.gs
+input HttpLoadBalancer.gs
 input HttpRequest.gs
 input HttpResponse.gs
 input HttpServer.gs
 input HttpsListener.gs
+input Log.gs
 input WebApp.gs
 input WebAppSample.gs
 input WebExternalSession.gs

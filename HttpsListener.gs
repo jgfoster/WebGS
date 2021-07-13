@@ -38,7 +38,7 @@ method: HttpsListener
 configureCertificates
 
 	| password |
-	HttpServer log: #'debug' string: 'HttpsListener>>configureCertificates'.
+	Log instance log: #'debug' string: 'HttpsListener>>configureCertificates'.
 	password := GsSecureSocket getPasswordFromFile: '$GEMSTONE/examples/openssl/private/server_1_server_passwd.txt'.
 	GsSecureSocket
 		useServerCertificateFile: '$GEMSTONE/examples/openssl/certs/server_1_servercert.pem'

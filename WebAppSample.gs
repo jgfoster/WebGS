@@ -3,12 +3,31 @@ removeAllMethods WebAppSample
 removeAllClassMethods WebAppSample
 ! ------------------- Class methods for WebAppSample
 set compile_env: 0
-category: 'required'
+category: 'other'
 classmethod: WebAppSample
-workerCount
-	"Do everything in one Gem"
-	^0
+run
+"
+	WebAppSample run.
+"
+	HttpsListener new
+		listenBacklog: 100;
+		port: 8888;
+		webApp: self;
+		run.
 %
+category: 'other'
+classmethod: WebAppSample
+runDistributed
+"
+	WebAppSample runDistributed.
+"
+	HttpsListener new
+		listenBacklog: 100;
+		port: 8888;
+		webApp: (HttpLoadBalancer for: self gemCount: 8);
+		run.
+%
+set compile_env: 0
 ! ------------------- Instance methods for WebAppSample
 set compile_env: 0
 category: 'REST API'
@@ -26,6 +45,8 @@ category: 'REST API'
 method: WebAppSample
 echo_gs: args
 
+	"UserGlobals at: #'James' put: args."
+	System commit.
 	^args
 %
 category: 'REST API'

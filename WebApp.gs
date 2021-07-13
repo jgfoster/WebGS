@@ -2,27 +2,6 @@
 removeAllMethods WebApp
 removeAllClassMethods WebApp
 ! ------------------- Class methods for WebApp
-set compile_env: 0
-category: 'required'
-classmethod: WebApp
-htdocs
-	"/path/to/static/files"
-
-	^nil
-%
-set compile_env: 0
-category: 'startup'
-classmethod: WebApp
-run
-"
-	WebApp run.
-"
-	HttpsListener new
-		listenBacklog: 100;
-		port: 8888;
-		withSocketDo: [:aSocket | self new serveClientSocket: aSocket];
-		run.
-%
 ! ------------------- Instance methods for WebApp
 set compile_env: 0
 category: 'Accessing'
@@ -63,7 +42,7 @@ buildResponse
 
 	| newSelector pieces selector size |
 	html := HtmlElement html.
-	HttpServer log: #'debug' string: 'WebApp>>buildResponse'.
+	Log instance log: #'debug' string: 'WebApp>>buildResponse'.
 	pieces := request path subStrings: $/.
 	selector := pieces at: 2.
 	selector isEmpty ifTrue: [selector := self defaultSelector].
@@ -101,7 +80,7 @@ buildResponseFor: aString
 	a top section could come before and a bottom section could come after."
 
 	| size |
-	HttpServer log: #'debug' string: 'WebApp>>buildResponseFor: ' , aString printString.
+	Log instance log: #'debug' string: 'WebApp>>buildResponseFor: ' , aString printString.
 	size := aString size.
 	((3 < size and: [(aString copyFrom: size - 2 to: size) = '_gs']) or: [
 		4 < size and: [(aString copyFrom: size - 3 to: size) = '_gs:']

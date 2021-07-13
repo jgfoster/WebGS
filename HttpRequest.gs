@@ -395,10 +395,10 @@ readLine1
 	method := [
 		self upToSpace asString.
 	] on: EndOfStream do: [:ex |
-		HttpServer debug ifTrue: [self halt].
+		Log instance debug ifTrue: [self halt].
 		ex return: ''.
 	].
-	HttpServer log: #'debug' string: 'HttpRequest>>readLine1 got method of ' , method printString.
+	Log instance log: #'debug' string: 'HttpRequest>>readLine1 got method of ' , method printString.
 	method isEmpty ifTrue: [^self].
 	(#('GET' 'HEAD' 'OPTIONS' 'POST') includes: method) ifFalse: [
 		self error: 'Expected a GET, HEAD, OPTIONS, or POST but got ' , method printString , ' (' , method size printString , ' characters)'
@@ -406,7 +406,7 @@ readLine1
 	uri := self upToSpace asString.
 	path := uri.
 	version := self nextLine asString.
-	HttpServer log: #'debug' string: method , ' ' , (uri copyFrom: 1 to: (40 min: uri size)).
+	Log instance log: #'debug' string: method , ' ' , (uri copyFrom: 1 to: (40 min: uri size)).
 %
 category: 'other'
 method: HttpRequest
@@ -554,7 +554,7 @@ upToNextPartDo: aOneArgumentBlock
 			self _fillStream.		"we could get an EndOfStream here"
 			bytes addAll: stream upToEnd.
 		] on: Error do: [:ex |
-			HttpServer debug ifTrue: [self halt].
+			Log instance debug ifTrue: [self halt].
 			(ex isKindOf: EndOfStream) ifTrue: [ex return].
 			ex pass.
 		].
@@ -610,35 +610,35 @@ _fillStream
 	want := sizeLeft ifNil: [4096].
 	4096 < want ifTrue: [want := 4096].
 	[
-		HttpServer log: #'debug' string: 'HttpRequest>>_fillStream - 1 - want = ' , want printString , '; have = ' , bytes size printString.
+		Log instance log: #'debug' string: 'HttpRequest>>_fillStream - 1 - want = ' , want printString , '; have = ' , bytes size printString.
 		socket readWillNotBlockWithin: 1000.
 	] whileTrue: [
 		| bytesRead |
 		bytesRead := socket read: want into: bytes startingAt: bytes size + 1.
-		HttpServer log: #'debug' string: 'HttpRequest>>_fillStream - 2 - bytesRead = ' , bytesRead printString.
+		Log instance log: #'debug' string: 'HttpRequest>>_fillStream - 2 - bytesRead = ' , bytesRead printString.
 		bytesRead == 0 ifTrue: [
 			| errors |
 			socket fetchLastIoErrorString ifNotNil: [:value |
-				HttpServer log: #'error' string: value.
+				Log instance log: #'error' string: value.
 				EndOfStream signal: value.
 			].
 			(errors := self _socket class fetchErrorStringArray) notEmpty ifTrue: [
 				errors do: [:each |
 					((each subStrings: $:) copyFrom: 1 to: 6) = #('error' '1410E114' 'SSL routines' 'SSL_peek' 'uninitialized' 'ssl/ssl_lib.c') ifTrue: [
-						HttpServer log: #'warn' string: each.
+						Log instance log: #'warn' string: each.
 					] ifFalse: [
-						HttpServer log: #'error' string: each.
+						Log instance log: #'error' string: each.
 					].
 				].
 				EndOfStream signal: errors.
 			].
-			HttpServer log: #'warning' string: 'nothing more to read'.
+			Log instance log: #'warning' string: 'nothing more to read'.
 			EndOfStream signal: 'nothing more to read'.
 		].
 		((sizeLeft notNil and: [sizeLeft <= bytes size]) or: [0 < (bytes indexOf: Character lf codePoint)]) ifTrue: [
 			stream := ReadStream on: bytes.
 			sizeLeft notNil ifTrue: [sizeLeft := sizeLeft - bytes size].
-			HttpServer log: #'debug' string: 'HttpRequest>>_fillStream - 4'.
+			Log instance log: #'debug' string: 'HttpRequest>>_fillStream - 4'.
 			^self
 		].
 	].

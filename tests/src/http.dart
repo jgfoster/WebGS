@@ -5,9 +5,10 @@ import 'package:http/http.dart' as http;
 const String PROTOCOL = 'https';
 
 /*
-HttpServer supportedLogTypes: #(#'startup' #'debug' #'warning' #'error').
-HttpServer debug: true.
+Log instance logTypes: #(#'startup' #'debug' #'warning' #'error').
+Log instance haltOnError: true.
 WebAppSample run.
+WebAppSample runDistributed.
 */
 
 void main() {
@@ -59,6 +60,7 @@ void main() {
     while (received < sent) {
       await Future.delayed(Duration(milliseconds: 20));
     }
-    print('$sent HTTPS requests executed in ${timer.elapsed}');
+    var ms = timer.elapsed.inMilliseconds / sent;
+    print('$sent HTTPS requests at $ms ms each');
   });
 }

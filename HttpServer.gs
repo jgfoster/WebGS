@@ -128,6 +128,26 @@ supportedLogTypes: anArray
 			at: #'WebServer_logTypes'
 			put: anArray
 %
+set compile_env: 0
+category: 'other'
+classmethod: HttpServer
+serveClientSocket: aSocket
+
+	self new serveClientSocket: aSocket
+%
+category: 'other'
+classmethod: HttpServer
+shutdown
+	"Nothing needs to be done!"
+%
+set compile_env: 0
+category: 'required'
+classmethod: HttpServer
+htdocs
+	"/path/to/static/files"
+
+	^nil
+%
 ! ------------------- Instance methods for HttpServer
 set compile_env: 0
 category: 'Request Handler'
@@ -141,10 +161,10 @@ method: HttpServer
 handleRequest
 	"We are in a forked process (thread) and socket has the unread request (new socket from accept)"
 
-	HttpServer log: #'debug' string: 'HttpServer>>handleRequest'.
+	Log instance log: #'debug' string: 'HttpServer>>handleRequest'.
 	request := HttpRequest readFromSocket: socket.
 	request method isEmpty ifTrue: [
-		HttpServer log: #'warning' string: 'Got an empty request'.
+		Log instance log: #'warning' string: 'Got an empty request'.
 		^self.
 	].
 	request isWebSocketUpgrade ifTrue: [
@@ -194,8 +214,8 @@ handleRequestWithErrorHandling
 	[
 		self handleRequest.
 	] on: Error , Admonition do: [:ex |
-		HttpServer debug ifTrue: [self halt].
-		HttpServer log: #'error' string:
+		Log instance debug ifTrue: [self halt].
+		Log instance log: #'error' string:
 			ex printString , Character lf asString ,
 			(GsProcess stackReportToLevel: 50).
 		response := HttpResponse serverError: ex.
@@ -220,10 +240,10 @@ sendResponse
 
 	[
 		response sendResponseOn: socket.
-		HttpServer log: #'debug' string: 'Response sent to socket: ', socket printString.
+		Log instance log: #'debug' string: 'Response sent to socket: ', socket printString.
 	] on: Error do: [:ex |
-		HttpServer debug ifTrue: [self halt].
-		HttpServer log: #'error' string: ex description , ' - socket: ', socket printString,  Character lf asString , (GsProcess stackReportToLevel: 40).
+		Log instance debug ifTrue: [self halt].
+		Log instance log: #'error' string: ex description , ' - socket: ', socket printString,  Character lf asString , (GsProcess stackReportToLevel: 40).
 	].
 %
 category: 'Request Handler'
@@ -232,10 +252,10 @@ serveClientSocket: aSocket
 	"Serve the request in a forked process."
 
 	socket := aSocket.
-	HttpServer log: #'debug' string: 'HttpServer>>serveClientSocket: ' , socket printString.
+	Log instance log: #'debug' string: 'HttpServer>>serveClientSocket: ' , socket printString.
 	[socket isConnected
 		ifTrue: [self handleRequestWithErrorHandling]		"<- work is done here"
-		ifFalse: [HttpServer log: #'warning' string: 'Socket is not connected: ' , socket printString].
+		ifFalse: [Log instance log: #'warning' string: 'Socket is not connected: ' , socket printString].
 	] ensure: [
 		socket close.
 		socket := nil.

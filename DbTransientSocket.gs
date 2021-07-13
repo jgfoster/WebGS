@@ -79,6 +79,12 @@ peerPort
 %
 category: 'other'
 method: DbTransientSocket
+port
+
+	^socket port
+%
+category: 'other'
+method: DbTransientSocket
 printOn: aStream
 
 	aStream
@@ -87,6 +93,12 @@ printOn: aStream
 		nextPutAll: ':';
 		print: socket asOop;
 		nextPut: $).
+%
+category: 'other'
+method: DbTransientSocket
+read: anInteger
+
+	^socket read: anInteger
 %
 category: 'other'
 method: DbTransientSocket
@@ -117,5 +129,6 @@ category: 'other'
 method: DbTransientSocket
 write: aByteObject
 
+	aByteObject isEmpty ifTrue: [^self].
 	^socket write: aByteObject
 %

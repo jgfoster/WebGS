@@ -13,25 +13,6 @@ new
 %
 ! ------------------- Instance methods for HttpListener
 set compile_env: 0
-category: 'default'
-method: HttpListener
-accept
-
-	^socket accept
-%
-category: 'default'
-method: HttpListener
-newSocket
-
-	^GsSignalingSocket new
-%
-category: 'default'
-method: HttpListener
-protocol
-
-	^'http'
-%
-set compile_env: 0
 category: 'Initializing'
 method: HttpListener
 initialize
@@ -56,9 +37,29 @@ port: anInteger
 %
 category: 'Initializing'
 method: HttpListener
-withSocketDo: aBlock
+webApp: anObject
+	"anObject implements #'serveClientSocket:'"
 
-	block := aBlock.
+	webApp := anObject.
+%
+set compile_env: 0
+category: 'Override Defaults'
+method: HttpListener
+accept
+
+	^socket accept
+%
+category: 'Override Defaults'
+method: HttpListener
+newSocket
+
+	^GsSignalingSocket new
+%
+category: 'Override Defaults'
+method: HttpListener
+protocol
+
+	^'http'
 %
 set compile_env: 0
 category: 'Web Server'
@@ -74,21 +75,30 @@ createListener
 		socket := nil.
 		self error: string.
 	].
-	HttpServer log: #'debug' string: 'HttpListener>>createListener - ' , socket printString.
+	Log instance log: #'debug' string: 'HttpListener>>createListener - ' , socket printString.
+	^socket port
 %
 category: 'Web Server'
 method: HttpListener
 mainLoop
 
 	[
-		System commitTransaction.
-	] whileTrue: [
-		| flag |
-		flag := socket readWillNotBlockWithin: 60000. 	"60 seconds"
-		[flag] whileTrue: [
-			self mainLoopBody.
-			flag := socket readWillNotBlock.
+		Log instance log: #'debug' string: 'HttpListener>>mainLoop - 1'.
+		[
+			System commitTransaction.
+		] whileTrue: [
+			| flag |
+			flag := socket readWillNotBlockWithin: 60000. 	"60 seconds"
+			[flag] whileTrue: [
+				self mainLoopBody.
+				flag := socket readWillNotBlock.
+			].
 		].
+	] ensure: [
+		Log instance log: #'debug' string: 'HttpListener>>mainLoop - 2'.
+		socket close.
+		socket := nil.
+		webApp shutdown.
 	].
 %
 category: 'Web Server'
@@ -99,15 +109,15 @@ mainLoopBody
 		| newSocket |
 		newSocket := self accept.
 		newSocket isNil ifTrue: [
-			HttpServer log: #'warning' string: 'GsSocket>>readWillNotBlock returned true but accept failed!'.
+			Log instance log: #'warning' string: 'GsSocket>>readWillNotBlock returned true but accept failed!'.
 		] ifFalse: [
-			[:aBlock :aSocket |
-				HttpServer log: #'debug' string: 'HttpListener>>mainLoop - accepted ' , aSocket printString , ' isConnected = ' , aSocket isConnected printString.
-				block value: aSocket.		"<== work is done here"
-			] forkWith: (Array with: block with: newSocket).
+			[:anObject :aSocket |
+				Log instance log: #'debug' string: 'HttpListener>>mainLoopBody - ' , aSocket printString.
+				anObject serveClientSocket: aSocket.		"<== work is done here"
+			] forkWith: (Array with: webApp with: newSocket).
 		].
 	] on: Error do: [:ex | 
-		HttpServer log: #'error' string: ex description.
+		Log instance log: #'error' string: ex description.
 	].
 %
 category: 'Web Server'
@@ -117,18 +127,15 @@ reportUrl
 
 	| serverURL |
 	serverURL := self protocol , '://' , (GsSocket getHostNameByAddress: ((System descriptionOfSession: System session) at: 11)) , ':' , port printString , '/'.
-	HttpServer log: #'startup' string: serverURL.
+	Log instance log: #'startup' string: serverURL.
 %
 category: 'Web Server'
 method: HttpListener
 run
 	"primary entry point; called immediately after initialization"
 
-	[
-		self createListener.
-		self mainLoop.		"<- work is done here"
-	] ensure: [
-		socket close.
-		socket := nil.
-	].
+	self 
+		reportUrl;
+		createListener;
+		mainLoop.		"<- work is done here"
 %
