@@ -270,7 +270,7 @@ isWebSocketUpgrade
 	| connection upgrade |
 	connection := headers at: 'connection' ifAbsent: [''].
 	upgrade := headers at: 'upgrade' ifAbsent: [''].
-	^connection = 'upgrade'  and: [upgrade = 'websocket']
+	^connection asLowercase = 'upgrade'  and: [upgrade asLowercase = 'websocket']
 %
 category: 'other'
 method: HttpRequest
@@ -406,7 +406,7 @@ readLine1
 	uri := self upToSpace asString.
 	path := uri.
 	version := self nextLine asString.
-	Log instance log: #'debug' string: method , ' ' , (uri copyFrom: 1 to: (40 min: uri size)).
+	Log instance log: #'request' string: method , ' ' , (uri copyFrom: 1 to: (40 min: uri size)).
 %
 category: 'other'
 method: HttpRequest
@@ -611,7 +611,7 @@ _fillStream
 	4096 < want ifTrue: [want := 4096].
 	[
 		Log instance log: #'debug' string: 'HttpRequest>>_fillStream - 1 - want = ' , want printString , '; have = ' , bytes size printString.
-		socket readWillNotBlockWithin: 1000.
+		0 < want and: [socket readWillNotBlockWithin: 1000].
 	] whileTrue: [
 		| bytesRead |
 		bytesRead := socket read: want into: bytes startingAt: bytes size + 1.
@@ -622,7 +622,7 @@ _fillStream
 				Log instance log: #'error' string: value.
 				EndOfStream signal: value.
 			].
-			(errors := self _socket class fetchErrorStringArray) notEmpty ifTrue: [
+			(errors := socket class fetchErrorStringArray) notEmpty ifTrue: [
 				errors do: [:each |
 					((each subStrings: $:) copyFrom: 1 to: 6) = #('error' '1410E114' 'SSL routines' 'SSL_peek' 'uninitialized' 'ssl/ssl_lib.c') ifTrue: [
 						Log instance log: #'warn' string: each.

@@ -48,6 +48,11 @@ Object subclass: 'DbTransientSocket'
 %
 expectvalue /Class
 doit
+DbTransientSocket comment: 
+'It is an error to try to persist a Socket so any object that references a Socket is similarly ineligible to be persisted. This class provides a wrapper for a Socket so the wrapper can be referenced.'
+%
+expectvalue /Class
+doit
 DbTransientSocket category: 'User Interface'
 %
 set compile_env: 0

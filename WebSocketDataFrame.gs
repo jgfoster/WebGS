@@ -19,6 +19,12 @@ new
 %
 category: 'other'
 classmethod: WebSocketDataFrame
+sendDisconnect: data onSocket: aSocket
+
+	self basicNew sendDisconnect: data onSocket: aSocket
+%
+category: 'other'
+classmethod: WebSocketDataFrame
 sendPongData: data onSocket: aSocket
 
 	self basicNew sendPongData: data onSocket: aSocket
@@ -77,7 +83,29 @@ initializeFromSocket: aSocket
 	1 to: count do: [:i | 
 		bytes at: i put: ((bytes at: i) bitXor: (mask at: i - 1 \\ 4 + 1)).
 	].
-	data := bytes decodeFromUTF8.
+	opcode == 0 ifTrue: [		"Continuation"
+		self error: 'Continuation frame not (yet) supported!'.
+	].
+	opcode == 1 ifTrue: [		"Text"
+		data := bytes decodeFromUTF8.
+		^self
+	].
+	opcode == 2 ifTrue: [		"Binary"
+		data := bytes.
+		^self
+	].
+	opcode == 8 ifTrue: [		"Close"
+		data := bytes unsigned16At: 1.
+		^self
+	].
+	opcode == 9 ifTrue: [		"Ping"
+		data := bytes.
+		^self
+	].
+	opcode == 0xA ifTrue: [	"Pong"
+		data := bytes.
+		^self
+	].
 %
 category: 'other'
 method: WebSocketDataFrame
@@ -90,8 +118,11 @@ sendBinary: bytes onSocket: aSocket
 %
 category: 'other'
 method: WebSocketDataFrame
-sendDisconnect: bytes onSocket: aSocket
+sendDisconnect: anInteger onSocket: aSocket
 
+	| bytes |
+	bytes := ByteArray new: 2.
+	bytes unsigned16At: 1 put: anInteger.
 	self
 		sendOpcode: 16r8
 		data: bytes 

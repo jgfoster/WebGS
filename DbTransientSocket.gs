@@ -102,6 +102,12 @@ read: anInteger
 %
 category: 'other'
 method: DbTransientSocket
+read: wantInteger into: byteObject
+
+	^socket read: wantInteger into: byteObject
+%
+category: 'other'
+method: DbTransientSocket
 read: wantInteger into: byteObject startingAt: startingAtInteger
 
 	^socket read: wantInteger into: byteObject startingAt: startingAtInteger

@@ -150,7 +150,7 @@ initialize
 		at: 'Cache-Control'			put: 'no-cache';
 		at: 'Content-Encoding'		put: 'none';
 		at: 'Content-Language'		put: 'en';
-		at: 'Content-Type'			put: 'text/html; charset=utf-8';
+		at: 'Content-Type'			put: 'text/html; charset=UTF-8';
 		at: 'Server'						put: 'GemStone/S 64 Bit HttpServer';
 		yourself.
 	code := 200.
@@ -159,7 +159,7 @@ category: 'other'
 method: HttpResponse
 isUTF8
 
-	^(headers at: 'Content-Type') includesString: 'utf-8'.
+	^(headers at: 'Content-Type') asLowercase includesString: 'utf-8'.
 %
 category: 'other'
 method: HttpResponse

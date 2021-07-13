@@ -10,7 +10,7 @@ contentTypeFor: aPath
 
 	^self contentTypes
 		at: (aPath subStrings: $.) last asLowercase
-		otherwise: 'text/html; UTF-8'.
+		otherwise: 'text/html; charset=UTF-8'.
 %
 category: 'constants'
 classmethod: HttpServer
@@ -168,7 +168,7 @@ handleRequest
 		^self.
 	].
 	request isWebSocketUpgrade ifTrue: [
-		^self wsRequest: request socket: socket
+		self wsUpgradeRequest.
 	].
 	response := HttpResponse new.
 	self buildResponse.		"<- work is done here for dynamic content"
@@ -185,7 +185,9 @@ handleRequestForFile
 	We will check to see if there is a static file available that matches the path."
 
 	| gsFile |
+	Log instance log: #'debug' string: 'HttpServer>>handleRequestForFile'.
 	(gsFile := self openFile) ifNil: [	"does file exist?"
+		Log instance log: #'debug' string: 'HttpServer>>handleRequestForFile - not found!'.
 		response := HttpResponse notFound: request path.
 		self sendResponse.
 		^self.
@@ -232,7 +234,9 @@ openFile
 	(path := self class htdocs) ifNil: [^nil]. "Should we offer static files?"
 	(file includesString: '../') ifTrue: [^nil]. "Is request for a file below provided path?"
 	(file isEmpty or: [file = '/']) ifTrue: [file := '/index.html'].
-	^GsFile openReadOnServer: path , file
+	path := path , file.
+	Log instance log: #'debug' string: 'HttpServer>>openFile - ' , path printString.
+	^GsFile openReadOnServer: path
 %
 category: 'Request Handler'
 method: HttpServer
@@ -264,55 +268,6 @@ serveClientSocket: aSocket
 set compile_env: 0
 category: 'WebSockets'
 method: HttpServer
-wsEventOn: aSocket
-
-	| frame |
-	(aSocket readWillNotBlockWithin: self wsReadTimeoutMS) ifFalse: [
-		^self wsOnIdle
-	].
-	frame := WebSocketDataFrame fromSocket: aSocket.
-	frame isPing ifTrue: [
-		WebSocketDataFrame sendPongData: frame data onSocket: aSocket.
-		^self
-	].
-	frame isText ifTrue: [
-		^self wsOnText: frame data
-	].
-	frame isDisconnect ifTrue: [
-		WebSocketDataFrame sendPongData: frame data onSocket: aSocket.
-		aSocket close.
-		Processor activeProcess terminate.	"There isn't really anything to return!"
-	].
-	self error: 'Unrecognized frame'.
-%
-category: 'WebSockets'
-method: HttpServer
-wsOnIdle
-	"override to do something interesting"
-%
-category: 'WebSockets'
-method: HttpServer
-wsOnText: bytes
-	"override to do something interesting"
-%
-category: 'WebSockets'
-method: HttpServer
-wsReadTimeoutMS
-
-	^10000
-%
-category: 'WebSockets'
-method: HttpServer
-wsRequest: aRequest socket: aSocket
-
-	self wsUpgradeRequest: aRequest socket: aSocket.
-	[aSocket isConnected] whileTrue: [
-		self wsEventOn: aSocket.
-	].
-	self error: 'Client did not send proper disconnect message!'.
-%
-category: 'WebSockets'
-method: HttpServer
 wsSecureResponseFor: aKey
 	"If the Key is 'dGhlIHNhbXBsZSBub25jZQ==', the response is 's3pPLMBiTxaQ9kYGzzhZRbK+xOo='."
 
@@ -328,20 +283,55 @@ wsSecureResponseFor: aKey
 %
 category: 'WebSockets'
 method: HttpServer
-wsUpgradeRequest: aRequest socket: aSocket
+wsUpgradeRequest
 
 	| count crlf key version |
-	version := aRequest headers at: 'sec-webwocket-version' ifAbsent: ['0'].
+	version := request headers at: 'sec-websocket-version' ifAbsent: ['0'].
 	version asNumber < 13 ifTrue: [
 		self error: 'WebSocketSample requires at least version 13!'.
 	].
 	crlf := Character cr asString , Character lf asString.
-	key := aRequest headers at: 'sec-webwocket-key' ifAbsent: [''].
+	key := request headers at: 'sec-websocket-key' ifAbsent: [''].
 	key := self wsSecureResponseFor: key.
 	response := 'HTTP/1.1 101 Switching Protocols' , crlf ,
 		'Upgrade: websocket' , crlf ,
 		'Connection: Upgrade' , crlf ,
 		'Sec-WebSocket-Accept: ' , key , crlf , crlf.
-	count := aSocket write: response.
+	count := socket write: response.
 	count == response size ifFalse: [self error: 'Unable to write response!'].
+%
+category: 'WebSockets'
+method: HttpServer
+wsWithBinaryDo: binaryBlock withTextDo: textBlock
+
+	Log instance log: #'debug' string: 'HttpServer>>wsWithBinaryDo:withTextDo:'.
+	[
+		socket readWillNotBlockWithin: -1.
+	] whileTrue: [
+		| frame |
+		[
+			frame := WebSocketDataFrame fromSocket: socket.
+		] on: Error do: [:ex | 
+		Log instance log: #'debug' string: 'HttpServer>>wsWithBinaryDo:withTextDo: - ' , ex description.
+			WebSocketDataFrame sendDisconnect: 1002 onSocket: socket.
+			socket close.
+			Processor activeProcess terminate.	"There isn't really anything to return!"
+		].
+		frame isDisconnect ifTrue: [
+			Log instance log: #'debug' string: 'HttpServer>>onDataDo: - disconnect - ' , frame data printString.
+			WebSocketDataFrame sendDisconnect: frame data onSocket: socket.
+			socket close.
+			Processor activeProcess terminate.	"There isn't really anything to return!"
+		].
+		frame isPing ifTrue: [
+			Log instance log: #'debug' string: 'HttpServer>>onDataDo: - ping - ' , frame data printString.
+			WebSocketDataFrame sendPongData: frame data onSocket: socket.
+		] ifFalse: [
+			frame isBinary ifTrue: [
+				binaryBlock value: frame data.
+			] ifFalse: [
+				textBlock value: frame data decodeFromUTF8ToUnicode.
+			].
+		].
+	].
 %

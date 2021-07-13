@@ -10,22 +10,6 @@ _socket
 
 	^(SessionTemps current at: #'HttpRequest_socket') at: Processor activeProcess.
 %
-category: 'Accessing'
-method: WebApp
-_socket: aSocket
-
-	| dict process |
-	dict := SessionTemps current at: #'HttpRequest_socket' ifAbsentPut: [Dictionary new].
-	dict copy keysAndValuesDo: [:eachProcess :eachSocket |
-		eachProcess _isTerminated ifTrue: [
-			eachSocket close.
-			dict removeKey: eachProcess.
-		].
-	].
-	process := Processor activeProcess.
-	(dict at: process otherwise: nil) ifNotNil: [:_socket | dict removeKey: process].
-	aSocket ifNotNil: [dict at: process put: aSocket].
-%
 set compile_env: 0
 category: 'base'
 method: WebApp
@@ -215,30 +199,4 @@ encode: aString
 		].
 	].
 	^stream contents
-%
-set compile_env: 0
-category: 'WebSockets'
-method: WebApp
-wsLoop
-
-	self upgradeToWebsocket.
-	[self serverSocket isConnected] whileTrue: [
-		self wsEvent.
-	].
-	self error: 'Client did not send proper disconnect message!'.
-%
-category: 'WebSockets'
-method: WebApp
-wsSecureResponseFor: aKey
-	"If the Key is 'dGhlIHNhbXBsZSBub25jZQ==', the response is 's3pPLMBiTxaQ9kYGzzhZRbK+xOo='."
-
-	| bytes key sha1 stream |
-	key := aKey , '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'.
-	sha1 := key asSha1String.
-	stream := ReadStream on: sha1.
-	bytes := ByteArray new.
-	[stream atEnd not] whileTrue: [
-		bytes add: ('16r' , stream next asString , stream next asString) asNumber.
-	].
-	^bytes asBase64String
 %
