@@ -16,6 +16,23 @@ for: aClass
 set compile_env: 0
 category: 'other'
 method: WebExternalSession
+_isOnMyStone
+	"GemStone has a bug in this method and we are always on the current stone!"
+
+	^true
+%
+category: 'other'
+method: WebExternalSession
+_signalIfError
+
+	(GsExternalSession canUnderstand: #'_signalIfError') ifTrue: [	"3.6.0 and later"
+		super _signalIfError.
+	] ifFalse: [
+		self _signalIfError: self _gciLibrary.
+	].
+%
+category: 'other'
+method: WebExternalSession
 beNotAvailable
 
 	isAvailable := false.
@@ -143,21 +160,4 @@ startServer: aClass
 	self forkString: '(Object objectForOop: ' , listener printString , ') mainLoop'.
 	isAvailable := true.
 	Log instance log: #'debug' string: 'remote port: ' , port printString.
-%
-category: 'other'
-method: WebExternalSession
-_isOnMyStone
-	"GemStone has a bug in this method and we are always on the current stone!"
-
-	^true
-%
-category: 'other'
-method: WebExternalSession
-_signalIfError
-
-	(GsExternalSession canUnderstand: #'_signalIfError') ifTrue: [	"3.6.0 and later"
-		super _signalIfError.
-	] ifFalse: [
-		self _signalIfError: self _gciLibrary.
-	].
 %

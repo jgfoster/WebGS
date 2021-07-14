@@ -104,6 +104,12 @@ unsetContentTypeHandlers
 set compile_env: 0
 category: 'Accessing'
 method: HttpRequest
+_sizeLeft
+
+	^sizeLeft.
+%
+category: 'Accessing'
+method: HttpRequest
 arguments
 
    ^arguments
@@ -194,12 +200,6 @@ method: HttpRequest
 version
 
    ^version
-%
-category: 'Accessing'
-method: HttpRequest
-_sizeLeft
-
-	^sizeLeft.
 %
 set compile_env: 0
 category: 'other'
@@ -457,6 +457,51 @@ translate: aString
 set compile_env: 0
 category: 'stream'
 method: HttpRequest
+_fillStream
+
+	| bytes want |
+	(stream isNil or: [stream atEnd]) ifFalse: [^self].	"No need to get more yet"
+	bytes := ByteArray new.
+	want := sizeLeft ifNil: [4096].
+	4096 < want ifTrue: [want := 4096].
+	[
+		Log instance log: #'debug' string: 'HttpRequest>>_fillStream - 1 - want = ' , want printString , '; have = ' , bytes size printString.
+		0 < want and: [socket readWillNotBlockWithin: 1000].
+	] whileTrue: [
+		| bytesRead |
+		bytesRead := socket read: want into: bytes startingAt: bytes size + 1.
+		Log instance log: #'debug' string: 'HttpRequest>>_fillStream - 2 - bytesRead = ' , bytesRead printString.
+		bytesRead == 0 ifTrue: [
+			| errors |
+			socket fetchLastIoErrorString ifNotNil: [:value |
+				Log instance log: #'error' string: value.
+				EndOfStream signal: value.
+			].
+			(errors := socket class fetchErrorStringArray) notEmpty ifTrue: [
+				errors do: [:each |
+					((each subStrings: $:) copyFrom: 1 to: 6) = #('error' '1410E114' 'SSL routines' 'SSL_peek' 'uninitialized' 'ssl/ssl_lib.c') ifTrue: [
+						Log instance log: #'warn' string: each.
+					] ifFalse: [
+						Log instance log: #'error' string: each.
+					].
+				].
+				EndOfStream signal: errors.
+			].
+			Log instance log: #'warning' string: 'nothing more to read'.
+			EndOfStream signal: 'nothing more to read'.
+		].
+		((sizeLeft notNil and: [sizeLeft <= bytes size]) or: [0 < (bytes indexOf: Character lf codePoint)]) ifTrue: [
+			stream := ReadStream on: bytes.
+			sizeLeft notNil ifTrue: [sizeLeft := sizeLeft - bytes size].
+			Log instance log: #'debug' string: 'HttpRequest>>_fillStream - 4'.
+			^self
+		].
+	].
+	EndOfStream signal: 'Read ' , bytes size printString , ' bytes but wanted ' ,
+		(sizeLeft ifNil: ['a line'] ifNotNil: [sizeLeft printString]).
+%
+category: 'stream'
+method: HttpRequest
 nextLine
 
 	| bytes |
@@ -599,49 +644,4 @@ upToSpace
 		upTo: Character space
 		ifNotFoundWaitMs: 20.
 	^bytes bytesIntoUnicode
-%
-category: 'stream'
-method: HttpRequest
-_fillStream
-
-	| bytes want |
-	(stream isNil or: [stream atEnd]) ifFalse: [^self].	"No need to get more yet"
-	bytes := ByteArray new.
-	want := sizeLeft ifNil: [4096].
-	4096 < want ifTrue: [want := 4096].
-	[
-		Log instance log: #'debug' string: 'HttpRequest>>_fillStream - 1 - want = ' , want printString , '; have = ' , bytes size printString.
-		0 < want and: [socket readWillNotBlockWithin: 1000].
-	] whileTrue: [
-		| bytesRead |
-		bytesRead := socket read: want into: bytes startingAt: bytes size + 1.
-		Log instance log: #'debug' string: 'HttpRequest>>_fillStream - 2 - bytesRead = ' , bytesRead printString.
-		bytesRead == 0 ifTrue: [
-			| errors |
-			socket fetchLastIoErrorString ifNotNil: [:value |
-				Log instance log: #'error' string: value.
-				EndOfStream signal: value.
-			].
-			(errors := socket class fetchErrorStringArray) notEmpty ifTrue: [
-				errors do: [:each |
-					((each subStrings: $:) copyFrom: 1 to: 6) = #('error' '1410E114' 'SSL routines' 'SSL_peek' 'uninitialized' 'ssl/ssl_lib.c') ifTrue: [
-						Log instance log: #'warn' string: each.
-					] ifFalse: [
-						Log instance log: #'error' string: each.
-					].
-				].
-				EndOfStream signal: errors.
-			].
-			Log instance log: #'warning' string: 'nothing more to read'.
-			EndOfStream signal: 'nothing more to read'.
-		].
-		((sizeLeft notNil and: [sizeLeft <= bytes size]) or: [0 < (bytes indexOf: Character lf codePoint)]) ifTrue: [
-			stream := ReadStream on: bytes.
-			sizeLeft notNil ifTrue: [sizeLeft := sizeLeft - bytes size].
-			Log instance log: #'debug' string: 'HttpRequest>>_fillStream - 4'.
-			^self
-		].
-	].
-	EndOfStream signal: 'Read ' , bytes size printString , ' bytes but wanted ' ,
-		(sizeLeft ifNil: ['a line'] ifNotNil: [sizeLeft printString]).
 %

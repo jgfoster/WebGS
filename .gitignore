@@ -17,3 +17,4 @@ SqueakDebug.log
 /github-cache
 github-*.zip
 *.out
+webServer.log

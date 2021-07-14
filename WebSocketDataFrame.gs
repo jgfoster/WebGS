@@ -52,7 +52,11 @@ initializeFromSocket: aSocket
 	| byte bytes count hasMask mask payloadLen |
 	bytes := ByteArray new: 4.
 	count := aSocket read: 2 into: bytes.
-	count < 2 ifTrue: [self error: 'Invalid response from client!'].
+	count < 2 ifTrue: [	"A GemStone bug (?) causes readWillNotBlock to return true and the read to return zero bytes"
+		fin := 1.
+		opcode := 8.
+		^self
+	].
 	byte := bytes at: 1.
 	fin 	:= (byte bitAnd: 2r10000000) ~= 0.
 	rsv1 	:= (byte bitAnd: 2r01000000) ~= 0.
@@ -95,14 +99,16 @@ initializeFromSocket: aSocket
 		^self
 	].
 	opcode == 8 ifTrue: [		"Close"
-		data := bytes unsigned16At: 1.
+		bytes notEmpty ifTrue: [
+			data := bytes unsigned16At: 1.
+		].
 		^self
 	].
 	opcode == 9 ifTrue: [		"Ping"
 		data := bytes.
 		^self
 	].
-	opcode == 0xA ifTrue: [	"Pong"
+	opcode == 16rA ifTrue: [	"Pong"
 		data := bytes.
 		^self
 	].
@@ -121,8 +127,12 @@ method: WebSocketDataFrame
 sendDisconnect: anInteger onSocket: aSocket
 
 	| bytes |
-	bytes := ByteArray new: 2.
-	bytes unsigned16At: 1 put: anInteger.
+	anInteger ifNil: [
+		bytes := ByteArray new: 0.
+	] ifNotNil: [
+		bytes := ByteArray new: 2.
+		bytes unsigned16At: 1 put: anInteger.
+	].
 	self
 		sendOpcode: 16r8
 		data: bytes 

@@ -37,6 +37,12 @@ webStringForDateTime: aDateTime
 set compile_env: 0
 category: 'other'
 method: HttpResponse
+_content
+
+	^content.
+%
+category: 'other'
+method: HttpResponse
 accessControlAllowHeaders: aStringOrNil
 
 	aStringOrNil ifNil: [
@@ -353,10 +359,4 @@ setDate
 	headers
 		at: 'Date'
 		put: (HttpResponse webStringForDateTime: DateTime now).
-%
-category: 'other'
-method: HttpResponse
-_content
-
-	^content.
 %

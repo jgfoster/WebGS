@@ -29,106 +29,6 @@ contentTypes
 		yourself.
 %
 set compile_env: 0
-category: 'critical'
-classmethod: HttpServer
-critical: aBlock
-	"Evaluate aBlock inside a commit while holding the mutex"
-
-	^self mutex critical: [
-		| result |
-		[
-			result := aBlock value.
-			System commitTransaction.
-		] whileFalse: [
-			System abort.
-		].
-		result
-	].
-%
-category: 'critical'
-classmethod: HttpServer
-mutex
-	"Share the mutex across all processes in this gem"
-
-	^SessionTemps current
-		at: #'HttpServer_mutex'
-		ifAbsentPut: [Semaphore forMutualExclusion].
-%
-set compile_env: 0
-category: 'debugging'
-classmethod: HttpServer
-debug
-
-	"Share the mutex across all processes in this gem"
-
-	^SessionTemps current
-		at: #'HttpServer_debug'
-		ifAbsent: [false].
-%
-category: 'debugging'
-classmethod: HttpServer
-debug: aBoolean
-
-	^SessionTemps current
-		at: #'HttpServer_debug'
-		put: aBoolean
-%
-category: 'debugging'
-classmethod: HttpServer
-log: aSymbol string: aString
-	"Write a string to the log if aSymbol in supportedLogTypes."
-
-	| log |
-	(self supportedLogTypes includes: aSymbol) ifTrue: [
-		System clientIsRemote ifTrue: [
-			self critical: [
-				log := GsFile openAppendOnServer: self logName.
-				log log: DateAndTime now printStringWithRoundedSeconds , ' - ', System gemProcessId printString ,' - ', Processor activeProcess asOop printString , ' - ' , aSymbol  , ' - ' , aString.
-				log close.
-			].
-		] ifFalse: [
-			GsFile gciLogServer: 	"stdout for linked topaz"
-				DateAndTime now printStringWithRoundedSeconds ,
-				' - ' , Processor activeProcess asOop printString ,
-				' - ' , aString.
-		]
-	].
-%
-category: 'debugging'
-classmethod: HttpServer
-logName
-
-	^SessionTemps current
-			at: #'HttpServer_logName'
-			ifAbsentPut: [ (System performOnServer: 'pwd') trimSeparators, '/webServer.log' ]
-%
-category: 'debugging'
-classmethod: HttpServer
-logName: aString
-
-	SessionTemps current
-			at: #'HttpServer_logName'
-			put: aString
-%
-category: 'debugging'
-classmethod: HttpServer
-supportedLogTypes
-
-	^SessionTemps current
-			at: #'WebServer_logTypes'
-			ifAbsentPut: [ #(#'startup' " #'debug' #'warning' " #'error') ]
-%
-category: 'debugging'
-classmethod: HttpServer
-supportedLogTypes: anArray
-"
-	HttpServer supportedLogTypes: #(#'startup' #'debug' #'warning' #'error').
-"
-	SessionTemps current
-			at: #'WebServer_logTypes'
-			put: anArray
-%
-set compile_env: 0
 category: 'other'
 classmethod: HttpServer
 serveClientSocket: aSocket
@@ -246,7 +146,7 @@ sendResponse
 		response sendResponseOn: socket.
 		Log instance log: #'debug' string: 'Response sent to socket: ', socket printString.
 	] on: Error do: [:ex |
-		Log instance debug ifTrue: [self halt].
+		Log instance haltIfRequested ifTrue: [self halt].
 		Log instance log: #'error' string: ex description , ' - socket: ', socket printString,  Character lf asString , (GsProcess stackReportToLevel: 40).
 	].
 %
@@ -312,7 +212,8 @@ wsWithBinaryDo: binaryBlock withTextDo: textBlock
 		[
 			frame := WebSocketDataFrame fromSocket: socket.
 		] on: Error do: [:ex | 
-		Log instance log: #'debug' string: 'HttpServer>>wsWithBinaryDo:withTextDo: - ' , ex description.
+			Log instance log: #'debug' string: 'HttpServer>>wsWithBinaryDo:withTextDo: - ' , ex description.
+			Log instance haltIfRequested.
 			WebSocketDataFrame sendDisconnect: 1002 onSocket: socket.
 			socket close.
 			Processor activeProcess terminate.	"There isn't really anything to return!"
