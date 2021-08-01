@@ -52,7 +52,7 @@ initializeFromSocket: aSocket
 	| byte bytes count hasMask mask payloadLen |
 	bytes := ByteArray new: 4.
 	count := aSocket read: 2 into: bytes.
-	count < 2 ifTrue: [	"A GemStone bug (?) causes readWillNotBlock to return true and the read to return zero bytes"
+	count < 2 ifTrue: [	"A GemStone bug (49606) causes readWillNotBlock to return true and the read to return zero bytes"
 		fin := 1.
 		opcode := 8.
 		^self
@@ -84,7 +84,7 @@ initializeFromSocket: aSocket
 	bytes := ByteArray new: payloadLen.
 	count := payloadLen == 0 ifTrue: [0] ifFalse: [aSocket read: payloadLen into: bytes].
 	count ~= payloadLen ifTrue: [self error: 'Invalid response from client!'].
-	1 to: count do: [:i | 
+	1 to: count do: [:i |
 		bytes at: i put: ((bytes at: i) bitXor: (mask at: i - 1 \\ 4 + 1)).
 	].
 	opcode == 0 ifTrue: [		"Continuation"
@@ -119,7 +119,7 @@ sendBinary: bytes onSocket: aSocket
 
 	self
 		sendOpcode: 16r2
-		data: bytes 
+		data: bytes
 		onSocket: aSocket
 %
 category: 'other'
@@ -135,7 +135,7 @@ sendDisconnect: anInteger onSocket: aSocket
 	].
 	self
 		sendOpcode: 16r8
-		data: bytes 
+		data: bytes
 		onSocket: aSocket
 %
 category: 'other'
@@ -145,21 +145,21 @@ sendOpcode: type data: bytes onSocket: aSocket
 	| count |
 	bytes size < 126 ifTrue: [
 		data := (ByteArray new: 2) , bytes.
-		data 
+		data
 			at: 1 put: 2r10000000 + type;
 			at: 2 put: bytes size;
 			yourself.
 	] ifFalse: [
 		bytes size < 16r10000 ifTrue: [
 			data := (ByteArray new: 4) , bytes.
-			data 
+			data
 				at: 1 put: 2r10000000 + 16r1;
 				at: 2 put: 126;
 				unsigned16At: 3 put: bytes size;
 				yourself.
 		] ifFalse: [
 			data := (ByteArray new: 8) , bytes.
-			data 
+			data
 				at: 1 put: 2r10000000 + 16r1;
 				at: 2 put: 127;
 				unsigned32At: 3 put: bytes size;
@@ -174,8 +174,8 @@ method: WebSocketDataFrame
 sendPongData: bytes onSocket: aSocket
 
 	self
-		sendOpcode: 16rA 
-		data: bytes 
+		sendOpcode: 16rA
+		data: bytes
 		onSocket: aSocket
 %
 category: 'other'
@@ -184,7 +184,7 @@ sendText: bytes onSocket: aSocket
 
 	self
 		sendOpcode: 16r1
-		data: bytes 
+		data: bytes
 		onSocket: aSocket
 %
 set compile_env: 0
