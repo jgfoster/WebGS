@@ -88,7 +88,11 @@ mainLoop
 			System commitTransaction.
 		] whileTrue: [
 			| flag |
-			flag := socket readWillNotBlockWithin: 60000. 	"60 seconds"
+			flag := [
+				socket readWillNotBlockWithin: 60000. 	"60 seconds"
+			] on: Error do: [:ex |
+				ex return: false.
+			].
 			[flag] whileTrue: [
 				self mainLoopBody.
 				flag := socket readWillNotBlock.
@@ -116,7 +120,7 @@ mainLoopBody
 				anObject serveClientSocket: aSocket.		"<== work is done here"
 			] forkWith: (Array with: webApp with: newSocket).
 		].
-	] on: Error do: [:ex | 
+	] on: Error do: [:ex |
 		Log instance log: #'error' string: ex description.
 	].
 %
@@ -134,7 +138,7 @@ method: HttpListener
 run
 	"primary entry point; called immediately after initialization"
 
-	self 
+	self
 		reportUrl;
 		createListener;
 		mainLoop.		"<- work is done here"
