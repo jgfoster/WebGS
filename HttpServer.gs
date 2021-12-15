@@ -146,7 +146,7 @@ sendResponse
 		response sendResponseOn: socket.
 		Log instance log: #'debug' string: 'Response sent to socket: ', socket printString.
 	] on: Error do: [:ex |
-		Log instance haltIfRequested ifTrue: [self halt].
+		Log instance haltIfRequested.
 		Log instance log: #'error' string: ex description , ' - socket: ', socket printString,  Character lf asString , (GsProcess stackReportToLevel: 40).
 	].
 %
