@@ -26,7 +26,7 @@ GsExternalSession subclass: 'WebExternalSession'
 %
 expectvalue /Class
 doit
-WebExternalSession comment: 
+WebExternalSession comment:
 'It seems that GsExternalSession does not properly handle hostPassword encryption (see HR9764 and http://kermit.gemtalksystems.com/bug?bug=47308).'
 %
 expectvalue /Class
@@ -48,7 +48,7 @@ Object subclass: 'DbTransientSocket'
 %
 expectvalue /Class
 doit
-DbTransientSocket comment: 
+DbTransientSocket comment:
 'It is an error to try to persist a Socket so any object that references a Socket is similarly ineligible to be persisted. This class provides a wrapper for a Socket so the wrapper can be referenced.'
 %
 expectvalue /Class
@@ -70,7 +70,7 @@ Object subclass: 'Html4Element'
 %
 expectvalue /Class
 doit
-Html4Element comment: 
+Html4Element comment:
 'This class represents an HTML Element. To learn more see books about HTML or on-line resources, including the following:
 	http://en.wikipedia.org/wiki/HTML_element
 	http://www.w3schools.com/html/html_elements.asp
@@ -112,7 +112,7 @@ Html4Element subclass: 'HtmlElement'
 %
 expectvalue /Class
 doit
-HtmlElement comment: 
+HtmlElement comment:
 'This class represents an HTML Element. To learn more see books about HTML or on-line resources, including the following:
 	http://en.wikipedia.org/wiki/HTML_element
 	http://www.w3schools.com/html/html_elements.asp
@@ -189,7 +189,7 @@ Object subclass: 'HttpLoadBalancer'
 %
 expectvalue /Class
 doit
-HttpLoadBalancer comment: 
+HttpLoadBalancer comment:
 'sessions:
 	A collection of Association instances
 		key: GsExternalSession
@@ -251,7 +251,7 @@ Object subclass: 'HttpServer'
 %
 expectvalue /Class
 doit
-HttpServer comment: 
+HttpServer comment:
 'WebApp new startHttpServer.'
 %
 expectvalue /Class
@@ -273,7 +273,7 @@ HttpServer subclass: 'WebApp'
 %
 expectvalue /Class
 doit
-WebApp comment: 
+WebApp comment:
 'This is the abstract superclass for a HttpServer delegate.
 
 The required methods are in the ''required'' category.'
@@ -283,10 +283,10 @@ doit
 WebApp category: 'User Interface'
 %
 set compile_env: 0
-! ------------------- Class definition for WebAppSample
+! ------------------- Class definition for Sample
 expectvalue /Class
 doit
-WebApp subclass: 'WebAppSample'
+WebApp subclass: 'Sample'
   instVarNames: #()
   classVars: #()
   classInstVars: #()
@@ -297,16 +297,16 @@ WebApp subclass: 'WebAppSample'
 %
 expectvalue /Class
 doit
-WebAppSample comment: 
-'No class-specific documentation for WebAppSample, hierarchy is:
+Sample comment:
+'No class-specific documentation for Sample, hierarchy is:
 Object
   WebApp( begin end exception html request response)
-    WebAppSample( main)
+    Sample( main)
 '
 %
 expectvalue /Class
 doit
-WebAppSample category: 'User Interface'
+Sample category: 'User Interface'
 %
 set compile_env: 0
 ! ------------------- Class definition for Log
@@ -341,7 +341,7 @@ Object subclass: 'WebSocketDataFrame'
 %
 expectvalue /Class
 doit
-WebSocketDataFrame comment: 
+WebSocketDataFrame comment:
 'Frame format (best viewed with a fixed-width font!):
 
       0                   1                   2                   3
@@ -378,7 +378,7 @@ input HttpResponse.gs
 input HttpServer.gs
 input HttpsListener.gs
 input Log.gs
+input Sample.gs
 input WebApp.gs
-input WebAppSample.gs
 input WebExternalSession.gs
 input WebSocketDataFrame.gs

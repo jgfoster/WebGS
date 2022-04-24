@@ -1,13 +1,13 @@
-! ------------------- Remove existing behavior from WebAppSample
-removeAllMethods WebAppSample
-removeAllClassMethods WebAppSample
-! ------------------- Class methods for WebAppSample
+! ------------------- Remove existing behavior from Sample
+removeAllMethods Sample
+removeAllClassMethods Sample
+! ------------------- Class methods for Sample
 set compile_env: 0
 category: 'other'
-classmethod: WebAppSample
+classmethod: Sample
 runDistributedHttps
 "
-	WebAppSample runDistributedHttps.
+	Sample runDistributedHttps.
 "
 	HttpsListener new
 		listenBacklog: 100;
@@ -16,10 +16,10 @@ runDistributedHttps
 		run.
 %
 category: 'other'
-classmethod: WebAppSample
+classmethod: Sample
 runHttp
 "
-	WebAppSample runHttp.
+	Sample runHttp.
 "
 	HttpListener new
 		listenBacklog: 100;
@@ -28,10 +28,10 @@ runHttp
 		run.
 %
 category: 'other'
-classmethod: WebAppSample
+classmethod: Sample
 runHttps
 "
-	WebAppSample runHttps.
+	Sample runHttps.
 "
 	HttpsListener new
 		listenBacklog: 100;
@@ -41,19 +41,25 @@ runHttps
 %
 set compile_env: 0
 category: 'required'
-classmethod: WebAppSample
+classmethod: Sample
 htdocs
 	"/path/to/static/files"
 
 	| string |
-	string := System performOnServer: 'echo $GEMSTONE'.
+	string := System performOnServer: 'pwd'.
 	string := string copyFrom: 1 to: string size - 1.		"remove trailing \n"
 	^string
 %
-! ------------------- Instance methods for WebAppSample
+! ------------------- Instance methods for Sample
+category: 'override'
+method: Sample
+index
+
+	response redirectTo: 'Sample.html'.
+%
 set compile_env: 0
 category: 'REST API'
-method: WebAppSample
+method: Sample
 add_gs: args
 
 	| x y |
@@ -64,7 +70,7 @@ add_gs: args
 		yourself.
 %
 category: 'REST API'
-method: WebAppSample
+method: Sample
 echo_gs: args
 
 	"UserGlobals at: #'James' put: args.
@@ -72,13 +78,13 @@ echo_gs: args
 	^args
 %
 category: 'REST API'
-method: WebAppSample
+method: Sample
 stone_gs
 
 	^System stoneConfigurationReport
 %
 category: 'REST API'
-method: WebAppSample
+method: Sample
 uploadFile_gs
 
 	| dict headers part pieces size string |
@@ -98,11 +104,11 @@ uploadFile_gs
 %
 set compile_env: 0
 category: 'WebSockets'
-method: WebAppSample
+method: Sample
 webSocket_gs
 
 	request isWebSocketUpgrade ifFalse: [self error: 'Expected a WebSocket protocol!'].
-	Log instance log: #'debug' string: 'WebAppSample>>webSocket_gs'.
+	Log instance log: #'debug' string: 'Sample>>webSocket_gs'.
 	"We can send arbitrary data on the socket"
 	[
 		[
@@ -114,12 +120,12 @@ webSocket_gs
 	] fork.
 	"We can receive arbitrary data on the socket.
 	The following never returns but quietly terminates when the other side closes the connection"
-	self 
-		wsWithBinaryDo: [:aByteArray | 
-			Log instance log: #'debug' string: 'WebAppSample>>webSocket_gs - ' , aByteArray printString.
+	self
+		wsWithBinaryDo: [:aByteArray |
+			Log instance log: #'debug' string: 'Sample>>webSocket_gs - ' , aByteArray printString.
 		]
 		withTextDo: [:unicode |
-			Log instance log: #'debug' string: 'WebAppSample>>webSocket_gs - ' , unicode printString.
+			Log instance log: #'debug' string: 'Sample>>webSocket_gs - ' , unicode printString.
 			unicode asString = 'foo' ifTrue: [
 				WebSocketDataFrame sendText: 'bar' onSocket: socket.
 			].

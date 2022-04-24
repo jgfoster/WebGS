@@ -12,9 +12,9 @@ const int LOAD = 10;
 Log instance logTypes: #(#'startup' #'debug' #'request' #'warning' #'error').
 Log instance logTypes: #(#'startup' #'request' #'error').
 Log instance haltOnError: true.
-WebAppSample runHttp.
-WebAppSample runHttps.
-WebAppSample runDistributedHttps.
+Sample runHttp.
+Sample runHttps.
+Sample runDistributedHttps.
 */
 
 void main() {
