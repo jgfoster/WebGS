@@ -26,3 +26,6 @@ Of course, simple GET requests can be submitted from a browser and [Postman](htt
 `Sample.gs` also has a demo of how to use WebSockets.
 
 Please keep in mind that *all* your WebSocket connections on this host/port will be sharing the same gem and the connections will stay alive until they are dropped by the client. (While the current implementation will respond to a ping, it does not initiate a ping and disconnect clients who fail to respond.) This may affect performance (depending on how much activity each connection requires) and it may affect behavior (think very carefully about commits and aborts!).
+
+## Tests
+WebGS includes a set of tests written in [Dart](https://dart.dev). This also provides an example of how to interact with WebGS from a client application.

@@ -1,3 +1,5 @@
+#! /usr/bin/env dart
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:test/test.dart';
@@ -23,11 +25,11 @@ void main() {
     var response = await http.get(url);
     expect(response.statusCode, equals(200));
     expect(
-      response.body,
-      equals('<html>\n <head>\n </head>\n <body>\n'
-          '   <h1>WebApp is running!<h1>\n </body>\n</html>'),
+      response.body.substring(0, 21),
+      equals('<!DOCTYPE html PUBLIC'),
     );
   });
+
   test('get echo', () async {
     var url = Uri.parse(PROTOCOL + '://localhost:8888/echo.gs?foo=bar');
     var response = await http.get(url);
@@ -66,17 +68,14 @@ void main() {
       await Future.delayed(Duration(milliseconds: 5));
     }
     var ms = timer.elapsed.inMilliseconds / sent;
-    print('$sent $PROTOCOL requests at $ms ms each');
+    expect(ms, lessThan(3.0));
   });
 
   test('readFile', () async {
-    var url = Uri.parse(PROTOCOL + '://localhost:8888/include/ruby.h');
+    var url = Uri.parse(PROTOCOL + '://localhost:8888/tests/test.txt');
     var response = await http.get(url);
     expect(response.statusCode, equals(200));
-    expect(
-        response.body,
-        equals('// file ruby.h , used in maglev vm only\n'
-            '//  This file is empty in non-Maglev branches of Gs64 v3.x\n'));
+    expect(response.body, equals('Hello, World!\n'));
   });
 
   test('writeFile', () async {
@@ -110,7 +109,10 @@ void main() {
       received = message;
     });
     channel.sink.add('foo');
-    while (received != 'bar') {
+    var count = 0;
+    while (++count < 100 &&
+        received != null &&
+        !received.startsWith("'foo' at ")) {
       await Future.delayed(Duration(milliseconds: 20));
     }
     await channel.sink.close(status.goingAway);
