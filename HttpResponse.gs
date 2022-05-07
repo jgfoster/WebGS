@@ -152,12 +152,16 @@ initialize
 
 	headers := Dictionary new
 		at: 'Accept-Ranges'			put: 'bytes';
-		at: 'Allow'						put: 'GET, HEAD, OPTIONS, POST';
+		at: 'Allow'							put: 'GET, HEAD, OPTIONS, POST';
 		at: 'Cache-Control'			put: 'no-cache';
-		at: 'Content-Encoding'		put: 'none';
-		at: 'Content-Language'		put: 'en';
+		at: 'Content-Encoding'	put: 'none';
+		at: 'Content-Language'	put: 'en';
 		at: 'Content-Type'			put: 'text/html; charset=UTF-8';
 		at: 'Server'						put: 'GemStone/S 64 Bit HttpServer';
+		at: 'Access-Control-Allow-Origin'		put: '*';
+		at: 'Access-Control-Allow-Methods'	put: '*';
+		at: 'Access-Control-Allow-Headers'	put: '*';
+		at: 'Access-Control-Max-Age'				put: '86400';	"cache for one day"
 		yourself.
 	code := 200.
 %
@@ -243,6 +247,7 @@ reasonPhrase
 
 	^(Dictionary new
 		at: 200 put: 'OK';
+		at: 204 put: 'No Content';
 		at: 303 put: 'See Other';
 		at: 404 put: 'Not Found';
 		at: 405 put: 'Method Not Allowed';

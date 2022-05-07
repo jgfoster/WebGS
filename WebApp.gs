@@ -45,12 +45,18 @@ buildResponse
 	"We don't generate the response body, so we don't know the content length (as we would for a file).
 	According to the standard, we SHOULD provide the length, but that is optional
 	(versus SHALL which would be required)."
-	request method = 'HEAD' ifFalse: [
+	request method = 'HEAD' ifTrue: [
+
+	] ifFalse: [request method = 'OPTIONS' ifTrue: [
+		response code: 204. "No Content"
+	] ifFalse: [(request method = 'GET' or: [request method = 'POST']) ifTrue: [
 		self buildResponseFor: selector.
 		response hasContent ifFalse: [
 			response content: html printString.
 		].
-	].
+	] ifFalse: [
+		self error: 'Unrecognized request method: ' , request method printString.
+	]]].
 	response maxAge: self maxAge.
 %
 category: 'base'
