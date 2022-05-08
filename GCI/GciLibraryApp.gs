@@ -580,6 +580,7 @@ handleRequestString: aString
 			dictIn := JsonParser parse: aString.
 			dictOut := self handleRequest: dictIn.
 		] on: Error do: [:ex |
+			dictIn ifNil: [dictIn := Dictionary new at: 'request' put: aString; yourself].
 			dictOut := Dictionary new
 				at: 'error' put: ex number;
 				at: 'message' put: ex description;

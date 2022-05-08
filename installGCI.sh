@@ -14,6 +14,10 @@ errorCount
 fileformat utf8
 input ./WebGS.gs
 input ./GCI/GciApp.gs
+send GciTsLibraryFull initializeFunctions
+run
+Log instance logTypes: #(#'startup' "#'debug'" #'request' #'warning' #'error').
+%
 output pop
 errorCount
 commit

@@ -141,11 +141,11 @@ class JadeServer {
   Future<List<String>> getFreeOops(String session, int count) async {
     await _write(
         {'request': 'getFreeOops', 'session': session, 'count': count});
-    var result = [];
+    var result = <String>[];
     ((await _read())['result']).forEach((each) {
       result.add(each as String);
     });
-    return result as List<String>;
+    return result;
   }
 
   // @override

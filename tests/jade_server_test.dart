@@ -304,4 +304,8 @@ void main() {
   test('sessionIsRemote after logout', () async {
     expect(await server.sessionIsRemote(session1), isFalse);
   });
+
+  test('close', () async {
+    server.close();
+  });
 }
