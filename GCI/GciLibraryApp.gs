@@ -546,8 +546,8 @@ handleRequest: aDict
 	command = 'encrypt' ifTrue: [^self encrypt].
 	command = 'execute' ifTrue: [^self execute].
 	command = 'fetchSpecialClass' ifTrue: [^self fetchSpecialClass].
-	command = 'getFreeOops' ifTrue: [^self getFreeOops].
 	command = 'fetchUnicode' ifTrue: [^self fetchUnicode].
+	command = 'getFreeOops' ifTrue: [^self getFreeOops].
 	command = 'getGciVersion' ifTrue: [^self getGciVersion].
 	command = 'i32ToOop' ifTrue: [^self i32ToOop].
 	command = 'i64ToOop' ifTrue: [^self i64ToOop].
@@ -595,6 +595,9 @@ handleRequestString: aString
 	dictOut
 		at: 'time' put: time;
 		at: 'request' put: (dictIn at: 'request');
+		at: '_time' put: time;
+		at: '_request' put: (dictIn at: 'request');
+		at: '_id' put: (dictIn at: 'id' ifAbsent: '');
 		yourself.
 	WebSocketDataFrame
 		sendText: dictOut asJson
