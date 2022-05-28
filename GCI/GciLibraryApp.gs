@@ -233,6 +233,7 @@ category: 'GciTs API'
 method: GciLibraryApp
 logout
 
+	Log instance log: #'debug' string: 'GciLibraryApp>>logout - ' , session printString.
 	^self return: (self library GciTsLogout_: session _: error) == 1
 %
 category: 'GciTs API'
@@ -618,10 +619,11 @@ method: GciLibraryApp
 webSocket_gs
 
 	request isWebSocketUpgrade ifFalse: [self error: 'Expected a WebSocket protocol!'].
-	Log instance log: #'debug' string: 'GciApp>>webSocket_gs'.
+	Log instance log: #'debug' string: 'GciLibraryApp>>webSocket_gs'.
 	self
 		wsWithBinaryDo: [:aByteArray | ]
 		withTextDo: [:unicode |
 			self handleRequestString: unicode.
-		].
+		]
+		onDisconnectDo: [self logout].
 %

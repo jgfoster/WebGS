@@ -204,9 +204,15 @@ category: 'WebSockets'
 method: HttpServer
 wsWithBinaryDo: binaryBlock withTextDo: textBlock
 
+	self wsWithBinaryDo: binaryBlock withTextDo: textBlock onDisconnectDo: [].
+%
+category: 'WebSockets'
+method: HttpServer
+wsWithBinaryDo: binaryBlock withTextDo: textBlock onDisconnectDo: disconnectBlock
+
 	Log instance log: #'debug' string: 'HttpServer>>wsWithBinaryDo:withTextDo:'.
 	[
-		socket readWillNotBlockWithin: -1.
+		socket readWillNotBlockWithin: -1.	"Wait forever (other GsProcess instances can run and abort)"
 	] whileTrue: [
 		| frame |
 		[
@@ -221,6 +227,7 @@ wsWithBinaryDo: binaryBlock withTextDo: textBlock
 		frame isDisconnect ifTrue: [
 			Log instance log: #'debug' string: 'HttpServer>>onDataDo: - disconnect - ' , frame data printString.
 			WebSocketDataFrame sendDisconnect: frame data onSocket: socket.
+			disconnectBlock value.
 			socket close.
 			Processor activeProcess terminate.	"There isn't really anything to return!"
 		].

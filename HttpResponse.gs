@@ -281,6 +281,7 @@ sendResponseOn: aSocket
 	stream := WriteStream on: String new.
 	self printAllExceptContentOn: stream.		"Headers, etc."
 	string := stream contents.
+	Log instance log: #'debug' string: 'HttpResponse>>sendResponseOn: - ' , string printString.
 	count := aSocket write: string.
 	count isNil ifTrue: [self error: aSocket lastErrorString].
 	count < string size ifTrue: [self error: 'Tried to write ' , string size printString , ', but wrote ' , count printString].
