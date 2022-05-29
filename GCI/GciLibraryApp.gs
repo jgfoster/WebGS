@@ -209,7 +209,7 @@ login
 	Interpreted as #ptr from #( #'const char*' #'const char*' #'const char*' #'int32' #'const char*' #'const char*' #'const char*' #'uint32' #'int32' #'ptr' #'ptr' )	"
 	| initFlag |
 	initFlag := CByteArray gcMalloc: 8.
-	session := self library
+	gciSession := self library
 		GciTsLogin_: GsNetworkResourceString defaultStoneNRSFromCurrent printString
 		_: nil "HostUserId"
 		_: nil "HostPassword"
@@ -221,9 +221,9 @@ login
 		_: 0	"haltOnErrNum"
 		_: initFlag
 		_: error.
-	session memoryAddress == 0 ifTrue: [^self returnError].
-	socketFileHandle := self library GciTsSocket_: session _: error.
-	session := session memoryAddress printStringRadix: 16 showRadix: false.
+	gciSession memoryAddress == 0 ifTrue: [^self returnError].
+	socketFileHandle := self library GciTsSocket_: gciSession _: error.
+	session := gciSession memoryAddress printStringRadix: 16 showRadix: false.
 	^Dictionary new
 		at: 'result' put: session , '_' , socketFileHandle printString;
 		at: 'type' put: 'session';
@@ -233,8 +233,8 @@ category: 'GciTs API'
 method: GciLibraryApp
 logout
 
-	Log instance log: #'debug' string: 'GciLibraryApp>>logout - ' , session printString.
-	^self return: (self library GciTsLogout_: session _: error) == 1
+	Log instance log: #'debug' string: 'GciLibraryApp>>logout - ' , gciSession printString.
+	^self return: (self library GciTsLogout_: gciSession _: error) == 1
 %
 category: 'GciTs API'
 method: GciLibraryApp
