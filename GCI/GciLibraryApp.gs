@@ -29,13 +29,13 @@ category: 'GciTs API'
 method: GciLibraryApp
 abort
 
-	^self return: (self library GciTsAbort_: session _: error) == 1
+	^self return: (self library GciTsAbort_: gciSession _: error) == 1
 %
 category: 'GciTs API'
 method: GciLibraryApp
 begin
 
-	^self return: (self library GciTsBegin_: session _: error) == 1
+	^self return: (self library GciTsBegin_: gciSession _: error) == 1
 %
 category: 'GciTs API'
 method: GciLibraryApp
@@ -43,7 +43,7 @@ break
 
 	| hardBreakFlag |
 	hardBreakFlag := (requestDict at: 'isHard') ifTrue: [1] ifFalse: [0].
-	^self return: (self library GciTsBreak_: session _: hardBreakFlag _: error) == 1
+	^self return: (self library GciTsBreak_: gciSession _: hardBreakFlag _: error) == 1
 %
 category: 'GciTs API'
 method: GciLibraryApp
@@ -55,14 +55,14 @@ category: 'GciTs API'
 method: GciLibraryApp
 commit
 
-	^self return: (self library GciTsCommit_: session _: error) == 1
+	^self return: (self library GciTsCommit_: gciSession _: error) == 1
 %
 category: 'GciTs API'
 method: GciLibraryApp
 doubleToOop
 
 	^self returnOop: (self library
-		GciTsDoubleToOop_: session
+		GciTsDoubleToOop_: gciSession
 		_: (requestDict at: 'double') _: error)
 %
 category: 'GciTs API'
@@ -99,8 +99,8 @@ execute
 	| flag string |
 	string := requestDict at: 'string'.
 	flag := self library
-		GciTsNbExecute_: session
-		_: string
+		GciTsNbExecute_: gciSession
+		_: (string copyReplaceAll: '\"' with: '"')
 		_: string class asOop
 		_: 1 		"OOP_ILLEGAL (context)"
 		_: 20 	"OOP_NIL (SymbolList)"
@@ -128,7 +128,7 @@ fetchUnicode
 		destSize := requiredSize int64At: 0.
 		buffer := CByteArray gcMalloc: destSize * 2.
 		result := self library
-			GciTsFetchUnicode_: session
+			GciTsFetchUnicode_: gciSession
 			_: (self oopAt: 'oop')
 			_: buffer
 			_: destSize
@@ -149,7 +149,7 @@ getFreeOops
 	count := requestDict at: 'count' ifAbsent: 0.
 	buffer := CByteArray gcMalloc: count * 8.
 	result := self library
-		GciTsGetFreeOops_: session
+		GciTsGetFreeOops_: gciSession
 		_: buffer
 		_: count
 		_: error.
@@ -191,7 +191,7 @@ method: GciLibraryApp
 i64ToOop
 
 	^self returnOop: (self library
-		GciTsI64ToOop_: session
+		GciTsI64ToOop_: gciSession
 		_: (self oopAt: 'i64')
 		_: error)
 %
@@ -208,6 +208,9 @@ login
 
 	Interpreted as #ptr from #( #'const char*' #'const char*' #'const char*' #'int32' #'const char*' #'const char*' #'const char*' #'uint32' #'int32' #'ptr' #'ptr' )	"
 	| initFlag |
+	gciSession ifNotNil: [
+		self error: 'Socket already has a logged-in gciSession!'.
+	].
 	initFlag := CByteArray gcMalloc: 8.
 	gciSession := self library
 		GciTsLogin_: GsNetworkResourceString defaultStoneNRSFromCurrent printString
@@ -223,18 +226,20 @@ login
 		_: error.
 	gciSession memoryAddress == 0 ifTrue: [^self returnError].
 	socketFileHandle := self library GciTsSocket_: gciSession _: error.
-	session := gciSession memoryAddress printStringRadix: 16 showRadix: false.
 	^Dictionary new
-		at: 'result' put: session , '_' , socketFileHandle printString;
-		at: 'type' put: 'session';
+		at: 'result' put: true;
+		at: 'type' put: 'Boolean';
 		yourself
 %
 category: 'GciTs API'
 method: GciLibraryApp
 logout
+	| returnValue |
 
 	Log instance log: #'debug' string: 'GciLibraryApp>>logout - ' , gciSession printString.
-	^self return: (self library GciTsLogout_: gciSession _: error) == 1
+	returnValue := self return: (self library GciTsLogout_: gciSession _: error) == 1.
+	gciSession := nil.
+	^returnValue
 %
 category: 'GciTs API'
 method: GciLibraryApp
@@ -244,15 +249,14 @@ nbResult
 	timeoutMs := requestDict at: 'timeout' ifAbsent: [-1].
 	((GsSocket fromFileHandle: socketFileHandle) readWillNotBlockWithin: timeoutMs) ifTrue: [
 		| oop |
-		oop := self library GciTsNbResult_: session _: error.
+		oop := self library GciTsNbResult_: gciSession _: error.
 		oop == 1 ifTrue: [
-			GsFile stdoutServer nextPutAll: 'nbResult error message => ' , error message printString; lf.
+			Log instance log: #'error' string: 'nbResult error message => ' , error message printString.
 			^self returnError
 		].
 		(self library GciTsOopIsSpecial_: oop) == 1 ifTrue: [
 			^self return: (Object objectForOop: oop)
 		].
-
 		^self returnOop: oop
 	].
 	^Dictionary new
@@ -268,7 +272,7 @@ newByteArray
 	bytes := ByteArray fromBase64String: bytes.
 	bytes := CByteArray withAll: bytes.
 	bytes := self library
-		GciTsNewByteArray_: session
+		GciTsNewByteArray_: gciSession
 		_: bytes
 		_: bytes size
 		_: error.
@@ -279,7 +283,7 @@ method: GciLibraryApp
 newObj
 
 	^self returnOop: (self library
-		GciTsNewObj_: session
+		GciTsNewObj_: gciSession
 		_: (self oopAt: 'class')
 		_: error)
 %
@@ -288,7 +292,7 @@ method: GciLibraryApp
 newString
 
 	^self returnOop: (self library
-		GciTsNewString_: session
+		GciTsNewString_: gciSession
 		_: (requestDict at: 'string' ifAbsent: [''])
 		_: error)
 %
@@ -297,7 +301,7 @@ method: GciLibraryApp
 newSymbol
 
 	^self returnOop: (self library
-		GciTsNewSymbol_: session
+		GciTsNewSymbol_: gciSession
 		_: (requestDict at: 'string' ifAbsent: [''])
 		_: error)
 %
@@ -308,7 +312,7 @@ newUnicodeString
 	| bytes |
 	bytes := requestDict at: 'bytes' ifAbsent: [''].
 	^self returnOop: (self library
-		GciTsNewUtf8String__: session
+		GciTsNewUtf8String__: gciSession
 		_: (Utf8 fromBase64String: bytes)
 		_: bytes size
 		_: 1 "convertToUnicode is true"
@@ -321,7 +325,7 @@ newUtf8String
 	| bytes |
 	bytes := requestDict at: 'bytes' ifAbsent: [''].
 	^self returnOop: (self library
-		GciTsNewUtf8String__: session
+		GciTsNewUtf8String__: gciSession
 		_: (Utf8 fromBase64String: bytes)
 		_: bytes size
 		_: 0 "convertToUnicode is false"
@@ -346,7 +350,7 @@ oopToDouble
 	| buffer |
 	buffer := CByteArray gcMalloc: 8.
 	result := self library
-		GciTsOopToDouble_: session
+		GciTsOopToDouble_: gciSession
 		_: (self oopAt: 'oop')
 		_: buffer
 		_: error.
@@ -362,7 +366,7 @@ oopToI64
 	| buffer |
 	buffer := CByteArray gcMalloc: 8.
 	result := self library
-		GciTsOopToI64_: session
+		GciTsOopToI64_: gciSession
 		_: (self oopAt: 'oop')
 		_: buffer
 		_: error.
@@ -373,10 +377,39 @@ oopToI64
 %
 category: 'GciTs API'
 method: GciLibraryApp
+performFetchBytes
+
+	| actualSize bytes |
+	Log instance log: #'debug' string: 'GciLibraryApp>>performFetchBytes'.
+	bytes := CByteArray malloc: (requestDict at: 'maxSize').
+[
+	actualSize := self library
+		"Interpreted as #int64 from #( #'ptr' #'uint64' #'const char*' #'ptr' #'int32' #'ptr' #'int64' #'ptr' )"
+		GciTsPerformFetchBytes_: gciSession
+		_: (self oopAt: 'receiver')
+		_: (requestDict at: 'selector')
+		_: nil	"not supporting args yet"
+		_: 0
+		_: bytes
+		_: bytes size
+		_: error.
+] on: Error do: [:ex |
+	Log instance log: #'error' string: 'GciLibraryApp>>performFetchBytes - ' , ex printString.
+	ex pass.
+].
+	actualSize == -1 ifTrue: [^self returnOop: -1].
+	bytes := bytes byteArrayFrom: 0 to: actualSize - 1.
+	(bytes allSatisfy: [:each | each >= 32 and: [each <= 127]]) ifTrue: [
+		^self return: (bytes stringOfSize: actualSize at: 1)
+	].
+	^self return: bytes
+%
+category: 'GciTs API'
+method: GciLibraryApp
 resolveSymbol
 
 	^self returnOop: (self library
-		GciTsResolveSymbol_: session
+		GciTsResolveSymbol_: gciSession
 		_: (requestDict at: 'symbol')
 		_: (self oopAt: 'symbolList')
 		_: error)
@@ -386,7 +419,7 @@ method: GciLibraryApp
 resolveSymbolObj
 
 	^self returnOop: (self library
-		GciTsResolveSymbolObj_: session
+		GciTsResolveSymbolObj_: gciSession
 		_: (self oopAt: 'oop')
 		_: (self oopAt: 'symbolList')
 		_: error)
@@ -395,24 +428,7 @@ category: 'GciTs API'
 method: GciLibraryApp
 sessionIsRemote
 
-	^self return: (self library GciTsSessionIsRemote_: session) == 1
-%
-set compile_env: 0
-category: 'Utilities'
-method: GciLibraryApp
-getSessionAndSocket
-
-	| bytes integer pieces string |
-	string := requestDict at: 'session' ifAbsent: [^self].
-	pieces := string subStrings: $_.
-	integer := Integer fromHexString: pieces first.
-	bytes := (CByteArray gcMalloc: 8)
-		int64At: 0 put: integer;
-		yourself.
-	session := bytes pointerAt: 0 resultClass: CPointer.
-	pieces size > 1 ifTrue: [
-		socketFileHandle := (pieces at: 2) asNumber.
-	].
+	^self return: (self library GciTsSessionIsRemote_: gciSession) == 1
 %
 category: 'Utilities'
 method: GciLibraryApp
@@ -435,6 +451,12 @@ return: anObject
 	object := anObject.
 	(object isKindOf: Character) ifTrue: [
 		object := object asString.
+	].
+	(object isKindOf: ByteArray) ifTrue: [
+		^Dictionary new
+			at: 'result' put: object asBase64String;
+			at: 'type' put: 'ByteArray';
+			yourself
 	].
 	^Dictionary new
 		at: 'result' put: object;
@@ -462,7 +484,7 @@ returnOop: anInteger
 	error number ~~ 0 ifTrue: [
 		^self returnError
 	].
-	(session isNil or: [anInteger == 1]) ifTrue: [
+	(gciSession isNil or: [anInteger == 1]) ifTrue: [
 		^Dictionary new
 			at: 'oop' put: (anInteger printStringRadix: 16 showRadix: false);
 			at: 'type' put: 'oop';
@@ -472,7 +494,7 @@ returnOop: anInteger
 		objInfo := GciTsObjInfo new.
 		buffer := CByteArray gcMalloc: 1024.
 		result := self library
-			GciTsFetchObjInfo_: session
+			GciTsFetchObjInfo_: gciSession
 			_: anInteger
 			_: 1
 			_: objInfo
@@ -483,7 +505,7 @@ returnOop: anInteger
 		buffer size < objInfo objSize ifTrue: [
 			buffer := CByteArray gcMalloc: objInfo objSize + 8.
 			result := self library
-				GciTsFetchObjInfo_: session
+				GciTsFetchObjInfo_: gciSession
 				_: anInteger
 				_: 1
 				_: objInfo
@@ -492,7 +514,10 @@ returnOop: anInteger
 				_: error.
 		].
 		impl := #('oop' 'byte' 'nsc' 'special') at: (objInfo _bits bitAnd: 16r03) + 1.
-		class := Object objectForOop: objInfo objClass.
+		"TODO: This needs to be called in the slave session (it might be a new class!)"
+		[
+			class := Object objectForOop: objInfo objClass.
+		] on: Error do: [:ex | ].
 		dict := Dictionary new
 			at: 'oop' put: (anInteger printStringRadix: 16 showRadix: false);
 			at: 'type' put: 'oop';
@@ -522,7 +547,7 @@ returnOop: anInteger
 		].
 		^dict
 	] on: Error do: [:ex |
-		GsFile stdoutServer nextPutAll: 'returnOop: - error ' , ex number printString , ' - ' , ex messageText; lf.
+		Log instance log: #'error' string: 'returnOop: - error ' , ex number printString , ' - ' , ex messageText.
 		ex pass.
 	].
 %
@@ -535,7 +560,6 @@ handleRequest: aDict
 	error := GciErrSType new.
 	requestDict := aDict.
 	result := nil.
-	self getSessionAndSocket.
 	command := requestDict at: 'request'.
 	command = 'abort' ifTrue: [^self abort].
 	command = 'begin' ifTrue: [^self begin].
@@ -565,6 +589,7 @@ handleRequest: aDict
 	command = 'oopToChar' ifTrue: [^self oopToChar].
 	command = 'oopToDouble' ifTrue: [^self oopToDouble].
 	command = 'oopToI64' ifTrue: [^self oopToI64].
+	command = 'performFetchBytes' ifTrue: [^self performFetchBytes].
 	command = 'resolveSymbol' ifTrue: [^self resolveSymbol].
 	command = 'resolveSymbolObj' ifTrue: [^self resolveSymbolObj].
 	command = 'sessionIsRemote' ifTrue: [^self sessionIsRemote].
@@ -575,10 +600,13 @@ method: GciLibraryApp
 handleRequestString: aString
 
 	| dictIn dictOut time |
-	Log instance log: #'debug' string: 'GciApp>>handleRequest: - ' , aString printString.
+	"Log instance log: #'debug' string: 'GciApp>>handleRequest: - ' , aString printString."
 	time := Time millisecondsElapsedTime: [
 		[
 			dictIn := JsonParser parse: aString.
+			(dictIn isKindOf: PPFailure) ifTrue: [
+				Log instance log: #'error' string: 'handleRequestString: - PPFailure = ' , dictIn printString.
+			].
 			dictOut := self handleRequest: dictIn.
 		] on: Error do: [:ex |
 			dictIn ifNil: [dictIn := Dictionary new at: 'request' put: aString; yourself].
@@ -590,7 +618,7 @@ handleRequestString: aString
 		].
 	].
 	(dictOut isKindOf: Dictionary) ifFalse: [
-		GsFile stdoutServer nextPutAll: 'handleRequestString: ' , aString; lf.
+		Log instance log: #'debug' string: 'handleRequestString: ' , aString.
 		dictOut := Dictionary new.
 	].
 	dictOut
