@@ -379,24 +379,24 @@ category: 'GciTs API'
 method: GciLibraryApp
 performFetchBytes
 
-	| actualSize bytes |
+	| actualSize argsOops args bytes |
 	Log instance log: #'debug' string: 'GciLibraryApp>>performFetchBytes'.
 	bytes := CByteArray malloc: (requestDict at: 'maxSize').
-[
+	args := requestDict at: 'args'.
+	argsOops := CByteArray malloc: args size * 8.
+	1 to: args size do: [:i | 
+		argsOops uint64At: i - 1 * 8 put: (args at: i).
+	].
 	actualSize := self library
 		"Interpreted as #int64 from #( #'ptr' #'uint64' #'const char*' #'ptr' #'int32' #'ptr' #'int64' #'ptr' )"
 		GciTsPerformFetchBytes_: gciSession
 		_: (self oopAt: 'receiver')
 		_: (requestDict at: 'selector')
-		_: nil	"not supporting args yet"
-		_: 0
+		_: argsOops
+		_: args size
 		_: bytes
 		_: bytes size
 		_: error.
-] on: Error do: [:ex |
-	Log instance log: #'error' string: 'GciLibraryApp>>performFetchBytes - ' , ex printString.
-	ex pass.
-].
 	actualSize == -1 ifTrue: [^self returnOop: -1].
 	bytes := bytes byteArrayFrom: 0 to: actualSize - 1.
 	(bytes allSatisfy: [:each | each >= 32 and: [each <= 127]]) ifTrue: [
@@ -557,6 +557,7 @@ method: GciLibraryApp
 handleRequest: aDict
 
 	| command |
+	"Log instance log: #'debug' string: 'GciLibraryApp>>handleRequest - ' , aDict printString."
 	error := GciErrSType new.
 	requestDict := aDict.
 	result := nil.
