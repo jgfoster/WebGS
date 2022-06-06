@@ -13,6 +13,7 @@ output push WebGS.out only
 errorCount
 fileformat utf8
 input ./WebGS.gs
+input ./GCI/GciJsonParser.gs
 input ./GCI/GciApp.gs
 send GciTsLibraryFull initializeFunctions
 run

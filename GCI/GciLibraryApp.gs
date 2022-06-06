@@ -160,7 +160,7 @@ getFreeOops
 	1 to: result do: [:i |
 		| oop |
 		oop := buffer uint64At: i - 1 * 8.
-		array at: i put: (oop printStringRadix: 16 showRadix: false).
+		array at: i put: oop.
 	].
 	^self return: array
 %
@@ -379,28 +379,36 @@ category: 'GciTs API'
 method: GciLibraryApp
 performFetchBytes
 
-	| actualSize argsOops args bytes |
-	Log instance log: #'debug' string: 'GciLibraryApp>>performFetchBytes'.
+	| actualSize argsOops args bytes receiverOop selector |
+	selector := requestDict at: 'selector'.
+	Log instance log: #'debug' string: 'GciLibraryApp>>performFetchBytes - ' , selector printString.
 	bytes := CByteArray malloc: (requestDict at: 'maxSize').
 	args := requestDict at: 'args'.
 	argsOops := CByteArray malloc: args size * 8.
-	1 to: args size do: [:i | 
+	1 to: args size do: [:i |
 		argsOops uint64At: i - 1 * 8 put: (args at: i).
 	].
-	actualSize := self library
-		"Interpreted as #int64 from #( #'ptr' #'uint64' #'const char*' #'ptr' #'int32' #'ptr' #'int64' #'ptr' )"
-		GciTsPerformFetchBytes_: gciSession
-		_: (self oopAt: 'receiver')
-		_: (requestDict at: 'selector')
-		_: argsOops
-		_: args size
-		_: bytes
-		_: bytes size
-		_: error.
+	receiverOop := self oopAt: 'receiver'.
+	[
+		actualSize := self library
+			"Interpreted as #int64 from #( #'ptr' #'uint64' #'const char*' #'ptr' #'int32' #'ptr' #'int64' #'ptr' )"
+			GciTsPerformFetchBytes_: gciSession
+			_: receiverOop
+			_: selector
+			_: argsOops
+			_: args size
+			_: bytes
+			_: bytes size
+			_: error.
+	] on: Error do: [:ex |
+		Log instance log: #'error' string: 'GciLibraryApp>>performFetchBytes - ' , ex printString.
+	].
 	actualSize == -1 ifTrue: [^self returnOop: -1].
 	bytes := bytes byteArrayFrom: 0 to: actualSize - 1.
 	(bytes allSatisfy: [:each | each >= 32 and: [each <= 127]]) ifTrue: [
-		^self return: (bytes stringOfSize: actualSize at: 1)
+		| string |
+		string := bytes stringOfSize: actualSize at: 1.
+		^self return: string
 	].
 	^self return: bytes
 %
@@ -434,7 +442,7 @@ category: 'Utilities'
 method: GciLibraryApp
 oopAt: aString
 
-	^Integer fromHexString: (requestDict at: aString ifAbsent: [^nil]).
+	^requestDict at: aString ifAbsent: [nil]
 %
 category: 'Utilities'
 method: GciLibraryApp
@@ -486,7 +494,7 @@ returnOop: anInteger
 	].
 	(gciSession isNil or: [anInteger == 1]) ifTrue: [
 		^Dictionary new
-			at: 'oop' put: (anInteger printStringRadix: 16 showRadix: false);
+			at: 'oop' put: anInteger;
 			at: 'type' put: 'oop';
 			yourself
 	].
@@ -519,9 +527,9 @@ returnOop: anInteger
 			class := Object objectForOop: objInfo objClass.
 		] on: Error do: [:ex | ].
 		dict := Dictionary new
-			at: 'oop' put: (anInteger printStringRadix: 16 showRadix: false);
+			at: 'oop' put: anInteger;
 			at: 'type' put: 'oop';
-			at: 'classOop' put: (objInfo objClass printStringRadix: 16 showRadix: false);
+			at: 'classOop' put: objInfo objClass;
 			at: 'className' put: (class ifNotNil: [class name] ifNil: ['?']);
 			at: 'size' put: objInfo objSize;
 			at: 'namedSize' put: objInfo namedSize;
@@ -601,16 +609,16 @@ method: GciLibraryApp
 handleRequestString: aString
 
 	| dictIn dictOut time |
-	"Log instance log: #'debug' string: 'GciApp>>handleRequest: - ' , aString printString."
+	"Log instance log: #'debug' string: 'handleRequestString: - 1 - ' , aString."
 	time := Time millisecondsElapsedTime: [
 		[
-			dictIn := JsonParser parse: aString.
-			(dictIn isKindOf: PPFailure) ifTrue: [
-				Log instance log: #'error' string: 'handleRequestString: - PPFailure = ' , dictIn printString.
-			].
+			dictIn := GciJsonParser parse: aString.
+			"Log instance log: #'debug' string: 'handleRequestString: - 2 - ' , (dictIn at: 'request')."
 			dictOut := self handleRequest: dictIn.
+			"Log instance log: #'debug' string: 'handleRequestString: - 3 - ' , dictOut printString."
 		] on: Error do: [:ex |
-			dictIn ifNil: [dictIn := Dictionary new at: 'request' put: aString; yourself].
+			Log instance log: #'error' string: 'handleRequestString: - 4 - ' , ex printString.
+			dictIn ifNil: [dictIn := Dictionary new at: 'request' put: '??'; yourself].
 			dictOut := Dictionary new
 				at: 'error' put: ex number;
 				at: 'message' put: ex description;
@@ -619,15 +627,15 @@ handleRequestString: aString
 		].
 	].
 	(dictOut isKindOf: Dictionary) ifFalse: [
-		Log instance log: #'debug' string: 'handleRequestString: ' , aString.
+		Log instance log: #'debug' string: 'handleRequestString: - 5 - ' , aString.
 		dictOut := Dictionary new.
 	].
 	dictOut
 		at: 'time' put: time;
-		at: 'request' put: (dictIn at: 'request');
+		at: 'request' put: (dictIn at: 'request' ifAbsent: ['??']);
 		at: '_time' put: time;
-		at: '_request' put: (dictIn at: 'request');
-		at: '_id' put: (dictIn at: 'id' ifAbsent: '');
+		at: '_request' put: (dictIn at: 'request' ifAbsent: ['??']);
+		at: '_id' put: (dictIn at: 'id' ifAbsent: ['']);
 		yourself.
 	WebSocketDataFrame
 		sendText: dictOut asJson
