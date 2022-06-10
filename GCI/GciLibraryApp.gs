@@ -111,6 +111,30 @@ execute
 %
 category: 'GciTs API'
 method: GciLibraryApp
+executeFetchBytes
+
+	| buffer index size string |
+	string := requestDict at: 'string'.
+	size := requestDict at: 'size'.
+	Log instance log: #'debug' string: 'GciLibraryApp>>executeFetchBytes'.
+	buffer := CByteArray gcMalloc: size.
+	size := self library
+		GciTsExecuteFetchBytes_: gciSession
+		_: (string copyReplaceAll: '\"' with: '"')
+		_: -1
+		_: string class asOop
+		_: 1 		"OOP_ILLEGAL (context)"
+		_: 20 	"OOP_NIL (SymbolList)"
+		_: buffer
+		_: buffer size
+		_: error.
+	string := buffer stringFrom: 0 to: buffer size - 1.
+	index := string indexOf: (Character codePoint: 0).
+	string := string copyFrom: 1 to: index - 1.
+	^self return: string
+%
+category: 'GciTs API'
+method: GciLibraryApp
 fetchSpecialClass
 
 	^self returnOop: (self library
@@ -579,6 +603,7 @@ handleRequest: aDict
 	command = 'doubleToSmallDouble' ifTrue: [^self doubleToSmallDouble].
 	command = 'encrypt' ifTrue: [^self encrypt].
 	command = 'execute' ifTrue: [^self execute].
+	command = 'executeFetchBytes' ifTrue: [^self executeFetchBytes].
 	command = 'fetchSpecialClass' ifTrue: [^self fetchSpecialClass].
 	command = 'fetchUnicode' ifTrue: [^self fetchUnicode].
 	command = 'getFreeOops' ifTrue: [^self getFreeOops].
