@@ -44,9 +44,8 @@ set compile_env: 0
 category: 'required'
 classmethod: HttpServer
 htdocs
-	"/path/to/static/files"
 
-	^nil
+	^'./htdocs/'
 %
 ! ------------------- Instance methods for HttpServer
 set compile_env: 0

@@ -144,19 +144,7 @@ method: WebApp
 defaultSelector
 	"if the path is empty, e.g., http://localhost/, then default to this 'directory' or method selector."
 
-	^'index'
-%
-category: 'override options'
-method: WebApp
-index
-
-	response content: '<html>
- <head>
- </head>
- <body>
-   <h1>WebApp is running!<h1>
- </body>
-</html>'.
+	^'index.html'
 %
 category: 'override options'
 method: WebApp

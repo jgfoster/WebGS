@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html xml:lang="en" xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"></meta>
+    <script src="demo.js"></script>
+  </head>
+  <body onload="load()">
+    <h2>Addition</h2>
+    <div>
+      <input id="x" type="number"></input>
+      +
+      <input id="y" type="number"></input>
+      <button id="addButton" type="button">
+        POST
+      </button>
+      <input id="sum" type="number"></input>
+    </div>
+    <hr>
+    <h2>Stone Configuration</h2>
+    <button id="configButton" type="button">GET</button>
+    <table>
+      <thead>
+        <tr>
+          <th text="Key"></th>
+          <th text="Value"></th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <hr>
+    <h2>WebSocket Client</h2>
+    <p>This client connects to a WebSocket server and sends 
+      when you press return in the outgoing message box (try &quot;foo&quot;).
+    </p>
+    <div>
+      Connected to server: 
+      <span id="connection">false</span>
+      <br />
+      <input id="connectButton" type="button" value="Connect"></input>
+      <br />
+      Outgoing message (data sent on open connection to server): 
+      <input id="outgoing" type="text"></input>
+      <br />
+      Incoming message (data sent on open connection from server): 
+      <span id="incoming"></span>
+      <br />
+    </div>
+  </body>
+</html>
