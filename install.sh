@@ -1,10 +1,9 @@
 #!/bin/sh
 source setEnv.sh
-
-echo "This will reload your WebGS code."
-echo "Make sure you have saved all your edits!"
-read -n 1 -s -r -p "Press any key to continue"
-echo
+if [ "$?" != "0" ]; then
+  echo "Unable to set environment!"
+  exit 1
+fi
 
 cd ./src
 topaz -lq -I ../.topazini << EOF

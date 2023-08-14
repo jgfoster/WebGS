@@ -170,9 +170,8 @@ void main() {
     x = await server.resolveSymbolObj(session1, '1C6401');
     expect(x, '10501');
     // look for #'Array' in DataCurator's SymbolList
-    // (AllUsers userWithId: 'DataCurator' ifAbsent: [nil])
-    //     symbolList asOop printStringRadix: 16.
-    x = await server.resolveSymbolObj(session1, '1C6401', '288B01');
+    // (AllUsers userWithId: 'DataCurator' ifAbsent: [nil]) symbolList asOop printStringRadix: 16.
+    x = await server.resolveSymbolObj(session1, '1C6401', '288101');
     expect(x, '10501');
     x = await server.resolveSymbolObj(session1, '2A9701'); // #'size'
     expect(x, '1');

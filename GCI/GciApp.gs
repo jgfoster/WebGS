@@ -281,7 +281,7 @@ expectvalue /Class
 doit
 WebApp subclass: 'GciLibraryApp'
   instVarNames: #( error gciSession requestDict
-                    result socketFileHandle)
+                    result sessions)
   classVars: #()
   classInstVars: #()
   poolDictionaries: #()

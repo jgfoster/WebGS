@@ -167,6 +167,55 @@ serveClientSocket: aSocket
 set compile_env: 0
 category: 'WebSockets'
 method: HttpServer
+webSocket_gs
+
+	request isWebSocketUpgrade ifFalse: [self error: 'Expected a WebSocket protocol!'].
+	Log instance log: #'debug' string: 'HttpServer>>webSocket_gs'.
+	[
+		socket readWillNotBlockWithin: -1.	"Wait forever (other GsProcess instances can run and abort)"
+	] whileTrue: [
+		| frame |
+		[
+			frame := WebSocketDataFrame fromSocket: socket.
+		] on: Error do: [:ex | 
+			Log instance log: #'debug' string: 'HttpServer>>webSocket_gs - ' , ex description.
+			Log instance haltIfRequested.
+			WebSocketDataFrame sendDisconnect: 1002 onSocket: socket.
+			socket close.
+			Processor activeProcess terminate.	"There isn't really anything to return!"
+		].
+		frame isDisconnect ifTrue: [
+			Log instance log: #'debug' string: 'HttpServer>>onDataDo: - disconnect - ' , frame data printString.
+			WebSocketDataFrame sendDisconnect: frame data onSocket: socket.
+			self wsDisconnect.
+			socket close.
+			Processor activeProcess terminate.	"There isn't really anything to return!"
+		].
+		frame isPing ifTrue: [
+			Log instance log: #'debug' string: 'HttpServer>>onDataDo: - ping - ' , frame data printString.
+			WebSocketDataFrame sendPongData: frame data onSocket: socket.
+		] ifFalse: [
+			frame isBinary ifTrue: [
+				self wsBinaryData: frame data.
+			] ifFalse: [
+				self wsTextData: frame data decodeFromUTF8ToUnicode.
+			].
+		].
+	].
+%
+set compile_env: 0
+category: 'WebSockets'
+method: HttpServer
+wsBinaryData: byteArray
+%
+set compile_env: 0
+category: 'WebSockets'
+method: HttpServer
+wsDisconnect
+%
+set compile_env: 0
+category: 'WebSockets'
+method: HttpServer
 wsSecureResponseFor: aKey
 	"If the Key is 'dGhlIHNhbXBsZSBub25jZQ==', the response is 's3pPLMBiTxaQ9kYGzzhZRbK+xOo='."
 
@@ -179,6 +228,11 @@ wsSecureResponseFor: aKey
 		bytes add: ('16r' , stream next asString , stream next asString) asNumber.
 	].
 	^bytes asBase64String
+%
+set compile_env: 0
+category: 'WebSockets'
+method: HttpServer
+wsTextData: aUnicodeString
 %
 category: 'WebSockets'
 method: HttpServer
@@ -203,42 +257,5 @@ category: 'WebSockets'
 method: HttpServer
 wsWithBinaryDo: binaryBlock withTextDo: textBlock
 
-	self wsWithBinaryDo: binaryBlock withTextDo: textBlock onDisconnectDo: [].
-%
-category: 'WebSockets'
-method: HttpServer
-wsWithBinaryDo: binaryBlock withTextDo: textBlock onDisconnectDo: disconnectBlock
-
-	Log instance log: #'debug' string: 'HttpServer>>wsWithBinaryDo:withTextDo:'.
-	[
-		socket readWillNotBlockWithin: -1.	"Wait forever (other GsProcess instances can run and abort)"
-	] whileTrue: [
-		| frame |
-		[
-			frame := WebSocketDataFrame fromSocket: socket.
-		] on: Error do: [:ex | 
-			Log instance log: #'debug' string: 'HttpServer>>wsWithBinaryDo:withTextDo: - ' , ex description.
-			Log instance haltIfRequested.
-			WebSocketDataFrame sendDisconnect: 1002 onSocket: socket.
-			socket close.
-			Processor activeProcess terminate.	"There isn't really anything to return!"
-		].
-		frame isDisconnect ifTrue: [
-			Log instance log: #'debug' string: 'HttpServer>>onDataDo: - disconnect - ' , frame data printString.
-			WebSocketDataFrame sendDisconnect: frame data onSocket: socket.
-			disconnectBlock value.
-			socket close.
-			Processor activeProcess terminate.	"There isn't really anything to return!"
-		].
-		frame isPing ifTrue: [
-			Log instance log: #'debug' string: 'HttpServer>>onDataDo: - ping - ' , frame data printString.
-			WebSocketDataFrame sendPongData: frame data onSocket: socket.
-		] ifFalse: [
-			frame isBinary ifTrue: [
-				binaryBlock value: frame data.
-			] ifFalse: [
-				textBlock value: frame data decodeFromUTF8ToUnicode.
-			].
-		].
-	].
+	self error: 'Please override #wsBinaryData: and #wsTextData:'.
 %

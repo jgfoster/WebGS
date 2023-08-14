@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 # set GEMSTONE and PATH environment variables
 if [ -d "/Users/jfoster/Library/GemStone/GemStone64Bit3.6.6-i386.Darwin" ]; then

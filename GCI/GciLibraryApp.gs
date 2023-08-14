@@ -184,7 +184,7 @@ getFreeOops
 	1 to: result do: [:i |
 		| oop |
 		oop := buffer uint64At: i - 1 * 8.
-		array at: i put: oop.
+		array at: i put: (oop printStringRadix: 16).
 	].
 	^self return: array
 %
@@ -231,12 +231,9 @@ login
 			GciErrSType *err) ;
 
 	Interpreted as #ptr from #( #'const char*' #'const char*' #'const char*' #'int32' #'const char*' #'const char*' #'const char*' #'uint32' #'int32' #'ptr' #'ptr' )	"
-	| initFlag |
-	gciSession ifNotNil: [
-		self error: 'Socket already has a logged-in gciSession!'.
-	].
+	| initFlag session |
 	initFlag := CByteArray gcMalloc: 8.
-	gciSession := self library
+	session := self library
 		GciTsLogin_: GsNetworkResourceString defaultStoneNRSFromCurrent printString
 		_: nil "HostUserId"
 		_: nil "HostPassword"
@@ -248,20 +245,22 @@ login
 		_: 0	"haltOnErrNum"
 		_: initFlag
 		_: error.
-	gciSession memoryAddress == 0 ifTrue: [^self returnError].
-	socketFileHandle := self library GciTsSocket_: gciSession _: error.
+	session memoryAddress == 0 ifTrue: [^self returnError].
+	sessions ifNil: [sessions := IdentitySet new].
+	sessions add: session.
 	^Dictionary new
-		at: 'result' put: true;
-		at: 'type' put: 'Boolean';
+		at: 'result' put: (session asOop printStringRadix: 16);
+		at: 'type' put: 'session';
 		yourself
 %
 category: 'GciTs API'
 method: GciLibraryApp
 logout
-	| returnValue |
 
+	| returnValue |
 	Log instance log: #'debug' string: 'GciLibraryApp>>logout - ' , gciSession printString.
 	returnValue := self return: (self library GciTsLogout_: gciSession _: error) == 1.
+	sessions removeIfPresent: gciSession.
 	gciSession := nil.
 	^returnValue
 %
@@ -269,9 +268,14 @@ category: 'GciTs API'
 method: GciLibraryApp
 nbResult
 
-	| timeoutMs |
+	| fileHandle sessionSocket timeoutMs |
+	fileHandle := self library GciTsSocket_: gciSession _: error.
+	error number ~= 0 ifTrue: [
+		self returnError.
+	].
+	sessionSocket := GsSocket fromFileHandle: fileHandle.
 	timeoutMs := requestDict at: 'timeout' ifAbsent: [-1].
-	((GsSocket fromFileHandle: socketFileHandle) readWillNotBlockWithin: timeoutMs) ifTrue: [
+	(sessionSocket readWillNotBlockWithin: timeoutMs) ifTrue: [
 		| oop |
 		oop := self library GciTsNbResult_: gciSession _: error.
 		oop == 1 ifTrue: [
@@ -466,7 +470,12 @@ category: 'Utilities'
 method: GciLibraryApp
 oopAt: aString
 
-	^requestDict at: aString ifAbsent: [nil]
+	| string |
+	string := requestDict at: aString.
+	(string isKindOf: String) ifFalse: [
+		self error: 'Expected OOP as #String but got ' , string class name printString.
+	].
+	^('16r' , string) evaluate
 %
 category: 'Utilities'
 method: GciLibraryApp
@@ -518,7 +527,7 @@ returnOop: anInteger
 	].
 	(gciSession isNil or: [anInteger == 1]) ifTrue: [
 		^Dictionary new
-			at: 'oop' put: anInteger;
+			at: 'oop' put: (anInteger printStringRadix: 16);
 			at: 'type' put: 'oop';
 			yourself
 	].
@@ -551,7 +560,7 @@ returnOop: anInteger
 			class := Object objectForOop: objInfo objClass.
 		] on: Error do: [:ex | ].
 		dict := Dictionary new
-			at: 'oop' put: anInteger;
+			at: 'oop' put: (anInteger printStringRadix: 16);
 			at: 'type' put: 'oop';
 			at: 'classOop' put: objInfo objClass;
 			at: 'className' put: (class ifNotNil: [class name] ifNil: ['?']);
@@ -586,12 +595,11 @@ returnOop: anInteger
 set compile_env: 0
 category: 'WebSockets'
 method: GciLibraryApp
-handleRequest: aDict
+handleGciRequest
 
 	| command |
-	"Log instance log: #'debug' string: 'GciLibraryApp>>handleRequest - ' , aDict printString."
+	Log instance log: #'debug' string: 'GciLibraryApp>>handleGciRequest - ' , requestDict printString.
 	error := GciErrSType new.
-	requestDict := aDict.
 	result := nil.
 	command := requestDict at: 'request'.
 	command = 'abort' ifTrue: [^self abort].
@@ -633,17 +641,23 @@ category: 'WebSockets'
 method: GciLibraryApp
 handleRequestString: aString
 
-	| dictIn dictOut time |
-	"Log instance log: #'debug' string: 'handleRequestString: - 1 - ' , aString."
+	| dictOut time |
+	Log instance log: #'debug' string: 'handleRequestString: - 1 - ' , aString printString.
 	time := Time millisecondsElapsedTime: [
 		[
-			dictIn := GciJsonParser parse: aString.
-			"Log instance log: #'debug' string: 'handleRequestString: - 2 - ' , (dictIn at: 'request')."
-			dictOut := self handleRequest: dictIn.
-			"Log instance log: #'debug' string: 'handleRequestString: - 3 - ' , dictOut printString."
+			requestDict := GciJsonParser parse: aString.
+			Log instance log: #'debug' string: 'handleRequestString: - 2 - ' , (requestDict at: 'request').
+			(requestDict at: 'session' ifAbsent: [nil]) ifNil: [
+				gciSession := nil.	
+			] ifNotNil: [:sessionString | | int |
+				int := ('16r' , sessionString) evaluate.
+				gciSession := Object _objectForOop: int.
+			].
+			dictOut := self handleGciRequest.
+			Log instance log: #'debug' string: 'handleRequestString: - 3 - ' , dictOut printString.
 		] on: Error do: [:ex |
 			Log instance log: #'error' string: 'handleRequestString: - 4 - ' , ex printString.
-			dictIn ifNil: [dictIn := Dictionary new at: 'request' put: '??'; yourself].
+			requestDict ifNil: [requestDict := Dictionary new at: 'request' put: '??'; yourself].
 			dictOut := Dictionary new
 				at: 'error' put: ex number;
 				at: 'message' put: ex description;
@@ -657,10 +671,10 @@ handleRequestString: aString
 	].
 	dictOut
 		at: 'time' put: time;
-		at: 'request' put: (dictIn at: 'request' ifAbsent: ['??']);
+		at: 'request' put: (requestDict at: 'request' ifAbsent: ['??']);
 		at: '_time' put: time;
-		at: '_request' put: (dictIn at: 'request' ifAbsent: ['??']);
-		at: '_id' put: (dictIn at: 'id' ifAbsent: ['']);
+		at: '_request' put: (requestDict at: 'request' ifAbsent: ['??']);
+		at: '_id' put: (requestDict at: 'id' ifAbsent: ['']);
 		yourself.
 	WebSocketDataFrame
 		sendText: dictOut asJson
@@ -678,14 +692,18 @@ library
 %
 category: 'WebSockets'
 method: GciLibraryApp
-webSocket_gs
+wsDisconnect
 
-	request isWebSocketUpgrade ifFalse: [self error: 'Expected a WebSocket protocol!'].
-	Log instance log: #'debug' string: 'GciLibraryApp>>webSocket_gs'.
-	self
-		wsWithBinaryDo: [:aByteArray | ]
-		withTextDo: [:unicode |
-			self handleRequestString: unicode.
-		]
-		onDisconnectDo: [self logout].
+
+	Log instance log: #'debug' string: 'GciLibraryApp>>wsDisconnect'.
+	sessions copy do: [:each |
+		sessions remove: each.
+		self library GciTsLogout_: each _: error.
+	].
+%
+category: 'WebSockets'
+method: GciLibraryApp
+wsTextData: aUnicodeString
+
+	self handleRequestString: aUnicodeString.
 %

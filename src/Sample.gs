@@ -87,27 +87,35 @@ uploadFile_gs
 category: 'WebSockets'
 method: Sample
 webSocket_gs
-	| string |
 
-	request isWebSocketUpgrade ifFalse: [self error: 'Expected a WebSocket protocol!'].
 	Log instance log: #'debug' string: 'Sample>>webSocket_gs'.
 	"We can send arbitrary data on the socket"
-	[
-		[
-			(Delay forSeconds: 1) wait.
-			socket isConnected.
-		] whileTrue: [
-			WebSocketDataFrame sendText: string printString , ' at ' , Time now printString onSocket: socket.
-		].
-	] fork.
+	[self wsSendToClient] fork.
 	"We can receive arbitrary data on the socket.
 	The following never returns but quietly terminates when the other side closes the connection"
-	self
-		wsWithBinaryDo: [:aByteArray |
-			Log instance log: #'debug' string: 'Sample>>webSocket_gs - ' , aByteArray printString.
-		]
-		withTextDo: [:unicode |
-			Log instance log: #'debug' string: 'Sample>>webSocket_gs - ' , unicode printString.
-			string := unicode asString.
-		].
+	super webSocket_gs.
+%
+category: 'WebSockets'
+method: Sample
+wsBinaryData: aByteArray
+
+	Log instance log: #'debug' string: 'Sample>>webSocket_gs - ' , aByteArray printString.
+%
+category: 'WebSockets'
+method: Sample
+wsSendToClient
+
+	[
+		(Delay forSeconds: 1) wait.
+		socket isConnected.
+	] whileTrue: [
+		WebSocketDataFrame sendText: clientString printString , ' at ' , Time now printString onSocket: socket.
+	].
+%
+category: 'WebSockets'
+method: Sample
+wsTextData: unicode
+
+	Log instance log: #'debug' string: 'Sample>>webSocket_gs - ' , unicode printString.
+	clientString := unicode asString.
 %

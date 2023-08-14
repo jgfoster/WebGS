@@ -287,7 +287,7 @@ set compile_env: 0
 expectvalue /Class
 doit
 WebApp subclass: 'Sample'
-  instVarNames: #()
+  instVarNames: #( clientString)
   classVars: #()
   classInstVars: #()
   poolDictionaries: #()
