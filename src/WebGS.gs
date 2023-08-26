@@ -144,7 +144,7 @@ expectvalue /Class
 doit
 Object subclass: 'HttpListener'
   instVarNames: #( listenBacklog port socket
-                    webApp)
+                    webAppClass)
   classVars: #()
   classInstVars: #()
   poolDictionaries: #()
@@ -252,7 +252,7 @@ Object subclass: 'HttpServer'
 expectvalue /Class
 doit
 HttpServer comment:
-'WebApp new startHttpServer.'
+'Sample runHttp.'
 %
 expectvalue /Class
 doit
@@ -274,7 +274,7 @@ HttpServer subclass: 'WebApp'
 expectvalue /Class
 doit
 WebApp comment:
-'This is the abstract superclass for a HttpServer delegate.
+'This is the abstract superclass for a web application.
 
 The required methods are in the ''required'' category.'
 %

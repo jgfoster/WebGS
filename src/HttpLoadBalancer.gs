@@ -63,14 +63,6 @@ webAppClass: aClass
 
 	webAppClass := aClass.
 %
-set compile_env: 0
-category: 'other'
-method: HttpLoadBalancer
-critical: aBlock
-	"Evaluate aBlock inside a commit while holding the mutex"
-
-	^self class critical: aBlock
-%
 category: 'other'
 method: HttpLoadBalancer
 getSession

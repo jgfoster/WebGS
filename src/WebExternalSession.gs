@@ -155,7 +155,7 @@ startServer: aClass
 	listener := (self executeString: 'HttpListener new') first.
 	port := self 
 		send: 'port:' to: listener withArguments: (Array with: nil);
-		send: 'webApp:' to: listener withArguments: (Array with: aClass);
+		send: 'webAppClass:' to: listener withArguments: (Array with: aClass);
 		send: 'createListener' to: listener.
 	self forkString: '(Object objectForOop: ' , listener printString , ') mainLoop'.
 	isAvailable := true.

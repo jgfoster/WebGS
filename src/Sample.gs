@@ -12,7 +12,7 @@ runDistributedHttps
 	HttpsListener new
 		listenBacklog: 100;
 		port: 8888;
-		webApp: (HttpLoadBalancer for: self gemCount: 2);
+		webAppClass: (HttpLoadBalancer for: self gemCount: 2);
 		run.
 %
 category: 'other'
@@ -24,7 +24,7 @@ runHttp
 	HttpListener new
 		listenBacklog: 100;
 		port: 8888;
-		webApp: self;
+		webAppClass: self;
 		run.
 %
 category: 'other'
@@ -36,7 +36,7 @@ runHttps
 	HttpsListener new
 		listenBacklog: 100;
 		port: 8888;
-		webApp: self;
+		webAppClass: self;
 		run.
 %
 ! ------------------- Instance methods for Sample

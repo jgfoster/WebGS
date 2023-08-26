@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 source setEnv.sh
 if [ "$?" != "0" ]; then
   echo "Unable to set environment!"

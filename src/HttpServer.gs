@@ -80,7 +80,7 @@ handleRequest
 category: 'Request Handler'
 method: HttpServer
 handleRequestForFile
-	"The delegate returned nil, indicating that it didn't have a response to offer.
+	"The #buildResponse method didn't create a response.
 	We will check to see if there is a static file available that matches the path."
 
 	| gsFile |
@@ -241,7 +241,7 @@ wsUpgradeRequest
 	| count crlf key version |
 	version := request headers at: 'sec-websocket-version' ifAbsent: ['0'].
 	version asNumber < 13 ifTrue: [
-		self error: 'WebSocketSample requires at least version 13!'.
+		self error: 'HttpServer requires at least version 13!'.
 	].
 	crlf := Character cr asString , Character lf asString.
 	key := request headers at: 'sec-websocket-key' ifAbsent: [''].

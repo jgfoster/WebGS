@@ -37,10 +37,10 @@ port: anInteger
 %
 category: 'Initializing'
 method: HttpListener
-webApp: anObject
+webAppClass: anObject
 	"anObject implements #'serveClientSocket:'"
 
-	webApp := anObject.
+	webAppClass := anObject.
 %
 set compile_env: 0
 category: 'Override Defaults'
@@ -102,7 +102,7 @@ mainLoop
 		Log instance log: #'debug' string: 'HttpListener>>mainLoop - 2'.
 		socket close.
 		socket := nil.
-		webApp shutdown.
+		webAppClass shutdown.
 	].
 %
 category: 'Web Server'
@@ -118,7 +118,7 @@ mainLoopBody
 			[:anObject :aSocket |
 				Log instance log: #'debug' string: 'HttpListener>>mainLoopBody - ' , aSocket printString.
 				anObject serveClientSocket: aSocket.		"<== work is done here"
-			] forkWith: (Array with: webApp with: newSocket).
+			] forkWith: (Array with: webAppClass with: newSocket).
 		].
 	] on: Error do: [:ex |
 		Log instance log: #'error' string: ex description.
