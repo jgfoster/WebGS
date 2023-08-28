@@ -5,11 +5,11 @@ removeAllClassMethods WebExternalSession
 set compile_env: 0
 category: 'other'
 classmethod: WebExternalSession
-for: aClass
+startServer: aServer withRouter: aRouter
 
 	^super newDefault
 		login;
-		startServer: aClass;
+		startServer: aServer withRouter: aRouter;
 		yourself
 %
 ! ------------------- Instance methods for WebExternalSession
@@ -148,14 +148,15 @@ serveClientSocket: clientSocket
 %
 category: 'other'
 method: WebExternalSession
-startServer: aClass
+startServer: aServer withRouter: aRouter
 
 	| listener |
-	Log instance log: #'debug' string: 'WebExternalSession>>initialize: ' , aClass printString.
+	Log instance log: #'debug' string: 'WebExternalSession>>startWithRouter: ' , aRouter printString.
 	listener := (self executeString: 'HttpListener new') first.
 	port := self 
+		send: 'server:' to: listener withArguments: (Array with: aServer);
 		send: 'port:' to: listener withArguments: (Array with: nil);
-		send: 'webAppClass:' to: listener withArguments: (Array with: aClass);
+		send: 'router:' to: listener withArguments: (Array with: aRouter);
 		send: 'createListener' to: listener.
 	self forkString: '(Object objectForOop: ' , listener printString , ') mainLoop'.
 	isAvailable := true.

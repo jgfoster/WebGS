@@ -5,6 +5,19 @@ removeAllClassMethods Sample
 set compile_env: 0
 category: 'other'
 classmethod: Sample
+runDistributedHttp
+"
+	Sample runDistributedHttp.
+"
+	HttpListener new
+		listenBacklog: 100;
+		port: 8888;
+		server: (HttpLoadBalancer startServer: self withRouter: nil gemCount: 2);
+		run.
+%
+set compile_env: 0
+category: 'other'
+classmethod: Sample
 runDistributedHttps
 "
 	Sample runDistributedHttps.
@@ -12,7 +25,7 @@ runDistributedHttps
 	HttpsListener new
 		listenBacklog: 100;
 		port: 8888;
-		webAppClass: (HttpLoadBalancer for: self gemCount: 2);
+		server: (HttpLoadBalancer startServer: self withRouter: nil gemCount: 2);
 		run.
 %
 category: 'other'
@@ -24,7 +37,7 @@ runHttp
 	HttpListener new
 		listenBacklog: 100;
 		port: 8888;
-		webAppClass: self;
+		server: self;
 		run.
 %
 category: 'other'
@@ -36,7 +49,7 @@ runHttps
 	HttpsListener new
 		listenBacklog: 100;
 		port: 8888;
-		webAppClass: self;
+		server: self;
 		run.
 %
 ! ------------------- Instance methods for Sample

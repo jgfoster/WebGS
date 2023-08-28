@@ -3,12 +3,22 @@ removeAllMethods HttpListener
 removeAllClassMethods HttpListener
 ! ------------------- Class methods for HttpListener
 set compile_env: 0
-category: 'other'
+category: 'constructors'
 classmethod: HttpListener
 new
 
 	^self basicNew
 		initialize;
+		yourself
+%
+set compile_env: 0
+category: 'constructors'
+classmethod: HttpListener
+run: aRouter
+
+	^self new
+		router: aRouter;
+		run;
 		yourself
 %
 ! ------------------- Instance methods for HttpListener
@@ -19,6 +29,7 @@ initialize
 
 	listenBacklog := 5.
 	port := 8888.
+	server := HttpServer.  "might be replaced with an HttpLoadBalancer"
 	System 		"some extra overhead, but we want to get exception stacks"
 		gemConfigurationAt: #GemExceptionSignalCapturesStack
 		put: true.
@@ -37,10 +48,16 @@ port: anInteger
 %
 category: 'Initializing'
 method: HttpListener
-webAppClass: anObject
-	"anObject implements #'serveClientSocket:'"
+server: anAbstractHttpServer
+	"anObject implements #'serveClientSocket:router:'"
 
-	webAppClass := anObject.
+	server := anAbstractHttpServer.
+%
+category: 'Initializing'
+method: HttpListener
+router: aRouter
+
+	router := aRouter.
 %
 set compile_env: 0
 category: 'Override Defaults'
@@ -102,7 +119,7 @@ mainLoop
 		Log instance log: #'debug' string: 'HttpListener>>mainLoop - 2'.
 		socket close.
 		socket := nil.
-		webAppClass shutdown.
+		server shutdown.
 	].
 %
 category: 'Web Server'
@@ -115,10 +132,10 @@ mainLoopBody
 		newSocket isNil ifTrue: [
 			Log instance log: #'warning' string: 'GsSocket>>readWillNotBlock returned true but accept failed!'.
 		] ifFalse: [
-			[:anObject :aSocket |
+			[:aServer :aSocket :aRouter |
 				Log instance log: #'debug' string: 'HttpListener>>mainLoopBody - ' , aSocket printString.
-				anObject serveClientSocket: aSocket.		"<== work is done here"
-			] forkWith: (Array with: webAppClass with: newSocket).
+				aServer serveClientSocket: aSocket router: aRouter.		"<== work is done here"
+			] forkWith: (Array with: server with: newSocket with: router).
 		].
 	] on: Error do: [:ex |
 		Log instance log: #'error' string: ex description.

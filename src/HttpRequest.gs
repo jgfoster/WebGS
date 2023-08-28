@@ -400,7 +400,7 @@ readLine1
 	].
 	Log instance log: #'debug' string: 'HttpRequest>>readLine1 got method of ' , method printString.
 	method isEmpty ifTrue: [^self].
-	(#('GET' 'HEAD' 'OPTIONS' 'POST') includes: method) ifFalse: [
+	(#('GET' 'HEAD' 'OPTIONS' 'POST' 'PUT') includes: method) ifFalse: [
 		self error: 'Expected a GET, HEAD, OPTIONS, or POST but got ' , method printString , ' (' , method size printString , ' characters)'
 	].
 	uri := self upToSpace asString.

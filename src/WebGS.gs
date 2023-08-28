@@ -56,101 +56,23 @@ doit
 DbTransientSocket category: 'User Interface'
 %
 set compile_env: 0
-! ------------------- Class definition for Html4Element
-expectvalue /Class
-doit
-Object subclass: 'Html4Element'
-  instVarNames: #( tag attributes children)
-  classVars: #()
-  classInstVars: #()
-  poolDictionaries: #()
-  inDictionary: WebGS
-  options: #()
-
-%
-expectvalue /Class
-doit
-Html4Element comment:
-'This class represents an HTML Element. To learn more see books about HTML or on-line resources, including the following:
-	http://en.wikipedia.org/wiki/HTML_element
-	http://www.w3schools.com/html/html_elements.asp
-
-Although you can get a new instance using the class-side #''new'' method, the typical approach is to send the #''html'' message to get a new HTML document (an element with the tag ''html''). This top-level element is initialized with two child elements, a <head> <meta charset="utf-8" />
-and a <body>, accessed with the #''head'' and #''body'' messages respectively.
-
-You can set attributes using messages based on the attribute name (e.g., the #''class:'' message will set the element''s class attribute).
-
-You can create additional elements inside the head and/or body by sending messages based on the child element''s tag (e.g., the #''div'' message will create a <div> element). The basic way of creating a child element is based on a unary selector that returns the element. For example, the following creates a <b> element and add to it some text:
-	HtmlElement html body bold text: ''Name''.
-
-Most child elements can also be created with a keyword selector that takes a single argument, a one-argument block that receives the new element as an argument. This is useful for setting additional attributes or defining children of the new element (e.g., a <select> element typically has <option> elements as its children). For example:
-	HtmlElement html body bold: [:bold | bold text: ''Name''].
-
-Several of the elements also have multi-argument keyword selectors that handle common use-cases. For example:
-	HtmlElement html body boldWithText: ''Name''.
-
-The advantage of the last two examples is that they allow cascades to send additional messages to the <body> element while the first example would send additional messages to the <b> element.
-
-Sending #''printString'' to an element shows you how it will be rendered.'
-%
-expectvalue /Class
-doit
-Html4Element category: 'Model'
-%
-set compile_env: 0
-! ------------------- Class definition for HtmlElement
-expectvalue /Class
-doit
-Html4Element subclass: 'HtmlElement'
-  instVarNames: #()
-  classVars: #()
-  classInstVars: #()
-  poolDictionaries: #()
-  inDictionary: WebGS
-  options: #()
-
-%
-expectvalue /Class
-doit
-HtmlElement comment:
-'This class represents an HTML Element. To learn more see books about HTML or on-line resources, including the following:
-	http://en.wikipedia.org/wiki/HTML_element
-	http://www.w3schools.com/html/html_elements.asp
-
-Although you can get a new instance using the class-side #''new'' method, the typical approach is to send the #''html'' message to get a new HTML document (an element with the tag ''html''). This top-level element is initialized with two child elements, a <head> and a <body>, accessed with the #''head'' and #''body'' messages respectively.
-
-You can set attributes using messages based on the attribute name (e.g., the #''class:'' message will set the element''s class attribute).
-
-You can create additional elements inside the head and/or body by sending messages based on the child element''s tag (e.g., the #''div'' message will create a <div> element). The basic way of creating a child element is based on a unary selector that returns the element. For example, the following creates a <b> element and add to it some text:
-	HtmlElement html body bold text: ''Name''.
-
-Most child elements can also be created with a keyword selector that takes a single argument, a one-argument block that receives the new element as an argument. This is useful for setting additional attributes or defining children of the new element (e.g., a <select> element typically has <option> elements as its children). For example:
-	HtmlElement html body bold: [:bold | bold text: ''Name''].
-
-Several of the elements also have multi-argument keyword selectors that handle common use-cases. For example:
-	HtmlElement html body boldWithText: ''Name''.
-
-The advantage of the last two examples is that they allow cascades to send additional messages to the <body> element while the first example would send additional messages to the <b> element.
-
-Sending #''printString'' to an element shows you how it will be rendered.'
-%
-expectvalue /Class
-doit
-HtmlElement category: 'Model'
-%
-set compile_env: 0
 ! ------------------- Class definition for HttpListener
 expectvalue /Class
 doit
 Object subclass: 'HttpListener'
   instVarNames: #( listenBacklog port socket
-                    webAppClass)
+                    server router)
   classVars: #()
   classInstVars: #()
   poolDictionaries: #()
   inDictionary: WebGS
   options: #()
 
+%
+expectvalue /Class
+doit
+HttpListener comment:
+'I listen for incoming requests and am configured with an AbstractHttpServer and Router.'
 %
 expectvalue /Class
 doit
@@ -172,32 +94,6 @@ HttpListener subclass: 'HttpsListener'
 expectvalue /Class
 doit
 HttpsListener category: 'User Interface'
-%
-set compile_env: 0
-! ------------------- Class definition for HttpLoadBalancer
-expectvalue /Class
-doit
-Object subclass: 'HttpLoadBalancer'
-  instVarNames: #( gemCount mutex sessions
-                    webAppClass)
-  classVars: #()
-  classInstVars: #()
-  poolDictionaries: #()
-  inDictionary: WebGS
-  options: #( dbTransient)
-
-%
-expectvalue /Class
-doit
-HttpLoadBalancer comment:
-'sessions:
-	A collection of Association instances
-		key: GsExternalSession
-		value: aBoolean indicating whether session is available'
-%
-expectvalue /Class
-doit
-HttpLoadBalancer category: 'User Interface'
 %
 set compile_env: 0
 ! ------------------- Class definition for HttpRequest
@@ -237,11 +133,58 @@ doit
 HttpResponse category: 'Model'
 %
 set compile_env: 0
+! ------------------- Class definition for AbstractHttpServer
+expectvalue /Class
+doit
+Object subclass: 'AbstractHttpServer'
+  instVarNames: #( router)
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #()
+
+%
+expectvalue /Class
+doit
+AbstractHttpServer comment:
+'Abstract superclass for object that handles socket after listener''s accept'
+%
+expectvalue /Class
+doit
+AbstractHttpServer category: 'User Interface'
+%
+set compile_env: 0
+! ------------------- Class definition for HttpLoadBalancer
+expectvalue /Class
+doit
+AbstractHttpServer subclass: 'HttpLoadBalancer'
+  instVarNames: #( gemCount mutex server sessions )
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #( dbTransient)
+
+%
+expectvalue /Class
+doit
+HttpLoadBalancer comment:
+'sessions:
+	A collection of Association instances
+		key: GsExternalSession
+		value: aBoolean indicating whether session is available'
+%
+expectvalue /Class
+doit
+HttpLoadBalancer category: 'User Interface'
+%
+set compile_env: 0
 ! ------------------- Class definition for HttpServer
 expectvalue /Class
 doit
-Object subclass: 'HttpServer'
-  instVarNames: #( request response socket)
+AbstractHttpServer subclass: 'HttpServer'
+  instVarNames: #( request response socket )
   classVars: #()
   classInstVars: #()
   poolDictionaries: #()
@@ -257,6 +200,52 @@ HttpServer comment:
 expectvalue /Class
 doit
 HttpServer category: 'User Interface'
+%
+set compile_env: 0
+! ------------------- Class definition for Route
+expectvalue /Class
+doit
+Object subclass: 'Route'
+  instVarNames: #( method pathPieces block)
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #()
+
+%
+expectvalue /Class
+doit
+Route comment:
+'I describe a route.'
+%
+expectvalue /Class
+doit
+Route category: 'User Interface'
+%
+set compile_env: 0
+! ------------------- Class definition for Router
+expectvalue /Class
+doit
+Object subclass: 'Router'
+  instVarNames: #( routes)
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #()
+
+%
+expectvalue /Class
+doit
+Router comment:
+'This is the abstract superclass for a web router.
+
+The required methods are in the ''required'' category.'
+%
+expectvalue /Class
+doit
+Router category: 'User Interface'
 %
 set compile_env: 0
 ! ------------------- Class definition for WebApp
@@ -368,9 +357,8 @@ doit
 WebSocketDataFrame category: 'Model'
 %
 
+input AbstractHttpServer.gs
 input DbTransientSocket.gs
-input Html4Element.gs
-input HtmlElement.gs
 input HttpListener.gs
 input HttpLoadBalancer.gs
 input HttpRequest.gs
@@ -378,6 +366,8 @@ input HttpResponse.gs
 input HttpServer.gs
 input HttpsListener.gs
 input Log.gs
+input Route.gs
+input Router.gs
 input Sample.gs
 input WebApp.gs
 input WebExternalSession.gs

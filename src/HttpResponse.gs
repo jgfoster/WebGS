@@ -9,19 +9,19 @@ new
 
 	^self basicNew
 		initialize;
-		yourself.
+		yourself
 %
 category: 'other'
 classmethod: HttpResponse
 notFound: aString
 
-	^self new notFound: aString.
+	^self new notFound: aString
 %
 category: 'other'
 classmethod: HttpResponse
 serverError: anException
 
-	^self new serverError: anException.
+	^self new serverError: anException
 %
 category: 'other'
 classmethod: HttpResponse
@@ -31,7 +31,7 @@ webStringForDateTime: aDateTime
 		nextPutAll: (#('Sun' 'Mon' 'Tue' 'Wed' 'Thu' 'Fri' 'Sat') at: aDateTime dayOfWeekGmt); space;
 		nextPutAll: (aDateTime asStringGmtUsingFormat: #(1 2 3 $  2 1 $: true true false false));
 		nextPutAll: ' GMT';
-		contents.
+		contents
 %
 ! ------------------- Instance methods for HttpResponse
 set compile_env: 0
@@ -39,7 +39,7 @@ category: 'other'
 method: HttpResponse
 _content
 
-	^content.
+	^content
 %
 category: 'other'
 method: HttpResponse
@@ -81,7 +81,7 @@ category: 'other'
 method: HttpResponse
 code
 
-	^code.
+	^code
 %
 category: 'other'
 method: HttpResponse
@@ -91,9 +91,11 @@ code: anInteger
 %
 category: 'other'
 method: HttpResponse
-content: aString
+content: anObject
 
-	content := aString.
+	content := (anObject isKindOf: String)
+		ifTrue: [anObject]
+		ifFalse: [anObject asJson].
 	self isUTF8 ifFalse: [content := content encodeAsUTF8].
 	self contentLength: content size.
 %
@@ -144,24 +146,25 @@ category: 'other'
 method: HttpResponse
 headers
 
-	^headers.
+	^headers
 %
 category: 'other'
 method: HttpResponse
 initialize
 
 	headers := Dictionary new
-		at: 'Accept-Ranges'			put: 'bytes';
+		at: 'Date'		put: (HttpResponse webStringForDateTime: DateTime now);
+		at: 'Server'	put: 'WebGS';
+		"at: 'Accept-Ranges'		put: 'bytes';
 		at: 'Allow'							put: 'GET, HEAD, OPTIONS, POST';
 		at: 'Cache-Control'			put: 'no-cache';
 		at: 'Content-Encoding'	put: 'none';
 		at: 'Content-Language'	put: 'en';
-		at: 'Content-Type'			put: 'text/html; charset=UTF-8';
-		at: 'Server'						put: 'GemStone/S 64 Bit HttpServer';
+		at: 'Content-Type'			put: 'text/plain; charset=UTF-8';
 		at: 'Access-Control-Allow-Origin'		put: '*';
 		at: 'Access-Control-Allow-Methods'	put: '*';
 		at: 'Access-Control-Allow-Headers'	put: '*';
-		at: 'Access-Control-Max-Age'				put: '86400';	"cache for one day"
+		at: 'Access-Control-Max-Age'				put: '86400';	"
 		yourself.
 	code := 200.
 %
@@ -169,7 +172,7 @@ category: 'other'
 method: HttpResponse
 isUTF8
 
-	^(headers at: 'Content-Type') asLowercase includesString: 'utf-8'.
+	^(headers at: 'Content-Type' ifAbsent: ['']) asLowercase includesString: 'utf-8'.
 %
 category: 'other'
 method: HttpResponse
@@ -199,12 +202,9 @@ category: 'other'
 method: HttpResponse
 notFound: aString
 
-	| html |
-	html := HtmlElement html.
-	html body content: aString , ' not found!'.
 	self
 		code: 404;
-		content: html printString;
+		content: aString , ' not found!';
 		yourself.
 %
 category: 'other'
@@ -268,6 +268,15 @@ redirectTo: aString
 %
 category: 'other'
 method: HttpResponse
+send: aString
+
+	self 
+		code: 200;
+		content: aString;
+		yourself
+%
+category: 'other'
+method: HttpResponse
 sendContentsBlock: aOneArgumentBlock
 	"If you want to do your own streaming, then provide a block that takes a socket"
 
@@ -301,29 +310,7 @@ serverError: anException
 	| html description |
 	self code: 500.
 	((description := anException description) isKindOf: String) ifFalse: [description := description printString].
-	html := HtmlElement html.
-	html body h3: [:h3 | h3 content: description].
-	"(anException isKindOf: KermitUserError) ifTrue: [
-		self code: 200.
-	] ifFalse: ["
-		(anException isKindOf: LockError) ifFalse: [
-			| stackReport |
-			stackReport := anException stackReport ifNil: [GsProcess stackReportToLevel: 100].
-			(stackReport subStrings: Character lf) do: [:each |
-				html body
-					content: each;
-					br.
-			].
-		].
-	"]."
-	html body form: [:form | form
-		submitButton
-			name: 'submit';
-			value: 'Back';
-			onclick: 'history.go(-1); return false;';
-			yourself.
-	].
-	self content: html printString.
+	self content: description.
 %
 category: 'other'
 method: HttpResponse

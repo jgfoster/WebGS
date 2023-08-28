@@ -31,9 +31,9 @@ contentTypes
 set compile_env: 0
 category: 'other'
 classmethod: HttpServer
-serveClientSocket: aSocket
+serveClientSocket: aSocket router: aRouter
 
-	self new serveClientSocket: aSocket
+	self new serveClientSocket: aSocket router: aRouter
 %
 category: 'other'
 classmethod: HttpServer
@@ -53,7 +53,11 @@ category: 'Request Handler'
 method: HttpServer
 buildResponse
 
-	self subclassResponsibility.
+	Log instance log: #'debug' string: 'HttpServer>>buildResponse for ' , request path printString.
+	router ifNil: [
+		self error: 'No routes defined!'.
+	].
+	response := router handle: request.
 %
 category: 'Request Handler'
 method: HttpServer
@@ -151,10 +155,11 @@ sendResponse
 %
 category: 'Request Handler'
 method: HttpServer
-serveClientSocket: aSocket
+serveClientSocket: aSocket router: aRouter
 	"Serve the request in a forked process."
 
 	socket := aSocket.
+	router := aRouter.
 	Log instance log: #'debug' string: 'HttpServer>>serveClientSocket: ' , socket printString.
 	[socket isConnected
 		ifTrue: [self handleRequestWithErrorHandling]		"<- work is done here"

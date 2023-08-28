@@ -25,7 +25,7 @@ buildResponse
 	For example, 'http://localhost:8888/foo/bar' will build a response for 'foo'."
 
 	| newSelector pieces selector size |
-	html := HtmlElement html.
+	html := nil. "HtmlElement html."
 	Log instance log: #'debug' string: 'WebApp>>buildResponse'.
 	pieces := request path subStrings: $/.
 	selector := pieces at: 2.
@@ -93,50 +93,6 @@ buildResponseFor: aString
 			response content: dict asJson.
 		].
 	].
-%
-set compile_env: 0
-category: 'convenience'
-method: WebApp
-message
-	"The requested path starts with 'message'."
-
-	self messageOnElement: self messageLocation.
-%
-category: 'convenience'
-method: WebApp
-message: aString
-	"This will redirect to a new page that shows a message."
-
-	response redirectTo: 'message?message=' , (aString collect: [:each | each == Character lf ifTrue: [$\] ifFalse: [each]]).
-%
-category: 'convenience'
-method: WebApp
-messageLocation
-	"Override this method to put a message into a nice location in your HTML document."
-
-	^html body
-%
-category: 'convenience'
-method: WebApp
-messageOnElement: anElement
-	"The actual implementation presents the message with a 'Back' button."
-
-	((request argumentsAt: 'message') subStrings: $\) do: [:each |
-		anElement content: each; br.
-	].
-	anElement form: [:form | form
-		submitButton
-			name: 'submit';
-			value: 'Back';
-			onclick: 'history.go(-1); return false;';
-			yourself.
-	].
-%
-category: 'convenience'
-method: WebApp
-titleWithContent: aString
-
-	html head titleWithContent: aString.
 %
 set compile_env: 0
 category: 'override options'

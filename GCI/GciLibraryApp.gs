@@ -20,7 +20,7 @@ run: anInteger
 	HttpListener new
 		listenBacklog: 100;
 		port: anInteger;
-		webAppClass: self;
+		httpServerClass: self;
 		run.
 %
 ! ------------------- Instance methods for GciLibraryApp

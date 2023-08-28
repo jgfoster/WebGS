@@ -5,19 +5,21 @@ removeAllClassMethods HttpLoadBalancer
 set compile_env: 0
 category: 'other'
 classmethod: HttpLoadBalancer
-for: aClass
+startServer: aServer withRouter: aRouter
 
 	^self
-		for: aClass
+		startServer: aServer 
+		withRouter: aRouter
 		gemCount: 2
 %
 category: 'other'
 classmethod: HttpLoadBalancer
-for: aClass gemCount: anInteger
+startServer: aServer withRouter: aRouter gemCount: anInteger
 
 	^self basicNew
 		initialize;
-		webAppClass: aClass;
+		server: aServer;
+		router: aRouter;
 		gemCount: anInteger;
 		loginSessions;
 		yourself
@@ -26,7 +28,7 @@ category: 'other'
 classmethod: HttpLoadBalancer
 new
 
-	self error: 'Use #for: aWebAppClass'.
+	self error: 'Use #startWithRouter: aRouter'.
 %
 ! ------------------- Instance methods for HttpLoadBalancer
 set compile_env: 0
@@ -54,21 +56,15 @@ loginSessions
 
 	Log instance log: #'debug' string: 'HttpLoadBalancer>>loginSessions'.
 	gemCount timesRepeat: [
-		sessions add: (WebExternalSession for: webAppClass).
+		sessions add: (WebExternalSession startServer: server withRouter: router).
 	].
-%
-category: 'Initializing'
-method: HttpLoadBalancer
-webAppClass: aClass
-
-	webAppClass := aClass.
 %
 category: 'other'
 method: HttpLoadBalancer
 getSession
 	"find a listener that is idle and can be called"
 
-	Log instance log: #'debug' string: 'HttpLoadBalancer>>getProxy'.
+	Log instance log: #'debug' string: 'HttpLoadBalancer>>getSession'.
 	[true] whileTrue: [
 		mutex critical: [
 			| session |
@@ -82,10 +78,16 @@ getSession
 %
 category: 'other'
 method: HttpLoadBalancer
-serveClientSocket: aSocket
+serveClientSocket: aSocket router: aRouter
 
 	Log instance log: #'debug' string: 'HttpLoadBalancer>>serveClientSocket: ' , aSocket printString.
  	^self getSession serveClientSocket: aSocket
+%
+category: 'Initializing'
+method: HttpLoadBalancer
+server: aServer
+
+	server := aServer.
 %
 category: 'other'
 method: HttpLoadBalancer
