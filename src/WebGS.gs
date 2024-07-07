@@ -79,23 +79,6 @@ doit
 HttpListener category: 'User Interface'
 %
 set compile_env: 0
-! ------------------- Class definition for HttpsListener
-expectvalue /Class
-doit
-HttpListener subclass: 'HttpsListener'
-  instVarNames: #()
-  classVars: #()
-  classInstVars: #()
-  poolDictionaries: #()
-  inDictionary: WebGS
-  options: #()
-
-%
-expectvalue /Class
-doit
-HttpsListener category: 'User Interface'
-%
-set compile_env: 0
 ! ------------------- Class definition for HttpRequest
 expectvalue /Class
 doit
@@ -364,7 +347,6 @@ input HttpLoadBalancer.gs
 input HttpRequest.gs
 input HttpResponse.gs
 input HttpServer.gs
-input HttpsListener.gs
 input Log.gs
 input Route.gs
 input Router.gs

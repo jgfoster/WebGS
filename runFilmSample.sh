@@ -5,11 +5,19 @@ topaz -lq << EOF
 errorCount
 iferr 1 stk
 iferr 2 exit
+input src/Films.gs
 run
-Log instance logTypes: #(#'startup' "#'debug'" #'request' #'warning' #'error').
+Log instance logTypes: #(#'startup' "#'debug' #'request'" #'warning' #'error').
 %
 run
 | app |
+"
+GET /films
+GET /films/1
+GET /films/1/views
+POST /films/1/views/1
+PUT /films/1/views/59019108
+"
 app := Router new
   get: '/films' do: [:req :res | 
     res send: Film films.

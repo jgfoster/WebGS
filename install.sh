@@ -26,7 +26,7 @@ exit 0
 EOF
 
 if [ "$?" == "0" ]; then
-  echo "Install was successful. Try runSample.sh or your own code."
+  echo "Install was successful. Try run*.sh or your own code."
 else
   echo "Install of WebGS failed. Please review WebGS.out and try again!"
 fi

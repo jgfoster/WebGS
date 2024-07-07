@@ -14,7 +14,7 @@ input ./GCI/GciApp.gs
 send GciTsLibraryFull initializeFunctions
 output pop
 run
-Log instance logTypes: #(#'startup' #'debug' #'request' #'warning' #'error').
+Log instance logTypes: #(#'startup' "#'debug'" #'request' #'warning' #'error').
 System commit.
 GciLibraryApp run: 50378
 %

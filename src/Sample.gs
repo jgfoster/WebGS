@@ -9,23 +9,19 @@ runDistributedHttp
 "
 	Sample runDistributedHttp.
 "
-	HttpListener new
-		listenBacklog: 100;
-		port: 8888;
-		server: (HttpLoadBalancer startServer: self withRouter: nil gemCount: 2);
-		run.
+	self runDistributedHttp: 4.
 %
 set compile_env: 0
 category: 'other'
 classmethod: Sample
-runDistributedHttps
+runDistributedHttp: anInteger
 "
-	Sample runDistributedHttps.
+	Sample runDistributedHttp: 4.
 "
-	HttpsListener new
-		listenBacklog: 100;
+	HttpListener new
+		listenBacklog: 200;
 		port: 8888;
-		server: (HttpLoadBalancer startServer: self withRouter: nil gemCount: 2);
+		server: (HttpLoadBalancer startServer: self withRouter: nil gemCount: anInteger);
 		run.
 %
 category: 'other'
@@ -35,19 +31,7 @@ runHttp
 	Sample runHttp.
 "
 	HttpListener new
-		listenBacklog: 100;
-		port: 8888;
-		server: self;
-		run.
-%
-category: 'other'
-classmethod: Sample
-runHttps
-"
-	Sample runHttps.
-"
-	HttpsListener new
-		listenBacklog: 100;
+		listenBacklog: 200;
 		port: 8888;
 		server: self;
 		run.
@@ -56,6 +40,7 @@ runHttps
 category: 'REST API'
 method: Sample
 add_gs: args
+	"localhost:8888/add.gs?x=1&y=2"
 
 	| x y |
 	x := args at: 'x'.
@@ -71,6 +56,17 @@ echo_gs: args
 	"UserGlobals at: #'James' put: args.
 	System commit."
 	^args
+%
+category: 'REST API'
+method: Sample
+sleep_gs: args
+
+	| ms |
+	ms := (args at: 'ms') asInteger.
+	(Delay forMilliseconds: ms) wait.
+	^Dictionary new
+		at: 'ms' put: ms;
+		yourself
 %
 category: 'REST API'
 method: Sample

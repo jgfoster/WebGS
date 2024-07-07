@@ -5,8 +5,8 @@ if [ "$GEMSTONE" = "" ]; then
   if [ -d "/opt/gemstone/product" ]; then
     export GEMSTONE=/opt/gemstone/product
   else 
-    if [ -d "/Users/jfoster/Library/GemStone/GemStone64Bit3.6.6-i386.Darwin" ]; then
-      export GEMSTONE=/Users/jfoster/Library/GemStone/GemStone64Bit3.6.6-i386.Darwin
+    if [ -d "/Users/jfoster/Library/GemStone/GemStone64Bit3.7.1-arm64.Darwin" ]; then
+      export GEMSTONE=/Users/jfoster/Library/GemStone/GemStone64Bit3.7.1-arm64.Darwin
     else
       export GEMSTONE=/path/to/gemstone/
     fi

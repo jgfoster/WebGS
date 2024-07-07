@@ -5,11 +5,7 @@ import 'dart:convert';
 
 import 'jade_server.dart';
 
-/*
-Log instance logTypes: #(#'startup' #'debug' #'request' #'warning' #'error').
-Log instance haltOnError: true.
-GciLibraryApp run.
-*/
+// runGCI.sh should be running in a separate session before running this test
 
 void main() {
   final server = JadeServer('localhost:50378');
@@ -19,7 +15,7 @@ void main() {
 // pre-login
   test('getGciVersion', () async {
     var version = await server.getGciVersion();
-    expect(version, startsWith('3.6.'));
+    expect(version, startsWith('3.7.'));
   });
 
   test('encrypt', () async {
@@ -167,13 +163,16 @@ void main() {
   test('resolveSymbolObj', () async {
     String x;
     // look for #'Array' in current SymbolList
-    x = await server.resolveSymbolObj(session1, '1C6401');
+    // #'Array' asOop printStringRadix: 16.
+    x = await server.resolveSymbolObj(session1, '243301');
+    // Array asOop printStringRadix: 16.
     expect(x, '10501');
     // look for #'Array' in DataCurator's SymbolList
     // (AllUsers userWithId: 'DataCurator' ifAbsent: [nil]) symbolList asOop printStringRadix: 16.
-    x = await server.resolveSymbolObj(session1, '1C6401', '288101');
+    x = await server.resolveSymbolObj(session1, '243301', '2F7901');
     expect(x, '10501');
-    x = await server.resolveSymbolObj(session1, '2A9701'); // #'size'
+    // #'size' asOop printStringRadix: 16.
+    x = await server.resolveSymbolObj(session1, '315E01'); // #'size'
     expect(x, '1');
   });
 

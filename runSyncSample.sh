@@ -6,7 +6,7 @@ errorCount
 iferr 1 stk
 iferr 2 exit
 run
-Log instance logTypes: #(#'startup' "#'debug'" #'request' #'warning' #'error').
-Sample runHttp
+Log instance logTypes: #(#'startup' "#'debug' #'request'" #'warning' #'error').
+Sample runHttp.
 %
 EOF

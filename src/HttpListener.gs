@@ -36,7 +36,7 @@ initialize
 %
 category: 'Initializing'
 method: HttpListener
- listenBacklog: anInteger
+listenBacklog: anInteger
 
 	listenBacklog := anInteger.
 %
