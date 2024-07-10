@@ -13,7 +13,7 @@ Future<void> main(List<String> args) async {
 
 Future<void> ajaxRequests() async {
   // final uri = Uri.parse('http://localhost:8888/add.gs?x=1&y=2');
-  final uri = Uri.parse('http://localhost:8888/sleep.gs?ms=8');
+  final uri = Uri.parse('http://localhost:8888/sleep.gs?ms=2');
   final stopwatch = Stopwatch()..start();
   final requestCount = 2000;
   for (var i = 0; i < requestCount; i++) {

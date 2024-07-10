@@ -43,8 +43,8 @@ add_gs: args
 	"localhost:8888/add.gs?x=1&y=2"
 
 	| x y |
-	x := args at: 'x'.
-	y := args at: 'y'.
+	x := (args at: 'x') asInteger.
+	y := (args at: 'y') asInteger.
 	^Dictionary new
 		at: 'sum' put: x + y;
 		yourself.
