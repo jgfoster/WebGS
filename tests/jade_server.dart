@@ -4,20 +4,16 @@ import 'dart:convert';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class GciError extends StateError {
-  late final Map<String, dynamic> error;
   GciError(Map<String, dynamic> gciError)
       : error = gciError,
         super(gciError['message']);
+  late final Map<String, dynamic> error;
 }
 
 class JadeServer {
-  final _buffer = <Map<String, dynamic>>[];
-  late final WebSocketChannel _channel;
-  String? _error;
-
   JadeServer([var address = 'localhost:50378']) {
-    var uriString = 'ws://' + address + '/webSocket.gs';
-    var uri = Uri.parse(uriString);
+    final uriString = 'ws://$address/webSocket.gs';
+    final uri = Uri.parse(uriString);
     _channel = WebSocketChannel.connect(uri);
     _channel.stream.listen(
       _onData,
@@ -25,18 +21,21 @@ class JadeServer {
       onError: _onError,
     );
   }
+  final _buffer = <Map<String, dynamic>>[];
+  late final WebSocketChannel _channel;
+  String? _error;
 
-  void _onData(dynamic data) async {
-    var x = jsonDecode(data);
+  Future<void> _onData(dynamic data) async {
+    final x = jsonDecode(data);
     _buffer.add(x);
   }
 
-  void _onDone() async {
+  Future<void> _onDone() async {
     _error = 'Connection to server is closed!';
     await _channel.sink.close();
   }
 
-  void _onError(var error) async {
+  Future<void> _onError(var error) async {
     _error = error.toString();
     await _channel.sink.close();
   }
@@ -48,7 +47,7 @@ class JadeServer {
       }
       await Future.delayed(const Duration(milliseconds: 10));
     }
-    var result = _buffer.removeAt(0);
+    final result = _buffer.removeAt(0);
     if (result['type'] == 'error') {
       throw GciError(result);
     }
@@ -61,7 +60,7 @@ class JadeServer {
 
   // @override
   void close() {
-    _channel.sink.close();
+    unawaited(_channel.sink.close());
   }
 
 // Public API
@@ -69,21 +68,21 @@ class JadeServer {
   // @override
   Future<bool> abort(String session) async {
     await _write({'request': 'abort', 'session': session});
-    var data = await _read();
+    final data = await _read();
     return data['result'];
   }
 
   // @override
   Future<bool> begin(String session) async {
     await _write({'request': 'begin', 'session': session});
-    var data = await _read();
+    final data = await _read();
     return data['result'];
   }
 
   // @override
   Future<bool> doBreak(String session, bool isHard) async {
     await _write({'request': 'break', 'session': session, 'isHard': isHard});
-    var data = await _read();
+    final data = await _read();
     return data['result'];
   }
 
@@ -96,14 +95,15 @@ class JadeServer {
   // @override
   Future<bool> commit(String session) async {
     await _write({'request': 'commit', 'session': session});
-    var data = await _read();
+    final data = await _read();
     return data['result'];
   }
 
   // @override
   Future<String> doubleToOop(String session, double value) async {
     await _write(
-        {'request': 'doubleToOop', 'session': session, 'double': value});
+      {'request': 'doubleToOop', 'session': session, 'double': value},
+    );
     return (await _read())['oop'];
   }
 
@@ -140,9 +140,10 @@ class JadeServer {
   // @override
   Future<List<String>> getFreeOops(String session, int count) async {
     await _write(
-        {'request': 'getFreeOops', 'session': session, 'count': count});
-    var result = <String>[];
-    ((await _read())['result']).forEach((each) {
+      {'request': 'getFreeOops', 'session': session, 'count': count},
+    );
+    final result = <String>[];
+    (await _read())['result'].forEach((each) {
       result.add(each as String);
     });
     return result;
@@ -151,7 +152,7 @@ class JadeServer {
   // @override
   Future<String> getGciVersion() async {
     await _write({'request': 'getGciVersion'});
-    var data = await _read();
+    final data = await _read();
     return data['version'];
   }
 
@@ -166,10 +167,10 @@ class JadeServer {
     await _write({
       'request': 'i64ToOop',
       'i64': value.toRadixString(16),
-      'session': session
+      'session': session,
     });
-    var x = await _read();
-    return (x)['oop'];
+    final x = await _read();
+    return x['oop'];
   }
 
   // @override
@@ -185,19 +186,21 @@ class JadeServer {
   // @override
   Future<bool> logout(String session) async {
     await _write({'request': 'logout', 'session': session});
-    var data = await _read();
+    final data = await _read();
     return data['result'] ?? false;
   }
 
   // @override
-  Future<Map<String, dynamic>> nbResult(String session,
-      [int timeoutMs = -1]) async {
+  Future<Map<String, dynamic>> nbResult(
+    String session, [
+    int timeoutMs = -1,
+  ]) async {
     await _write({
       'request': 'nbResult',
       'session': session,
       'timeout': timeoutMs,
     });
-    return await _read();
+    return _read();
   }
 
   // @override
@@ -205,7 +208,7 @@ class JadeServer {
     await _write({
       'request': 'newByteArray',
       'bytes': base64Encode(bytes),
-      'session': session
+      'session': session,
     });
     return (await _read())['oop'];
   }
@@ -219,35 +222,37 @@ class JadeServer {
   // @override
   Future<String> newString(String session, String string) async {
     await _write(
-        {'request': 'newString', 'session': session, 'string': string});
+      {'request': 'newString', 'session': session, 'string': string},
+    );
     return (await _read())['oop'];
   }
 
   // @override
   Future<String> newSymbol(String session, String string) async {
     await _write(
-        {'request': 'newSymbol', 'session': session, 'string': string});
+      {'request': 'newSymbol', 'session': session, 'string': string},
+    );
     return (await _read())['oop'];
   }
 
   // @override
-  Future<String> newUnicodeString(String session, var bytes) async {
+  Future<String> newUnicodeString(String session, List<int> bytes) async {
     // GciTs returns UTF-16 but Dart only supports UTF-8
     // so we just give back the base64 encoded sequence
     await _write({
       'request': 'newUnicodeString',
       'bytes': base64Encode(bytes),
-      'session': session
+      'session': session,
     });
     return (await _read())['oop'];
   }
 
   // @override
-  Future<String> newUtf8String(String session, var bytes) async {
+  Future<String> newUtf8String(String session, List<int> bytes) async {
     await _write({
       'request': 'newUtf8String',
       'bytes': base64.encode(bytes),
-      'session': session
+      'session': session,
     });
     return (await _read())['oop'];
   }
@@ -271,16 +276,22 @@ class JadeServer {
   }
 
   // @override
-  Future<BigInt> oopToI64(String session, String anOop,
-      [String symbolList = '14']) async {
+  Future<BigInt> oopToI64(
+    String session,
+    String anOop, [
+    String symbolList = '14',
+  ]) async {
     await _write({'request': 'oopToI64', 'session': session, 'oop': anOop});
-    var data = await _read();
+    final data = await _read();
     return BigInt.parse(data['result']);
   }
 
   // @override
-  Future<String> resolveSymbol(String session, String symbol,
-      [String symbolList = '14']) async {
+  Future<String> resolveSymbol(
+    String session,
+    String symbol, [
+    String symbolList = '14',
+  ]) async {
     await _write({
       'request': 'resolveSymbol',
       'symbol': symbol,
@@ -291,8 +302,11 @@ class JadeServer {
   }
 
   // @override
-  Future<String> resolveSymbolObj(String session, String anOop,
-      [String symbolList = '14']) async {
+  Future<String> resolveSymbolObj(
+    String session,
+    String anOop, [
+    String symbolList = '14',
+  ]) async {
     await _write({
       'request': 'resolveSymbolObj',
       'oop': anOop,
@@ -305,7 +319,7 @@ class JadeServer {
   // @override
   Future<bool> sessionIsRemote(String session) async {
     await _write({'request': 'sessionIsRemote', 'session': session});
-    var data = await _read();
+    final data = await _read();
     return data['result'];
   }
 }

@@ -1,7 +1,7 @@
 #! /usr/bin/env dart
 
-import 'package:test/test.dart';
 import 'dart:convert';
+import 'package:test/test.dart';
 
 import 'jade_server.dart';
 
@@ -14,12 +14,12 @@ void main() {
 
 // pre-login
   test('getGciVersion', () async {
-    var version = await server.getGciVersion();
+    final version = await server.getGciVersion();
     expect(version, startsWith('3.7.'));
   });
 
   test('encrypt', () async {
-    var encrypted = await server.encrypt('swordfish');
+    final encrypted = await server.encrypt('swordfish');
     expect(encrypted, equals('GT543NBVJJUQK7ICC7CZTWAHPE'));
   });
 
@@ -177,22 +177,22 @@ void main() {
   });
 
   test('nbResult with nothing', () async {
-    var x = await server.nbResult(session1, 0);
+    final x = await server.nbResult(session1, 0);
     expect(x['type'], equals('timeout after 0ms'));
   });
 
   test('getFreeOops', () async {
-    var x = await server.getFreeOops(session1, 2);
+    final x = await server.getFreeOops(session1, 2);
     expect(x.length, equals(2));
   });
 
   test('newObj', () async {
-    var x = await server.newObj(session1, '10501');
+    final x = await server.newObj(session1, '10501');
     expect(x, isA<String>());
   });
 
   test('newByteArray', () async {
-    var x = await server.newByteArray(
+    final x = await server.newByteArray(
       session1,
       [0, 1, 2, 3, 243, 244, 245],
     );
@@ -200,79 +200,79 @@ void main() {
   });
 
   test('newString', () async {
-    var x = await server.newString(session1, 'abc');
+    final x = await server.newString(session1, 'abc');
     expect(x, isA<String>());
   });
 
   test('newSymbol', () async {
-    var x = await server.newString(session1, 'foo');
+    final x = await server.newString(session1, 'foo');
     expect(x, isA<String>());
   });
 
   test('newUnicodeString', () async {
-    var x = await server.newUnicodeString(session1, utf8.encode('foo'));
+    final x = await server.newUnicodeString(session1, utf8.encode('foo'));
     expect(x, isA<String>());
   });
 
   test('newUtf8String', () async {
-    var x = await server.newUtf8String(session1, utf8.encode('foo'));
+    final x = await server.newUtf8String(session1, utf8.encode('foo'));
     expect(x, isA<String>());
   });
 
   test('fetchUnicode', () async {
     // Since Dart doesn't support UTF-16, we just get a
     // base64 encoded string of the bytes
-    var dbfHistory = await server.resolveSymbol(session1, 'DbfHistory');
-    var x = await server.fetchUnicode(session1, dbfHistory);
+    final dbfHistory = await server.resolveSymbol(session1, 'DbfHistory');
+    final x = await server.fetchUnicode(session1, dbfHistory);
     expect(x, isA<String>());
   });
 
   test('executeString returning nil', () async {
-    var flag = await server.execute(session1, 'nil');
+    final flag = await server.execute(session1, 'nil');
     expect(flag, isTrue);
-    var result = await server.nbResult(session1, 200);
+    final result = await server.nbResult(session1, 200);
     expect(result['result'], isNull);
   });
 
   test('executeString returning Boolean', () async {
-    var flag = await server.execute(session1, 'true');
+    final flag = await server.execute(session1, 'true');
     expect(flag, isTrue);
-    var result = await server.nbResult(session1, 200);
+    final result = await server.nbResult(session1, 200);
     expect(result['result'], isTrue);
   });
 
   test('executeString returning Character', () async {
-    var flag = await server.execute(session1, '\$a');
+    final flag = await server.execute(session1, '\$a');
     expect(flag, isTrue);
-    var result = await server.nbResult(session1, 200);
+    final result = await server.nbResult(session1, 200);
     expect(result['result'], equals('a'));
   });
 
   test('executeString returning SmallInteger', () async {
-    var flag = await server.execute(session1, "'foo' size");
+    final flag = await server.execute(session1, "'foo' size");
     expect(flag, isTrue);
-    var result = await server.nbResult(session1, 200);
+    final result = await server.nbResult(session1, 200);
     expect(result['result'], equals(3));
   });
 
   test('executeString returning SmallDouble', () async {
-    var flag = await server.execute(session1, '1.25');
+    final flag = await server.execute(session1, '1.25');
     expect(flag, isTrue);
-    var result = await server.nbResult(session1, 200);
+    final result = await server.nbResult(session1, 200);
     expect(result['result'], equals(1.25));
   });
 
   test('executeString returning String', () async {
-    var flag = await server.execute(session1, '1.25 printString');
+    final flag = await server.execute(session1, '1.25 printString');
     expect(flag, isTrue);
-    var result = await server.nbResult(session1, 200);
+    final result = await server.nbResult(session1, 200);
     expect(result['string'], equals('1.25'));
   });
 
   test('executeString returning ByteArray', () async {
-    var flag = await server.execute(session1, '#[0 1 2 3]');
+    final flag = await server.execute(session1, '#[0 1 2 3]');
     expect(flag, isTrue);
-    var result = await server.nbResult(session1, 200);
+    final result = await server.nbResult(session1, 200);
     expect(result['bytes'], equals('AAECAw=='));
   });
 
