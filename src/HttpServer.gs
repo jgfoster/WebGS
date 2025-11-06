@@ -1,8 +1,7 @@
 ! ------------------- Remove existing behavior from HttpServer
-removeAllMethods HttpServer
-removeAllClassMethods HttpServer
+removeallmethods HttpServer
+removeallclassmethods HttpServer
 ! ------------------- Class methods for HttpServer
-set compile_env: 0
 category: 'constants'
 classmethod: HttpServer
 contentTypeFor: aPath
@@ -28,7 +27,6 @@ contentTypes
 		at: 'png'		put: 'image/png';
 		yourself.
 %
-set compile_env: 0
 category: 'other'
 classmethod: HttpServer
 serveClientSocket: aSocket router: aRouter
@@ -40,7 +38,6 @@ classmethod: HttpServer
 shutdown
 	"Nothing needs to be done!"
 %
-set compile_env: 0
 category: 'required'
 classmethod: HttpServer
 htdocs
@@ -48,7 +45,6 @@ htdocs
 	^'./htdocs/'
 %
 ! ------------------- Instance methods for HttpServer
-set compile_env: 0
 category: 'Request Handler'
 method: HttpServer
 buildResponse
@@ -169,7 +165,6 @@ serveClientSocket: aSocket router: aRouter
 		socket := nil.
 	].
 %
-set compile_env: 0
 category: 'WebSockets'
 method: HttpServer
 webSocket_gs
@@ -208,17 +203,14 @@ webSocket_gs
 		].
 	].
 %
-set compile_env: 0
 category: 'WebSockets'
 method: HttpServer
 wsBinaryData: byteArray
 %
-set compile_env: 0
 category: 'WebSockets'
 method: HttpServer
 wsDisconnect
 %
-set compile_env: 0
 category: 'WebSockets'
 method: HttpServer
 wsSecureResponseFor: aKey
@@ -234,7 +226,6 @@ wsSecureResponseFor: aKey
 	].
 	^bytes asBase64String
 %
-set compile_env: 0
 category: 'WebSockets'
 method: HttpServer
 wsTextData: aUnicodeString

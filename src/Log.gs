@@ -1,8 +1,7 @@
 ! ------------------- Remove existing behavior from Log
-removeAllMethods Log
-removeAllClassMethods Log
+removeallmethods Log
+removeallclassmethods Log
 ! ------------------- Class methods for Log
-set compile_env: 0
 category: 'other'
 classmethod: Log
 instance
@@ -20,7 +19,6 @@ new
 	self error: 'Use #''instance''!'.
 %
 ! ------------------- Instance methods for Log
-set compile_env: 0
 category: 'other'
 method: Log
 haltIfRequested

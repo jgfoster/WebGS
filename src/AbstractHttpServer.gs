@@ -1,6 +1,6 @@
 ! ------------------- Remove existing behavior from AbstractHttpServer
-removeAllMethods AbstractHttpServer
-removeAllClassMethods AbstractHttpServer
+removeallmethods AbstractHttpServer
+removeallclassmethods AbstractHttpServer
 ! ------------------- Class methods for AbstractHttpServer
 category: 'other'
 classmethod: AbstractHttpServer

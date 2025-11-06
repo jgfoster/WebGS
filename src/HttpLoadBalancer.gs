@@ -1,8 +1,13 @@
 ! ------------------- Remove existing behavior from HttpLoadBalancer
-removeAllMethods HttpLoadBalancer
-removeAllClassMethods HttpLoadBalancer
+removeallmethods HttpLoadBalancer
+removeallclassmethods HttpLoadBalancer
 ! ------------------- Class methods for HttpLoadBalancer
-set compile_env: 0
+category: 'other'
+classmethod: HttpLoadBalancer
+new
+
+	self error: 'Use #startWithRouter: aRouter'.
+%
 category: 'other'
 classmethod: HttpLoadBalancer
 startServer: aServer withRouter: aRouter
@@ -24,14 +29,7 @@ startServer: aServer withRouter: aRouter gemCount: anInteger
 		loginSessions;
 		yourself
 %
-category: 'other'
-classmethod: HttpLoadBalancer
-new
-
-	self error: 'Use #startWithRouter: aRouter'.
-%
 ! ------------------- Instance methods for HttpLoadBalancer
-set compile_env: 0
 category: 'Initializing'
 method: HttpLoadBalancer
 gemCount: anInteger
@@ -59,6 +57,12 @@ loginSessions
 		sessions add: (WebExternalSession startServer: server withRouter: router).
 	].
 %
+category: 'Initializing'
+method: HttpLoadBalancer
+server: aServer
+
+	server := aServer.
+%
 category: 'other'
 method: HttpLoadBalancer
 getSession
@@ -82,12 +86,6 @@ serveClientSocket: aSocket router: aRouter
 
 	Log instance log: #'debug' string: 'HttpLoadBalancer>>serveClientSocket: ' , aSocket printString.
  	^self getSession serveClientSocket: aSocket
-%
-category: 'Initializing'
-method: HttpLoadBalancer
-server: aServer
-
-	server := aServer.
 %
 category: 'other'
 method: HttpLoadBalancer

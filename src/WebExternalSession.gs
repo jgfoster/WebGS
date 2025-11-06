@@ -1,8 +1,7 @@
 ! ------------------- Remove existing behavior from WebExternalSession
-removeAllMethods WebExternalSession
-removeAllClassMethods WebExternalSession
+removeallmethods WebExternalSession
+removeallclassmethods WebExternalSession
 ! ------------------- Class methods for WebExternalSession
-set compile_env: 0
 category: 'other'
 classmethod: WebExternalSession
 startServer: aServer withRouter: aRouter
@@ -13,7 +12,6 @@ startServer: aServer withRouter: aRouter
 		yourself
 %
 ! ------------------- Instance methods for WebExternalSession
-set compile_env: 0
 category: 'other'
 method: WebExternalSession
 _isOnMyStone

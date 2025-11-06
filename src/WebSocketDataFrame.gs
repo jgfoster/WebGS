@@ -1,8 +1,7 @@
 ! ------------------- Remove existing behavior from WebSocketDataFrame
-removeAllMethods WebSocketDataFrame
-removeAllClassMethods WebSocketDataFrame
+removeallmethods WebSocketDataFrame
+removeallclassmethods WebSocketDataFrame
 ! ------------------- Class methods for WebSocketDataFrame
-set compile_env: 0
 category: 'other'
 classmethod: WebSocketDataFrame
 fromSocket: aSocket
@@ -36,14 +35,12 @@ sendText: data onSocket: aSocket
 	self basicNew sendText: data onSocket: aSocket
 %
 ! ------------------- Instance methods for WebSocketDataFrame
-set compile_env: 0
 category: 'accessors'
 method: WebSocketDataFrame
 data
 
 	^data
 %
-set compile_env: 0
 category: 'other'
 method: WebSocketDataFrame
 initializeFromSocket: aSocket
@@ -187,7 +184,6 @@ sendText: bytes onSocket: aSocket
 		data: bytes
 		onSocket: aSocket
 %
-set compile_env: 0
 category: 'testing'
 method: WebSocketDataFrame
 isBinary

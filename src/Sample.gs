@@ -1,8 +1,7 @@
 ! ------------------- Remove existing behavior from Sample
-removeAllMethods Sample
-removeAllClassMethods Sample
+removeallmethods Sample
+removeallclassmethods Sample
 ! ------------------- Class methods for Sample
-set compile_env: 0
 category: 'other'
 classmethod: Sample
 runDistributedHttp
@@ -11,7 +10,6 @@ runDistributedHttp
 "
 	self runDistributedHttp: 4.
 %
-set compile_env: 0
 category: 'other'
 classmethod: Sample
 runDistributedHttp: anInteger

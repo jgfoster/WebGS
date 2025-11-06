@@ -1,8 +1,7 @@
 ! ------------------- Remove existing behavior from HttpListener
-removeAllMethods HttpListener
-removeAllClassMethods HttpListener
+removeallmethods HttpListener
+removeallclassmethods HttpListener
 ! ------------------- Class methods for HttpListener
-set compile_env: 0
 category: 'constructors'
 classmethod: HttpListener
 new
@@ -11,7 +10,6 @@ new
 		initialize;
 		yourself
 %
-set compile_env: 0
 category: 'constructors'
 classmethod: HttpListener
 run: aRouter
@@ -22,7 +20,6 @@ run: aRouter
 		yourself
 %
 ! ------------------- Instance methods for HttpListener
-set compile_env: 0
 category: 'Initializing'
 method: HttpListener
 initialize
@@ -48,18 +45,17 @@ port: anInteger
 %
 category: 'Initializing'
 method: HttpListener
+router: aRouter
+
+	router := aRouter.
+%
+category: 'Initializing'
+method: HttpListener
 server: anAbstractHttpServer
 	"anObject implements #'serveClientSocket:router:'"
 
 	server := anAbstractHttpServer.
 %
-category: 'Initializing'
-method: HttpListener
-router: aRouter
-
-	router := aRouter.
-%
-set compile_env: 0
 category: 'Override Defaults'
 method: HttpListener
 accept
@@ -78,7 +74,6 @@ protocol
 
 	^'http'
 %
-set compile_env: 0
 category: 'Web Server'
 method: HttpListener
 createListener

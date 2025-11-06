@@ -1,16 +1,14 @@
 ! ------------------- Remove existing behavior from WebApp
-removeAllMethods WebApp
-removeAllClassMethods WebApp
+removeallmethods WebApp
+removeallclassmethods WebApp
 ! ------------------- Class methods for WebApp
 ! ------------------- Instance methods for WebApp
-set compile_env: 0
 category: 'Accessing'
 method: WebApp
 _socket
 
 	^(SessionTemps current at: #'HttpRequest_socket') at: Processor activeProcess.
 %
-set compile_env: 0
 category: 'base'
 method: WebApp
 buildResponse
@@ -94,7 +92,6 @@ buildResponseFor: aString
 		].
 	].
 %
-set compile_env: 0
 category: 'override options'
 method: WebApp
 defaultSelector
@@ -109,7 +106,6 @@ maxAge
 
 	^0
 %
-set compile_env: 0
 category: 'selectors'
 method: WebApp
 allowedSelectors
@@ -127,7 +123,6 @@ pathExists: aString
 
 	^self allowedSelectors includes: aString
 %
-set compile_env: 0
 category: 'utilities'
 method: WebApp
 encode: aString
