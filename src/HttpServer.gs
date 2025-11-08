@@ -29,6 +29,12 @@ contentTypes
 %
 category: 'other'
 classmethod: HttpServer
+htdocs: aString
+
+	htdocs := aString.
+%
+category: 'other'
+classmethod: HttpServer
 serveClientSocket: aSocket router: aRouter
 
 	self new serveClientSocket: aSocket router: aRouter
@@ -42,7 +48,7 @@ category: 'required'
 classmethod: HttpServer
 htdocs
 
-	^'./htdocs/'
+	^htdocs ifNil: ['./htdocs']
 %
 ! ------------------- Instance methods for HttpServer
 category: 'Request Handler'
@@ -134,7 +140,7 @@ openFile
 	(file includesString: '../') ifTrue: [^nil]. "Is request for a file below provided path?"
 	(file isEmpty or: [file = '/']) ifTrue: [file := '/index.html'].
 	path := path , file.
-	Log instance log: #'debug' string: 'HttpServer>>openFile - ' , path printString.
+	Log instance log: #'debug' string: 'HttpServer>>openFile - ' , (System performOnServer: 'pwd') trimWhiteSpace , '/' , path.
 	^GsFile openReadOnServer: path
 %
 category: 'Request Handler'

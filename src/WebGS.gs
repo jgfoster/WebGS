@@ -85,7 +85,7 @@ doit
 AbstractHttpServer subclass: 'HttpServer'
   instVarNames: #( request response socket)
   classVars: #()
-  classInstVars: #()
+  classInstVars: #( htdocs)
   poolDictionaries: #()
   inDictionary: WebGS
   options: #()

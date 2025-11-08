@@ -16,6 +16,8 @@ runDistributedHttp: anInteger
 "
 	Sample runDistributedHttp: 4.
 "
+	self htdocs: (System performOnServer: 'pwd') trimSeparators , '/htdocs'.
+	System commit.
 	HttpListener new
 		listenBacklog: 200;
 		port: 8888;
