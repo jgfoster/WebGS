@@ -1,2 +1,4 @@
 *.out
+.topazini
+setEnv.sh
 webServer.log

@@ -12,10 +12,10 @@ Future<void> main(List<String> args) async {
 }
 
 Future<void> ajaxRequests() async {
-  // final uri = Uri.parse('http://localhost:8888/add.gs?x=1&y=2');
-  final uri = Uri.parse('http://localhost:8888/sleep.gs?ms=2');
+  final uri = Uri.parse('http://localhost:8888/add.gs?x=1&y=2');
+  // final uri = Uri.parse('http://localhost:8888/sleep.gs?ms=2');
   final stopwatch = Stopwatch()..start();
-  final requestCount = 2000;
+  final requestCount = 5000;
   for (var i = 0; i < requestCount; i++) {
     await http.get(uri);
   }
@@ -27,7 +27,7 @@ Future<void> ajaxRequests() async {
 Future<void> fileRequests() async {
   final uri = Uri.parse('http://localhost:8888/index.html');
   final stopwatch = Stopwatch()..start();
-  final count = 5000;
+  final count = 1000;
   for (var i = 0; i < count; i++) {
     await http.get(uri);
   }
