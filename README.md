@@ -2,10 +2,12 @@
 WebGS is a framework for building the back-end for modern web applications in GemStone/S 64 Bit Smalltalk. It provides a basic server and can respond to HTTP requests with Smalltalk-generated strings. While these strings can be HTML, in today's environment it is more common that they will be JSON.
 
 ## Install
-Install WebGS with Topaz (see `installWebGS.sh` and `.topazini` for an example of how to do this).
+* Confirm that `.topazini` properly describes a running GemStone/S system.
+* Run `setUnicodeMode.sh` to use the modern character comparison mode (optional).
+* Run `install.sh` to install WebGS with Topaz.
 
 ## Use
-The typical use is to subclass WebApp and override appropriate methods. To see how this works, take a look at Sample.gs. This application will be run by the `installWebGS.sh` script as part of the initial install or you can run the application from a Topaz prompt or from an IDE (such as [Jade](https://github.com/jgfoster/jade)) using `Sample runHttp`. If you have breakpoints or halts in your code, then the server will stop and you can debug the code (or just step through it to see how it works). To test the server, access it from a web browser (`http://localhost:8888`) or from a Linux or macOS shell:
+The typical use is to subclass `WebApp` and override appropriate methods. To see how this works, take a look at `Sample.gs`. This class will be installed initial install or you can run the application from a Topaz prompt or from an IDE (such as [Jade](https://github.com/jgfoster/jade)) using `Sample runHttp`. If you have breakpoints or halts in your code, then the server will stop and you can debug the code (or just step through it to see how it works). To test the server, access it from a web browser (`http://localhost:8888`) or from a Linux or macOS shell:
 
 ```shell
 curl http://localhost:8888/stone.gs

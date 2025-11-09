@@ -1,4 +1,4 @@
-#!/bin/sh -ex
+#!/bin/bash -e
 
 # set GEMSTONE and PATH environment variables
 if [ "$GEMSTONE" = "" ]; then

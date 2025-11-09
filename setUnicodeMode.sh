@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -e
 source setEnv.sh
 
 topaz -lq << EOF
