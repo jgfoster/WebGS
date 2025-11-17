@@ -8,6 +8,6 @@ iferr 2 exit
 run
 Log instance logTypes: #(#'startup' #'debug' #'request' #'warning' #'error').
 Log instance logTypes: #(#'startup' #'warning' #'error').
-Sample runDistributedHttp.
+Sample runDistributedHttp: 8.
 %
 EOF

@@ -12,7 +12,7 @@ void main() {
   var session1 = '0';
   var session2 = '0';
 
-// pre-login
+  // pre-login
   test('getGciVersion', () async {
     final version = await server.getGciVersion();
     expect(version, startsWith('3.7.'));
@@ -65,7 +65,7 @@ void main() {
     expect(await server.i32ToOop(-0x80000000), 'FFFFFFFC00000002');
   });
 
-// login
+  // login
   test('login with invalid password', () async {
     var flag = false;
     try {
@@ -91,8 +91,8 @@ void main() {
     expect(session1, isNot(session2));
   });
 
-///////////////////////
-// while logged in
+  ///////////////////////
+  // while logged in
   test('hardBreak', () async {
     expect(await server.doBreak(session1, true), isTrue);
   });
@@ -164,15 +164,16 @@ void main() {
     String x;
     // look for #'Array' in current SymbolList
     // #'Array' asOop printStringRadix: 16.
-    x = await server.resolveSymbolObj(session1, '243301');
+    x = await server.resolveSymbolObj(session1, '1C6401');
     // Array asOop printStringRadix: 16.
     expect(x, '10501');
+  
     // look for #'Array' in DataCurator's SymbolList
     // (AllUsers userWithId: 'DataCurator' ifAbsent: [nil]) symbolList asOop printStringRadix: 16.
-    x = await server.resolveSymbolObj(session1, '243301', '2F7901');
+    x = await server.resolveSymbolObj(session1, '1C6401', '27A601');
     expect(x, '10501');
     // #'size' asOop printStringRadix: 16.
-    x = await server.resolveSymbolObj(session1, '315E01'); // #'size'
+    x = await server.resolveSymbolObj(session1, '298F01'); // #'size'
     expect(x, '1');
   });
 
@@ -192,10 +193,7 @@ void main() {
   });
 
   test('newByteArray', () async {
-    final x = await server.newByteArray(
-      session1,
-      [0, 1, 2, 3, 243, 244, 245],
-    );
+    final x = await server.newByteArray(session1, [0, 1, 2, 3, 243, 244, 245]);
     expect(x, isA<String>());
   });
 
@@ -276,8 +274,8 @@ void main() {
     expect(result['bytes'], equals('AAECAw=='));
   });
 
-///////////////////////
-// logout
+  ///////////////////////
+  // logout
   test('logout session 1', () async {
     expect(await server.logout(session1), isTrue);
   });
@@ -286,7 +284,7 @@ void main() {
     expect(await server.logout(session2), isTrue);
   });
 
-// after logout
+  // after logout
   test('logout second time should fail', () async {
     try {
       await server.logout(session2);

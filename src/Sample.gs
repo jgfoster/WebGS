@@ -51,6 +51,18 @@ add_gs: args
 %
 category: 'REST API'
 method: Sample
+cpu_gs: args
+
+	| ms endTime |
+	ms := (args at: 'ms') asInteger.
+	endTime := System _timeGmtFloat + (ms / 1000).
+	[System _timeGmtFloat < endTime] whileTrue: [].
+	^Dictionary new
+		at: 'ms' put: ms;
+		yourself
+%
+category: 'REST API'
+method: Sample
 echo_gs: args
 
 	"UserGlobals at: #'James' put: args.
