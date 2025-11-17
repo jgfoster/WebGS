@@ -1,8 +1,7 @@
 ! ------------------- Remove existing behavior from HttpRequest
-removeAllMethods HttpRequest
-removeAllClassMethods HttpRequest
+removeallmethods HttpRequest
+removeallclassmethods HttpRequest
 ! ------------------- Class methods for HttpRequest
-set compile_env: 0
 category: 'other'
 classmethod: HttpRequest
 contentTypeHandlers
@@ -101,7 +100,6 @@ unsetContentTypeHandlers
 	contentTypeHandlers := nil
 %
 ! ------------------- Instance methods for HttpRequest
-set compile_env: 0
 category: 'Accessing'
 method: HttpRequest
 _sizeLeft
@@ -201,7 +199,6 @@ version
 
    ^version
 %
-set compile_env: 0
 category: 'other'
 method: HttpRequest
 closeSocket
@@ -454,7 +451,6 @@ translate: aString
 		copyReplaceAll: Character cr asString , Character lf asString
 		with: Character lf asString.
 %
-set compile_env: 0
 category: 'stream'
 method: HttpRequest
 _fillStream

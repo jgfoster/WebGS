@@ -1,8 +1,7 @@
 ! ------------------- Remove existing behavior from HttpResponse
-removeAllMethods HttpResponse
-removeAllClassMethods HttpResponse
+removeallmethods HttpResponse
+removeallclassmethods HttpResponse
 ! ------------------- Class methods for HttpResponse
-set compile_env: 0
 category: 'other'
 classmethod: HttpResponse
 new
@@ -34,7 +33,6 @@ webStringForDateTime: aDateTime
 		contents
 %
 ! ------------------- Instance methods for HttpResponse
-set compile_env: 0
 category: 'other'
 method: HttpResponse
 _content

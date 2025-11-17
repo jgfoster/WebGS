@@ -16,8 +16,6 @@ Log instance logTypes: #(#'startup' #'debug' #'request' #'warning' #'error').
 Log instance logTypes: #(#'startup' #'request' #'error').
 Log instance haltOnError: true.
 Sample runHttp.
-Sample runHttps.
-Sample runDistributedHttps.
 */
 
 void main() {

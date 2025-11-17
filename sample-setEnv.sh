@@ -1,13 +1,13 @@
-#!/bin/sh -ex
+#!/bin/bash -e
 
 # set GEMSTONE and PATH environment variables
 if [ "$GEMSTONE" = "" ]; then
   if [ -d "/opt/gemstone/product" ]; then
     export GEMSTONE=/opt/gemstone/product
   else 
-    if [ -d "/Users/jfoster/Documents/GemStone/GemStone64Bit3.7.2-arm64.Darwin" ]; then
-      export GEMSTONE=/Users/jfoster/Documents/GemStone/GemStone64Bit3.7.2-arm64.Darwin
-      export GEMSTONE_GLOBAL_DIR=/Users/jfoster/Documents/GemStone 
+    if [ -d "/Users/jfoster/Documents/GemStone/GemStone64Bit3.7.4.3-arm64.Darwin" ]; then
+      export GEMSTONE=/Users/jfoster/Documents/GemStone/GemStone64Bit3.7.4.3-arm64.Darwin
+      export GEMSTONE_GLOBAL_DIR=/Users/jfoster/Documents/GemStone
     else
       export GEMSTONE=/path/to/gemstone/
     fi

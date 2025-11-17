@@ -1,8 +1,7 @@
 ! ------------------- Remove existing behavior from Sample
-removeAllMethods Sample
-removeAllClassMethods Sample
+removeallmethods Sample
+removeallclassmethods Sample
 ! ------------------- Class methods for Sample
-set compile_env: 0
 category: 'other'
 classmethod: Sample
 runDistributedHttp
@@ -11,13 +10,14 @@ runDistributedHttp
 "
 	self runDistributedHttp: 4.
 %
-set compile_env: 0
 category: 'other'
 classmethod: Sample
 runDistributedHttp: anInteger
 "
 	Sample runDistributedHttp: 4.
 "
+	self htdocs: (System performOnServer: 'pwd') trimSeparators , '/htdocs'.
+	System commit.
 	HttpListener new
 		listenBacklog: 200;
 		port: 8888;
@@ -48,6 +48,18 @@ add_gs: args
 	^Dictionary new
 		at: 'sum' put: x + y;
 		yourself.
+%
+category: 'REST API'
+method: Sample
+cpu_gs: args
+
+	| ms endTime |
+	ms := (args at: 'ms') asInteger.
+	endTime := System _timeGmtFloat + (ms / 1000).
+	[System _timeGmtFloat < endTime] whileTrue: [].
+	^Dictionary new
+		at: 'ms' put: ms;
+		yourself
 %
 category: 'REST API'
 method: Sample

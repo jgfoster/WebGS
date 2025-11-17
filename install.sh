@@ -1,9 +1,5 @@
-#!/bin/bash
+#!/bin/bash -e
 source setEnv.sh
-if [ "$?" != "0" ]; then
-  echo "Unable to set environment!"
-  exit 1
-fi
 
 cd ./src
 topaz -lq -I ../.topazini << EOF

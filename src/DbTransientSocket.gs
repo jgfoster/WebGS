@@ -1,8 +1,7 @@
 ! ------------------- Remove existing behavior from DbTransientSocket
-removeAllMethods DbTransientSocket
-removeAllClassMethods DbTransientSocket
+removeallmethods DbTransientSocket
+removeallclassmethods DbTransientSocket
 ! ------------------- Class methods for DbTransientSocket
-set compile_env: 0
 category: 'other'
 classmethod: DbTransientSocket
 new: aSocket
@@ -12,7 +11,6 @@ new: aSocket
 		yourself
 %
 ! ------------------- Instance methods for DbTransientSocket
-set compile_env: 0
 category: 'other'
 method: DbTransientSocket
 accept

@@ -1,8 +1,7 @@
 ! ------------------- Remove existing behavior from Route
-removeAllMethods Route
-removeAllClassMethods Route
+removeallmethods Route
+removeallclassmethods Route
 ! ------------------- Class methods for Route
-set compile_env: 0
 category: 'constructors'
 classmethod: Route
 method: methodString path: pathString block: aBlock
@@ -13,7 +12,6 @@ method: methodString path: pathString block: aBlock
     block: aBlock;
     yourself
 %
-set compile_env: 0
 category: 'constructors'
 classmethod: Route
 new
@@ -21,14 +19,6 @@ new
   self error: 'Use #method:path:block:'
 %
 ! ------------------- Instance methods for Route
-set compile_env: 0
-category: 'setters'
-method: Route
-block: aBlock
-
-  block := aBlock.
-%
-set compile_env: 0
 category: 'handler'
 method: Route
 handle: aRequest
@@ -81,7 +71,18 @@ handle: aRequest
   block valueWithArguments: args.
   ^response
 %
-set compile_env: 0
+category: 'setters'
+method: Route
+block: aBlock
+
+  block := aBlock.
+%
+category: 'setters'
+method: Route
+method: aString
+
+  method := aString.
+%
 category: 'setters'
 method: Route
 path: aString
@@ -115,11 +116,4 @@ path: aString
     ].
   ].
   Log instance log: #'debug' string: pathPieces printString.
-%
-set compile_env: 0
-category: 'setters'
-method: Route
-method: aString
-
-  method := aString.
 %
