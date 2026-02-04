@@ -1,4 +1,4 @@
-# locust -f fast_speed_test.py -u 5 -r 5 --host https://capella:8080 --processes -1
+# locust -f locust/fast_speed_test.py -u 5 -r 5 --host https://capella:8080 --processes -1
 
 from locust import task, between, FastHttpUser
 
