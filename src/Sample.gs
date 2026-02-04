@@ -26,12 +26,46 @@ runDistributedHttp: anInteger
 %
 category: 'other'
 classmethod: Sample
+runDistributedHttps
+"
+	Sample runDistributedHttps.
+"
+	self runDistributedHttps: 4.
+%
+category: 'other'
+classmethod: Sample
+runDistributedHttps: anInteger
+"
+	Sample runDistributedHttps: 4.
+"
+	self htdocs: (System performOnServer: 'pwd') trimSeparators , '/htdocs'.
+	System commit.
+	HttpsListener new
+		listenBacklog: 200;
+		port: 8888;
+		server: (HttpLoadBalancer startServer: self withRouter: nil gemCount: anInteger);
+		run.
+%
+category: 'other'
+classmethod: Sample
 runHttp
 "
 	Sample runHttp.
 "
 	HttpListener new
 		listenBacklog: 200;
+		port: 8888;
+		server: self;
+		run.
+%
+category: 'other'
+classmethod: Sample
+runHttps
+"
+	Sample runHttps.
+"
+	HttpsListener new
+		listenBacklog: 100;
 		port: 8888;
 		server: self;
 		run.
@@ -47,6 +81,18 @@ add_gs: args
 	y := (args at: 'y') asInteger.
 	^Dictionary new
 		at: 'sum' put: x + y;
+		yourself.
+%
+category: 'REST API'
+method: Sample
+counter_gs: args
+	"localhost:8888/counter.gs"
+
+	Counter ifNil: [Counter := 0].
+	Counter := Counter + 1.
+	System commit.
+	^Dictionary new
+		at: 'counter' put: Counter;
 		yourself.
 %
 category: 'REST API'

@@ -1,0 +1,396 @@
+STATISTICAL SAMPLING RESULTS
+elapsed CPU time:    7 ms
+monitoring interval:  5 us ,  775 samples
+report limit threshold: 77 hits / 9.9%
+0 pageFaults  4 objFaults  0 gcMs  23688 edenBytesUsed
+
+tally        %   class and method name
+------   -----   --------------------------------------
+   775  100.00   374 other methods
+   775  100.00   Total
+
+
+================
+STATISTICAL STACK SAMPLING RESULTS
+elapsed CPU time:    7 ms
+monitoring interval:  5 us ,  775 samples
+report limit threshold: 77 hits / 9.9%
+0 pageFaults  4 objFaults  0 gcMs  23688 edenBytesUsed
+
+ total       %   class and method name
+------   -----   --------------------------------------
+  1988  256.52   ExecBlock                 >> ensure:
+  1330  171.61   ExecBlock                 >> on:do:
+   775  100.00   GsNMethod class           >> _gsReturnToC
+   775  100.00   executed code            
+   775  100.00   Sample class              >> runHttps
+   775  100.00   ProfMonitor               >> runBlock:
+   775  100.00   ProfMonitor class         >> monitorBlock:downTo:intervalNs:options:
+   775  100.00   block in HttpListener     >> mainLoop
+   775  100.00   HttpListener              >> mainLoop
+   775  100.00   HttpListener              >> run
+   774   99.87   block in HttpListener     >> mainLoop
+   774   99.87   block in ProfMonitor      >> runBlock:
+   756   97.55   HttpListener              >> mainLoopBody
+   755   97.42   block in HttpListener     >> mainLoopBody
+   439   56.65   ExecBlock                 >> valueWithArguments:
+   439   56.65   block in HttpListener     >> mainLoopBody
+   431   55.61   HttpServer class          >> serveClientSocket:router:
+   430   55.48   HttpServer                >> serveClientSocket:router:
+   420   54.19   block in HttpServer       >> serveClientSocket:router:
+   419   54.06   HttpServer                >> handleRequestWithErrorHandling
+   417   53.81   block in HttpServer       >> handleRequestWithErrorHandling
+   417   53.81   HttpServer                >> handleRequest
+   316   40.77   HttpsListener             >> accept
+   311   40.13   DbTransientSocket         >> secureAccept
+   310   40.00   GsSecureSocket            >> secureAccept
+   310   40.00   GsSecureSocket            >> secureAcceptTimeoutMs:
+   310   40.00   GsSecureSocket            >> secureAcceptTimeoutMs:errorOnTimeout:
+   310   40.00   GsSecureSocket            >> _secureAcceptTimeoutMs:
+   284   36.65   Delay class               >> waitForMilliseconds:
+   277   35.74   ProcessorScheduler        >> _waitForMilliseconds:
+   221   28.52   HttpRequest class         >> readFromSocket:
+   220   28.39   HttpRequest               >> initializeWithSocket:
+   218   28.13   ProcessorScheduler        >> _reschedule
+   211   27.23   ProcessorScheduler        >> _findReadyProcess
+   205   26.45   ProcessorScheduler        >> _reapEvents:
+   167   21.55   ProcessorScheduler        >> _checkForExpiredDelays:
+   118   15.23   HttpRequest               >> readRequest
+   108   13.94   HttpServer                >> sendResponse
+   108   13.94   block in HttpServer       >> sendResponse
+   102   13.16   HttpResponse              >> sendResponseOn:
+    90   11.61   HttpResponse              >> printAllExceptContentOn:
+    87   11.23   Dictionary                >> at:put:
+    86   11.10   HttpResponse class        >> webStringForDateTime:
+   738   95.23   331 other methods
+   775  100.00   Total
+
+
+================
+STATISTICAL METHOD SENDERS RESULTS
+elapsed CPU time:    7 ms
+monitoring interval:  5 us ,  775 samples
+report limit threshold: 77 hits / 9.9%
+
+     %       %                     Parent
+  self  total   total  local  Method
+  Time   Time      ms    %         Child
+------ ------  ------  -----  -----------
+
+                    0.0    0.1       System class >> _processDeferredGciUpdates
+                    0.1    0.6       Object       >> objectSecurityPolicy:
+                    3.8   21.4       HttpServer   >> serveClientSocket:router:
+                    7.0   39.0       ProfMonitor  >> runBlock:
+                    7.0   39.0       HttpListener >> mainLoop
+=    0.0  256.5    18.0    0.0  ExecBlock    >> ensure:   [oop 6935041]
+                    0.0    0.1       ExecBlock    >> _removeEnsure
+                    0.0    0.1       block in System class >> _processDeferredGciUpdates
+                    0.1    0.6       ExecBlock    >> _terminationBlockValue
+                    0.0    0.2       block in Object >> objectSecurityPolicy:
+                    3.8   21.1       block in HttpServer >> serveClientSocket:router:
+                    7.0   38.9       block in ProfMonitor >> runBlock:
+                    7.0   39.0       block in HttpListener >> mainLoop
+-----------------------------------------------------
+
+                    1.0    8.1       HttpServer   >> sendResponse
+                    0.2    1.5       Object       >> asJson
+                    0.1    1.2       HttpRequest  >> readLine1
+                    3.8   31.4       HttpServer   >> handleRequestWithErrorHandling
+                    6.8   56.8       HttpListener >> mainLoopBody
+                    0.1    1.1       block in HttpListener >> mainLoop
+=    0.0  171.6    12.0    0.0  ExecBlock    >> on:do:   [oop 6942465]
+                    1.0    8.1       block in HttpServer >> sendResponse
+                    0.2    1.5       block in Object >> asJson
+                    0.1    1.2       block in HttpRequest >> readLine1
+                    3.8   31.4       block in HttpServer >> handleRequestWithErrorHandling
+                    6.8   56.8       block in HttpListener >> mainLoopBody
+                    0.1    1.1       block in HttpListener >> mainLoop
+-----------------------------------------------------
+
+=    0.0  100.0     7.0    0.0  GsNMethod class >> _gsReturnToC   [oop 6768897]
+                    7.0  100.0       executed code
+-----------------------------------------------------
+
+                    7.0  100.0       GsNMethod class >> _gsReturnToC
+=    0.0  100.0     7.0    0.0  executed code   [oop 47433729]
+                    7.0  100.0       Sample class >> runHttps
+-----------------------------------------------------
+
+                    7.0  100.0       executed code
+=    0.0  100.0     7.0    0.0  Sample class >> runHttps   [oop 47043585]
+                    7.0  100.0       HttpListener >> run
+-----------------------------------------------------
+
+                    7.0  100.0       ProfMonitor class >> monitorBlock:downTo:intervalNs:options:
+=    0.0  100.0     7.0    0.0  ProfMonitor  >> runBlock:   [oop 24923393]
+                    7.0  100.0       ExecBlock    >> ensure:
+-----------------------------------------------------
+
+                    7.0  100.0       block in HttpListener >> mainLoop
+=    0.0  100.0     7.0    0.0  ProfMonitor class >> monitorBlock:downTo:intervalNs:options:   [oop 26788609]
+                    7.0  100.0       ProfMonitor  >> runBlock:
+-----------------------------------------------------
+
+                    7.0  100.0       ExecBlock    >> ensure:
+=    0.0  100.0     7.0    0.0  block in HttpListener >> mainLoop   [oop 46817281]
+                    7.0  100.0       ProfMonitor class >> monitorBlock:downTo:intervalNs:options:
+-----------------------------------------------------
+
+                    7.0  100.0       HttpListener >> run
+=    0.0  100.0     7.0    0.0  HttpListener >> mainLoop   [oop 47095553]
+                    7.0  100.0       ExecBlock    >> ensure:
+-----------------------------------------------------
+
+                    7.0  100.0       Sample class >> runHttps
+=    0.0  100.0     7.0    0.0  HttpListener >> run   [oop 47094273]
+                    7.0  100.0       HttpListener >> mainLoop
+-----------------------------------------------------
+
+                    7.0  100.0       block in ProfMonitor >> runBlock:
+=    0.3   99.9     7.0    0.3  block in HttpListener >> mainLoop   [oop 46645249]
+                    0.0    0.3       DbTransientSocket >> readWillNotBlock
+                    6.8   97.7       HttpListener >> mainLoopBody
+                    0.1    1.8       ExecBlock    >> on:do:
+-----------------------------------------------------
+
+                    7.0  100.0       ExecBlock    >> ensure:
+=    0.0   99.9     7.0    0.0  block in ProfMonitor >> runBlock:   [oop 27822337]
+                    7.0  100.0       block in HttpListener >> mainLoop
+-----------------------------------------------------
+
+                    6.8  100.0       block in HttpListener >> mainLoop
+=    0.1   97.5     6.8    0.1  HttpListener >> mainLoopBody   [oop 47095809]
+                    6.8   99.9       ExecBlock    >> on:do:
+-----------------------------------------------------
+
+                    6.8  100.0       ExecBlock    >> on:do:
+=    0.0   97.4     6.8    0.0  block in HttpListener >> mainLoopBody   [oop 46818049]
+                    4.0   58.1       ExecBlock    >> valueWithArguments:
+                    2.9   41.9       HttpsListener >> accept
+-----------------------------------------------------
+
+                    4.0  100.0       block in HttpListener >> mainLoopBody
+=    0.0   56.6     4.0    0.0  ExecBlock    >> valueWithArguments:   [oop 6937089]
+                    4.0  100.0       block in HttpListener >> mainLoopBody
+-----------------------------------------------------
+
+                    4.0  100.0       ExecBlock    >> valueWithArguments:
+=    0.1   56.6     4.0    0.2  block in HttpListener >> mainLoopBody   [oop 46645505]
+                    3.9   98.2       HttpServer class >> serveClientSocket:router:
+                    0.0    0.2       Log          >> log:string:
+                    0.0    0.2       String       >> ,
+                    0.0    1.1       Object       >> printString
+-----------------------------------------------------
+
+                    3.9  100.0       block in HttpListener >> mainLoopBody
+=    0.1   55.6     3.9    0.2  HttpServer class >> serveClientSocket:router:   [oop 47057921]
+                    3.9   99.8       HttpServer   >> serveClientSocket:router:
+-----------------------------------------------------
+
+                    3.9  100.0       HttpServer class >> serveClientSocket:router:
+=    0.0   55.5     3.9    0.0  HttpServer   >> serveClientSocket:router:   [oop 47059969]
+                    0.0    0.2       Log          >> log:string:
+                    0.0    0.2       String       >> ,
+                    0.0    0.7       Object       >> printString
+                    3.8   98.8       ExecBlock    >> ensure:
+-----------------------------------------------------
+
+                    3.8  100.0       ExecBlock    >> ensure:
+=    0.0   54.2     3.8    0.0  block in HttpServer >> serveClientSocket:router:   [oop 46693889]
+                    3.8   99.8       HttpServer   >> handleRequestWithErrorHandling
+                    0.0    0.2       DbTransientSocket >> isConnected
+-----------------------------------------------------
+
+                    3.8  100.0       block in HttpServer >> serveClientSocket:router:
+=    0.0   54.1     3.8    0.0  HttpServer   >> handleRequestWithErrorHandling   [oop 47060225]
+                    0.0    0.5       AbstractException class >> ,
+                    3.8   99.5       ExecBlock    >> on:do:
+-----------------------------------------------------
+
+                    3.8  100.0       ExecBlock    >> on:do:
+=    0.0   53.8     3.8    0.0  block in HttpServer >> handleRequestWithErrorHandling   [oop 46694657]
+                    3.8  100.0       HttpServer   >> handleRequest
+-----------------------------------------------------
+
+                    3.8  100.0       block in HttpServer >> handleRequestWithErrorHandling
+=    0.1   53.8     3.8    0.2  HttpServer   >> handleRequest   [oop 47062017]
+                    1.0   25.9       HttpServer   >> sendResponse
+                    0.6   16.5       WebApp       >> buildResponse
+                    0.1    3.4       HttpResponse class >> new
+                    0.0    0.5       HttpRequest  >> isWebSocketUpgrade
+                    2.0   53.0       HttpRequest class >> readFromSocket:
+                    0.0    0.5       Log          >> log:string:
+-----------------------------------------------------
+
+                    2.9  100.0       block in HttpListener >> mainLoopBody
+=    0.0   40.8     2.9    0.0  HttpsListener >> accept   [oop 47056641]
+                    2.8   98.4       DbTransientSocket >> secureAccept
+                    0.0    1.6       DbTransientSocket >> accept
+-----------------------------------------------------
+
+                    2.8  100.0       HttpsListener >> accept
+=    0.1   40.1     2.8    0.3  DbTransientSocket >> secureAccept   [oop 47097345]
+                    2.8   99.7       GsSecureSocket >> secureAccept
+-----------------------------------------------------
+
+                    2.8  100.0       DbTransientSocket >> secureAccept
+=    0.0   40.0     2.8    0.0  GsSecureSocket >> secureAccept   [oop 26169345]
+                    2.8  100.0       GsSecureSocket >> secureAcceptTimeoutMs:
+-----------------------------------------------------
+
+                    2.8  100.0       GsSecureSocket >> secureAccept
+=    0.0   40.0     2.8    0.0  GsSecureSocket >> secureAcceptTimeoutMs:   [oop 26161921]
+                    2.8  100.0       GsSecureSocket >> secureAcceptTimeoutMs:errorOnTimeout:
+-----------------------------------------------------
+
+                    2.8  100.0       GsSecureSocket >> secureAcceptTimeoutMs:
+=    0.0   40.0     2.8    0.0  GsSecureSocket >> secureAcceptTimeoutMs:errorOnTimeout:   [oop 26162177]
+                    2.8  100.0       GsSecureSocket >> _secureAcceptTimeoutMs:
+-----------------------------------------------------
+
+                    2.8  100.0       GsSecureSocket >> secureAcceptTimeoutMs:errorOnTimeout:
+=    1.0   40.0     2.8    2.6  GsSecureSocket >> _secureAcceptTimeoutMs:   [oop 26162433]
+                    2.6   91.6       Delay class  >> waitForMilliseconds:
+                    0.2    5.8       GsSecureSocket >> _zeroArgSslPrim:
+-----------------------------------------------------
+
+                    2.6  100.0       GsSecureSocket >> _secureAcceptTimeoutMs:
+=    0.3   36.6     2.6    0.7  Delay class  >> waitForMilliseconds:   [oop 18400769]
+                    0.0    0.4       Object       >> class
+                    2.5   97.5       ProcessorScheduler >> _waitForMilliseconds:
+                    0.0    1.4       ProcessorScheduler >> _enterCritical
+-----------------------------------------------------
+
+                    2.5  100.0       Delay class  >> waitForMilliseconds:
+=    0.0   35.7     2.5    0.0  ProcessorScheduler >> _waitForMilliseconds:   [oop 7333889]
+                    0.0    0.7       ProcessorScheduler >> activeProcess
+                    0.1    4.3       ProcessorScheduler >> _now
+                    0.1    5.1       ProcessorScheduler >> _exitCritical
+                    0.2    6.5       SortedCollection >> removeIdentical:otherwise:
+                    0.1    5.1       ProcessorScheduler >> _enterCritical
+                    1.9   75.8       ProcessorScheduler >> _reschedule
+                    0.1    2.5       ProcessorScheduler >> _addDelay:to:
+-----------------------------------------------------
+
+                    2.0  100.0       HttpServer   >> handleRequest
+=    0.0   28.5     2.0    0.0  HttpRequest class >> readFromSocket:   [oop 47075585]
+                    2.0   99.5       HttpRequest  >> initializeWithSocket:
+                    0.0    0.5       Behavior     >> basicNew
+-----------------------------------------------------
+
+                    2.0  100.0       HttpRequest class >> readFromSocket:
+=    0.0   28.4     2.0    0.0  HttpRequest  >> initializeWithSocket:   [oop 47082241]
+                    1.1   53.6       HttpRequest  >> readRequest
+                    0.0    0.5       DbTransientSocket >> peerPort
+                    0.0    0.5       DbTransientSocket >> peerAddress
+                    0.0    0.9       DbTransientSocket >> peerName
+                    0.1    6.4       Dictionary   >> at:put:
+                    0.7   36.8       HttpResponse class >> webStringForDateTime:
+                    0.0    0.9       DateTime class >> now
+                    0.0    0.5       Dictionary class >> new
+-----------------------------------------------------
+
+                    1.9   96.3       ProcessorScheduler >> _waitForMilliseconds:
+                    0.1    3.7       ProcessorScheduler >> _waitForSocket:timeout:forWrite:
+=    0.0   28.1     2.0    0.0  ProcessorScheduler >> _reschedule   [oop 7339265]
+                    0.1    3.2       ProcessorScheduler >> activeProcess
+                    1.9   96.8       ProcessorScheduler >> _findReadyProcess
+-----------------------------------------------------
+
+                    1.9  100.0       ProcessorScheduler >> _reschedule
+=    0.1   27.2     1.9    0.5  ProcessorScheduler >> _findReadyProcess   [oop 7342337]
+                    0.0    2.4       SortedCollection >> _removeAtOrNil:
+                    1.9   97.2       ProcessorScheduler >> _reapEvents:
+-----------------------------------------------------
+
+                    1.9  100.0       ProcessorScheduler >> _findReadyProcess
+=    0.1   26.5     1.9    0.5  ProcessorScheduler >> _reapEvents:   [oop 7350273]
+                    0.1    7.8       Object       >> size
+                    0.0    1.5       GsSocket     >> _reapEvents
+                    0.2    8.8       ProcessorScheduler >> _doPoll:yield:
+                    1.5   81.5       ProcessorScheduler >> _checkForExpiredDelays:
+-----------------------------------------------------
+
+                    1.5  100.0       ProcessorScheduler >> _reapEvents:
+=    1.3   21.5     1.5    6.0  ProcessorScheduler >> _checkForExpiredDelays:   [oop 7345153]
+                    0.2   11.4       SortedCollection >> size:
+                    0.3   22.2       GsProcess    >> _finishDelay
+                    0.2   14.4       ProcessorScheduler >> _timeoutNow:
+                    0.1    6.0       SortedCollection >> at:
+                    0.2   10.8       Object       >> size
+                    0.3   21.0       ProcessorScheduler >> _updateTimerThread:priority:
+                    0.1    8.4       GsProcess    >> priority
+-----------------------------------------------------
+
+                    1.1  100.0       HttpRequest  >> initializeWithSocket:
+=    0.0   15.2     1.1    0.0  HttpRequest  >> readRequest   [oop 47086849]
+                    0.1   11.0       HttpRequest  >> readContents
+                    0.0    4.2       HttpRequest  >> needsSocket
+                    0.6   58.5       HttpRequest  >> readHeaders
+                    0.0    0.8       Collection   >> isEmpty
+                    0.3   25.4       HttpRequest  >> readLine1
+-----------------------------------------------------
+
+                    1.0  100.0       HttpServer   >> handleRequest
+=    0.0   13.9     1.0    0.0  HttpServer   >> sendResponse   [oop 47062785]
+                    1.0  100.0       ExecBlock    >> on:do:
+-----------------------------------------------------
+
+                    1.0  100.0       ExecBlock    >> on:do:
+=    0.0   13.9     1.0    0.0  block in HttpServer >> sendResponse   [oop 46776577]
+                    0.9   94.4       HttpResponse >> sendResponseOn:
+                    0.0    0.9       Log          >> log:string:
+                    0.0    0.9       String       >> ,
+                    0.0    3.7       Object       >> printString
+-----------------------------------------------------
+
+                    0.9  100.0       block in HttpServer >> sendResponse
+=    0.0   13.2     0.9    0.0  HttpResponse >> sendResponseOn:   [oop 47070209]
+                    0.0    3.9       DbTransientSocket >> write:
+                    0.8   88.2       HttpResponse >> printAllExceptContentOn:
+                    0.0    3.9       CharacterCollection >> printString
+                    0.0    2.0       PositionableStream class >> on:
+                    0.0    2.0       Log          >> log:string:
+-----------------------------------------------------
+
+                    0.8  100.0       HttpResponse >> sendResponseOn:
+=    0.0   11.6     0.8    0.0  HttpResponse >> printAllExceptContentOn:   [oop 47069441]
+                    0.1   16.7       Collection   >> asSortedCollection
+                    0.3   34.4       AbstractDictionary >> keys
+                    0.2   26.7       HttpResponse >> reasonPhrase
+                    0.1   16.7       Collection   >> do:
+                    0.0    1.1       SmallInteger >> printString
+                    0.0    2.2       WriteStream  >> nextPutAll:
+                    0.0    1.1       Stream       >> space
+                    0.0    1.1       String       >> ,
+-----------------------------------------------------
+
+                    0.2   26.4       HttpResponse >> reasonPhrase
+                    0.0    5.7       HttpResponse >> maxAge:
+                    0.0    3.4       HttpResponse >> contentLength:
+                    0.1    8.0       Sample       >> counter_gs:
+                    0.1    6.9       HttpResponse >> initialize
+                    0.3   33.3       HttpRequest  >> readHeaders
+                    0.1   16.1       HttpRequest  >> initializeWithSocket:
+=    0.9   11.2     0.8    8.0  Dictionary   >> at:put:   [oop 13192705]
+                    0.1    8.0       Association class >> newWithKey:value:
+                    0.1    9.2       Dictionary   >> associationAtOrNil:hash:
+                    0.3   35.6       Dictionary   >> addNewAssociation:hash:
+                    0.2   21.8       Object       >> objectSecurityPolicy:
+                    0.1    6.9       Object       >> objectSecurityPolicy
+                    0.1    9.2       AbstractDictionary >> hashFunction:
+                    0.0    1.1       Object       >> class
+-----------------------------------------------------
+
+                    0.0    5.8       HttpResponse >> initialize
+                    0.7   94.2       HttpRequest  >> initializeWithSocket:
+=    0.1   11.1     0.8    1.2  HttpResponse class >> webStringForDateTime:   [oop 47064577]
+                    0.0    1.2       WriteStream  >> contents
+                    0.0    1.2       WriteStream  >> nextPutAll:
+                    0.1   17.4       DateTime     >> asStringGmtUsingFormat:
+                    0.0    1.2       Stream       >> space
+                    0.5   64.0       DateTime     >> dayOfWeekGmt
+                    0.0    1.2       PositionableStream class >> on:
+                    0.0    1.2       String class >> new
+                    0.1   11.6       DateTime     >> year
+-----------------------------------------------------

@@ -468,21 +468,7 @@ _fillStream
 		bytesRead := socket read: want into: bytes startingAt: bytes size + 1.
 		Log instance log: #'debug' string: 'HttpRequest>>_fillStream - 2 - bytesRead = ' , bytesRead printString.
 		bytesRead == 0 ifTrue: [
-			| errors |
-			socket fetchLastIoErrorString ifNotNil: [:value |
-				Log instance log: #'error' string: value.
-				EndOfStream signal: value.
-			].
-			(errors := socket class fetchErrorStringArray) notEmpty ifTrue: [
-				errors do: [:each |
-					((each subStrings: $:) copyFrom: 1 to: 6) = #('error' '1410E114' 'SSL routines' 'SSL_peek' 'uninitialized' 'ssl/ssl_lib.c') ifTrue: [
-						Log instance log: #'warn' string: each.
-					] ifFalse: [
-						Log instance log: #'error' string: each.
-					].
-				].
-				EndOfStream signal: errors.
-			].
+			socket checkForErrors.
 			Log instance log: #'warning' string: 'nothing more to read'.
 			EndOfStream signal: 'nothing more to read'.
 		].

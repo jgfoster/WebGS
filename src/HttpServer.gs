@@ -140,7 +140,7 @@ openFile
 	(file includesString: '../') ifTrue: [^nil]. "Is request for a file below provided path?"
 	(file isEmpty or: [file = '/']) ifTrue: [file := '/index.html'].
 	path := path , file.
-	Log instance log: #'debug' string: 'HttpServer>>openFile - ' , (System performOnServer: 'pwd') trimWhiteSpace , '/' , path.
+	Log instance log: #'debug' string: 'HttpServer>>openFile - ' , path printString.
 	^GsFile openReadOnServer: path
 %
 category: 'Request Handler'

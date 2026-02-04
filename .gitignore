@@ -2,3 +2,5 @@
 .topazini
 setEnv.sh
 webServer.log
+.claude
+locust/__pycache__

@@ -24,6 +24,12 @@ category: 'Initializing'
 method: HttpListener
 initialize
 
+	System sessionCacheStatAt: 0 put: 0.	"request count"
+	System sessionCacheStatAt: 1 put: 0.	"time in secure accept (us)"
+	System sessionCacheStatAt: 2 put: 0.	"secure accept failure count"
+	System sessionCacheStatAt: 3 put: 0.	"readWillNotBlock returned true but accept failure count"
+	System sessionCacheStatAt: 4 put: 0.	"time in #'serveClientSocket:router:' (us)"
+	System sessionCacheStatAt: 5 put: 0.	"#'serveClientSocket:router:' failure count"
 	listenBacklog := 5.
 	port := 8888.
 	server := HttpServer.  "might be replaced with an HttpLoadBalancer"
@@ -55,12 +61,6 @@ server: anAbstractHttpServer
 	"anObject implements #'serveClientSocket:router:'"
 
 	server := anAbstractHttpServer.
-%
-category: 'Override Defaults'
-method: HttpListener
-accept
-
-	^socket accept
 %
 category: 'Override Defaults'
 method: HttpListener
@@ -106,7 +106,8 @@ mainLoop
 				ex return: false.
 			].
 			[flag] whileTrue: [
-				self mainLoopBody.
+				System sessionCacheStatAt: 0 incrementBy: 1.	"request count"
+				[:newSocket | self mainLoopBody: newSocket] forkWith: { socket accept }.
 				flag := socket readWillNotBlock.
 			].
 		].
@@ -119,21 +120,23 @@ mainLoop
 %
 category: 'Web Server'
 method: HttpListener
-mainLoopBody
+mainLoopBody: aSocket
 
+	| t1 t2 |
+	aSocket isNil ifTrue: [
+		Log instance log: #'warning' string: 'GsSocket>>readWillNotBlock returned true but accept failed!'.
+		System sessionCacheStatAt: 3 incrementBy: 1.	"error count"
+		^self
+	].
+	Log instance log: #'debug' string: 'HttpListener>>mainLoopBody - ' , aSocket printString.
 	[
-		| newSocket |
-		newSocket := self accept.
-		newSocket isNil ifTrue: [
-			Log instance log: #'warning' string: 'GsSocket>>readWillNotBlock returned true but accept failed!'.
-		] ifFalse: [
-			[:aServer :aSocket :aRouter |
-				Log instance log: #'debug' string: 'HttpListener>>mainLoopBody - ' , aSocket printString.
-				aServer serveClientSocket: aSocket router: aRouter.		"<== work is done here"
-			] forkWith: (Array with: server with: newSocket with: router).
-		].
+		t1 := System timeNs.
+		server serveClientSocket: aSocket router: router.		"<== work is done here"
+		t2 := System timeNs.
+		System sessionCacheStatAt: 4 incrementBy: (t2 - t1) // 1000.	"time in #'serveClientSocket:router:' (us)"
 	] on: Error do: [:ex |
 		Log instance log: #'error' string: ex description.
+		System sessionCacheStatAt: 5 incrementBy: 1.	"error count"
 	].
 %
 category: 'Web Server'

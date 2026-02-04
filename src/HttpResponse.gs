@@ -26,11 +26,18 @@ category: 'other'
 classmethod: HttpResponse
 webStringForDateTime: aDateTime
 
-	^(WriteStream on: String new)
+	(cachedDateTime notNil 
+		and: [aDateTime yearGmt == cachedDateTime year 
+		and: [aDateTime dayOfYearGmt == cachedDateTime dayOfYearGmt 
+		and: [(aDateTime millisecondsGmt // 1000) == (cachedDateTime millisecondsGmt // 1000)]]])
+		ifTrue: [^cachedWebStringForDateTime].
+	cachedDateTime := aDateTime.
+	cachedWebStringForDateTime := (WriteStream on: String new)
 		nextPutAll: (#('Sun' 'Mon' 'Tue' 'Wed' 'Thu' 'Fri' 'Sat') at: aDateTime dayOfWeekGmt); space;
 		nextPutAll: (aDateTime asStringGmtUsingFormat: #(1 2 3 $  2 1 $: true true false false));
 		nextPutAll: ' GMT';
-		contents
+		contents.
+	^cachedWebStringForDateTime
 %
 ! ------------------- Instance methods for HttpResponse
 category: 'other'

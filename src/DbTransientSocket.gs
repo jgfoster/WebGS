@@ -22,6 +22,26 @@ accept
 %
 category: 'other'
 method: DbTransientSocket
+checkForErrors
+	| errors |
+	(socket isKindOf: GsSecureSocket) ifFalse: [^self].
+	socket fetchLastIoErrorString ifNotNil: [:value | 
+		Log instance log: #'error' string: errors.
+		EndOfStream signal: errors.
+	].
+	(errors := socket class fetchErrorStringArray) notEmpty ifTrue: [
+		errors do: [:each |
+			((each subStrings: $:) copyFrom: 1 to: 6) = #('error' '1410E114' 'SSL routines' 'SSL_peek' 'uninitialized' 'ssl/ssl_lib.c') ifTrue: [
+				Log instance log: #'warn' string: each.
+			] ifFalse: [
+				Log instance log: #'error' string: each.
+			].
+		].
+		EndOfStream signal: errors.
+	].
+%
+category: 'other'
+method: DbTransientSocket
 close
 
 	socket ifNotNil: [

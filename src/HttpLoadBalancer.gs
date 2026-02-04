@@ -77,7 +77,7 @@ getSession
 				ifNone: [nil].
 			session ifNotNil: [^session beNotAvailable].	"session is not available"
 		].
-		Processor yield. 			"wait to see if something becomes available"
+		(Delay forMilliseconds: 10) wait. 			"wait to see if something becomes available"
 	].
 %
 category: 'other'

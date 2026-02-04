@@ -1,5 +1,0 @@
-! default initialization for Topaz session
-set user DataCurator pass swordfish
-set gems gs64stone
-set cachename WebGS_Server
-login

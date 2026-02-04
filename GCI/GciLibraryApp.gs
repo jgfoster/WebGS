@@ -269,7 +269,6 @@ method: GciLibraryApp
 nbResult
 
 	| fileHandle sessionSocket timeoutMs |
-	Log instance log: #'debug' string: 'GciLibraryApp>>nbResult'.
 	fileHandle := self library GciTsSocket_: gciSession _: error.
 	error number ~= 0 ifTrue: [
 		self returnError.
@@ -671,6 +670,8 @@ handleRequestString: aString
 		dictOut := Dictionary new.
 	].
 	dictOut
+		at: 'time' put: time;
+		at: 'request' put: (requestDict at: 'request' ifAbsent: ['??']);
 		at: '_time' put: time;
 		at: '_request' put: (requestDict at: 'request' ifAbsent: ['??']);
 		at: '_id' put: (requestDict at: 'id' ifAbsent: ['']);

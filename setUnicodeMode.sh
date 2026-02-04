@@ -1,5 +1,4 @@
 #!/bin/bash -e
-source setEnv.sh
 
 topaz -lq << EOF
 logout

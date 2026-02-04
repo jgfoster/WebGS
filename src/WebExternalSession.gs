@@ -139,7 +139,7 @@ serveClientSocket: clientSocket
 		semaphore signal.
 	] fork.
 	semaphore wait.
-	(Delay forMilliseconds: 10) wait.
+	(Delay forMilliseconds: 1) wait.
 	clientSocket close.
 	serverSocket close.
 	isAvailable := true.
