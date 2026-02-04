@@ -30,6 +30,8 @@ initialize
 	System sessionCacheStatAt: 3 put: 0.	"readWillNotBlock returned true but accept failure count"
 	System sessionCacheStatAt: 4 put: 0.	"time in #'serveClientSocket:router:' (us)"
 	System sessionCacheStatAt: 5 put: 0.	"#'serveClientSocket:router:' failure count"
+	System sessionCacheStatAt: 6 put: 0.	"time in socket read (us)"
+	System sessionCacheStatAt: 7 put: 0.	"time in socket write (us)"
 	listenBacklog := 5.
 	port := 8888.
 	server := HttpServer.  "might be replaced with an HttpLoadBalancer"
