@@ -35,13 +35,13 @@ WebGS includes a set of tests written in [Dart](https://dart.dev).
 The tests also provides an example of how to interact with WebGS from a client application.
 
 ## Performance
-Recent tests have been run with [Locust](https://locust.io). On a 3.7.5 GemStone server (with round-trip `ping` time of 15ms) using a single gem (no load balancing) the following were observed for the `/add.gs?x=1&y=2` request:
+Recent tests have been run with [Locust](https://locust.io) (see the `./locust` directory). On a 3.7.4.3 GemStone server (with round-trip `ping` time of 15ms) using a single gem (no load balancing) the following were observed for the `/add.gs?x=1&y=2` request:
 
 | Protocol  | Median (ms) | 95%ile (ms) | 99%ile (ms) | Average (ms) | Min (ms) | Max (ms) |  RPS |
 |-----------|------------:|------------:|------------:|-------------:|---------:|---------:|-----:|
 | **http**  |          32 |          53 |          68 |           35 |        2 |     1051 | 2900 |
 | **https** |         190 |         250 |         280 |          191 |      115 |      322 |   25 |
 
-At present there is a serious performance problem with HTTPS. This is being investigated as GemTalk issue #51782.
+This demonstrated a serious performance problem with HTTPS. This has been addressed in [3.7.5](https://downloads.gemtalksystems.com/docs/GemStone64/3.7.x/GS64-ReleaseNotes-3.7.5/2-BugFixes.htm#pgfId-1971160) (watch this site for an update to the the timings!).
 
 Note that for trivial operations, the sync server is faster (no load balancing overhead), but for operations that take non-trivial CPU time, the async server shows significant benefits.
