@@ -291,12 +291,15 @@ category: 'other'
 method: HttpResponse
 sendResponseOn: aSocket
 
-	| stream string count |
+	| stream string count t1 t2 |
 	stream := WriteStream on: String new.
 	self printAllExceptContentOn: stream.		"Headers, etc."
 	string := stream contents.
 	Log instance log: #'debug' string: 'HttpResponse>>sendResponseOn: - ' , string printString.
+	t1 := System timeNs.
 	count := aSocket write: string.
+	t2 := System timeNs.
+	System sessionCacheStatAt: 7 incrementBy: (t2 - t1) // 1000.	"time in socket write (us)"
 	count isNil ifTrue: [self error: aSocket lastErrorString].
 	count < string size ifTrue: [self error: 'Tried to write ' , string size printString , ', but wrote ' , count printString].
 	sendContentsBlock ifNil: [

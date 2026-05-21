@@ -27,7 +27,7 @@ mainLoopBody: aSocket
 		System sessionCacheStatAt: 2 incrementBy: 1.	"secure accept failure count"
 		Log instance log: #'warning' string: aSocket lastErrorString.
 		^self
-	]
+	].
 	t2 := System timeNs.
 	System sessionCacheStatAt: 1 incrementBy: (t2 - t1) // 1000.	"time in secure accept (us)"
 	super mainLoopBody: aSocket.

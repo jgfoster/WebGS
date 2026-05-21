@@ -464,8 +464,11 @@ _fillStream
 		Log instance log: #'debug' string: 'HttpRequest>>_fillStream - 1 - want = ' , want printString , '; have = ' , bytes size printString.
 		0 < want and: [socket readWillNotBlockWithin: 1000].
 	] whileTrue: [
-		| bytesRead |
+		| bytesRead t1 t2 |
+		t1 := System timeNs.
 		bytesRead := socket read: want into: bytes startingAt: bytes size + 1.
+		t2 := System timeNs.
+		System sessionCacheStatAt: 6 incrementBy: (t2 - t1) // 1000.	"time in socket read (us)"
 		Log instance log: #'debug' string: 'HttpRequest>>_fillStream - 2 - bytesRead = ' , bytesRead printString.
 		bytesRead == 0 ifTrue: [
 			socket checkForErrors.
