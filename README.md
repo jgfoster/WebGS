@@ -25,6 +25,25 @@ curl http://localhost:8888/index.html
 
 Of course, simple GET requests can be submitted from a browser and [Postman](https://www.postman.com/) is a great tool for working with web servers.
 
+## OpenAPI
+WebGS ships with a layered OpenAPI 3 plumbing on top of `Router`. To document an API, register routes on a `DocumentedRouter` instead of a `Router` and attach an `OpenApiOperation` to each route. Two meta-routes are pre-registered for you:
+* `GET /openapi.json` — the OpenAPI 3 document built from your registered operations
+* `GET /docs` — Swagger UI loaded from a CDN
+
+The plumbing consists of `OpenApiSchema` (JSON Schema fragments), `OpenApiOperation` (per-endpoint metadata), `OpenApiSpec` (the top-level document), and `DocumentedRouter` (a `Router` subclass that combines them). Core classes (`Router`, `Route`, `HttpServer`, `WebApp`) are unchanged — apps that do not want OpenAPI can ignore the new classes entirely.
+
+A working demo is provided by `FilmsApi.gs` (running against the `Films.gs` data class):
+```shell
+./installFilmsApi.sh    # one-time install of Films + FilmsApi
+./sampleFilmsApi.sh     # launches FilmsApi on http://localhost:8888
+```
+Then visit `http://localhost:8888/docs` in a browser, or
+```shell
+curl http://localhost:8888/films
+curl http://localhost:8888/films/3
+curl http://localhost:8888/openapi.json
+```
+
 ## WebSockets
 `Sample.gs` also has a *demo* of WebSockets. Please keep in mind that *all* your WebSocket connections on this host/port will be sharing the same gem and each connection will stay alive until it is dropped by the client. This may affect performance (depending on how much activity each connection requires) and it may affect behavior (think very carefully about changes to persistent objects and transactions!).
 

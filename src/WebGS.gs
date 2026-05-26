@@ -304,6 +304,109 @@ expectvalue /Class
 doit
 Router category: 'User Interface'
 %
+! ------------------- Class definition for OpenApiSchema
+expectvalue /Class
+doit
+Object subclass: 'OpenApiSchema'
+  instVarNames: #( type format description example
+                    properties propertyOrder required items
+                    ref enum)
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #()
+
+%
+expectvalue /Class
+doit
+OpenApiSchema comment:
+'A builder for a JSON Schema fragment used inside an OpenAPI document.
+
+Use class methods (string, integer, number, boolean, object, array:, ref:) to construct,
+then send instance messages to add properties, required-lists, descriptions, etc.'
+%
+expectvalue /Class
+doit
+OpenApiSchema category: 'Model'
+%
+! ------------------- Class definition for OpenApiOperation
+expectvalue /Class
+doit
+Object subclass: 'OpenApiOperation'
+  instVarNames: #( summary description operationId tags
+                    parameters requestBody responses responseOrder)
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #()
+
+%
+expectvalue /Class
+doit
+OpenApiOperation comment:
+'Holds the OpenAPI metadata for a single (method, path) endpoint:
+summary, description, tags, parameters, request body, and responses.
+
+Path parameters are auto-derived by OpenApiSpec from the route''s path string,
+so you usually only declare query parameters, request bodies, and responses here.'
+%
+expectvalue /Class
+doit
+OpenApiOperation category: 'Model'
+%
+! ------------------- Class definition for OpenApiSpec
+expectvalue /Class
+doit
+Object subclass: 'OpenApiSpec'
+  instVarNames: #( title version description servers
+                    paths pathOrder schemas schemaOrder)
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #()
+
+%
+expectvalue /Class
+doit
+OpenApiSpec comment:
+'Top-level OpenAPI 3.0 document. Populated automatically by DocumentedRouter as
+routes are registered; configure title/version/description/servers/schemas
+through the spec accessor on a DocumentedRouter.'
+%
+expectvalue /Class
+doit
+OpenApiSpec category: 'Model'
+%
+! ------------------- Class definition for DocumentedRouter
+expectvalue /Class
+doit
+Router subclass: 'DocumentedRouter'
+  instVarNames: #( spec)
+  classVars: #()
+  classInstVars: #()
+  poolDictionaries: #()
+  inDictionary: WebGS
+  options: #()
+
+%
+expectvalue /Class
+doit
+DocumentedRouter comment:
+'A Router that also builds an OpenApiSpec describing the registered routes.
+
+Use the standard Router protocol (get:do:, post:do:, ...) for routes you do not
+want to document, or the documented variants (get:do:operation:, ...) to attach
+an OpenApiOperation to a route. Two meta-routes are pre-registered:
+  GET /openapi.json  - the OpenAPI 3 document
+  GET /docs          - Swagger UI loaded from a CDN'
+%
+expectvalue /Class
+doit
+DocumentedRouter category: 'User Interface'
+%
 ! ------------------- Class definition for WebSocketDataFrame
 expectvalue /Class
 doit
@@ -348,6 +451,7 @@ WebSocketDataFrame category: 'Model'
 
 input AbstractHttpServer.gs
 input DbTransientSocket.gs
+input DocumentedRouter.gs
 input HttpListener.gs
 input HttpLoadBalancer.gs
 input HttpRequest.gs
@@ -355,6 +459,9 @@ input HttpResponse.gs
 input HttpServer.gs
 input HttpsListener.gs
 input Log.gs
+input OpenApiOperation.gs
+input OpenApiSchema.gs
+input OpenApiSpec.gs
 input Route.gs
 input Router.gs
 input Sample.gs
