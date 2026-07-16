@@ -1,0 +1,12 @@
+RwProjectSpecificationV3 {
+	#specName : 'project',
+	#projectVersion : '1.0.0',
+	#projectSpecPath : 'rowan',
+	#componentsPath : 'rowan/components',
+	#packagesPath : 'src',
+	#projectsPath : 'rowan/projects',
+	#specsPath : 'rowan/specs',
+	#packageFormat : 'tonel',
+	#packageConvention : 'RowanHybrid',
+	#comment : 'WebGS: a framework for building web application back-ends in GemStone/S 64 Bit Smalltalk.'
+}

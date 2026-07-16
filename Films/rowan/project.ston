@@ -1,0 +1,12 @@
+RwProjectSpecificationV3 {
+	#specName : 'project',
+	#projectVersion : '1.0.0',
+	#projectSpecPath : 'rowan',
+	#componentsPath : 'rowan/components',
+	#packagesPath : 'src',
+	#projectsPath : 'rowan/projects',
+	#specsPath : 'rowan/specs',
+	#packageFormat : 'tonel',
+	#packageConvention : 'RowanHybrid',
+	#comment : 'Films: the OpenAPI demo app for WebGS (Film data class + FilmsApi). Loads into its own Films symbol dictionary, matching installFilmsApi.sh.'
+}

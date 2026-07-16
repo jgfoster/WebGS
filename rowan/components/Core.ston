@@ -1,0 +1,11 @@
+RwLoadComponent {
+	#name : 'Core',
+	#projectNames : [ ],
+	#componentNames : [ ],
+	#packageNames : [
+		'WebGS-Core',
+		'WebGS-OpenApi',
+		'WebGS-Sample'
+	],
+	#comment : 'The WebGS HTTP server framework, its OpenAPI documentation support, and the Sample demo app (matches install.sh).'
+}

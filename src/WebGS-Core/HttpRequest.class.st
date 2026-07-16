@@ -1,0 +1,646 @@
+Class {
+	#name : 'HttpRequest',
+	#superclass : 'Object',
+	#instVars : [
+		'socket',
+		'stream',
+		'method',
+		'uri',
+		'path',
+		'version',
+		'headers',
+		'arguments',
+		'bodyContents',
+		'sizeLeft',
+		'multipartFormDataBoundary'
+	],
+	#classInstVars : [
+		'contentTypeHandlers'
+	],
+	#category : 'WebGS-Core'
+}
+
+{ #category : 'other' }
+HttpRequest class >> contentTypeHandlers [
+
+	" I return a dictionary with all configured Content-Type handlers.
+	  Handlers are blocks that take a httpRequest and a string as arguments. "
+
+	contentTypeHandlers isNil ifTrue: [
+		self installContentTypeHandlers
+	].
+
+	^contentTypeHandlers
+]
+
+{ #category : 'other' }
+HttpRequest class >> fromBytes: aByteArray [
+	"Used exclusively by tests"
+
+	| listener server client string request |
+	listener := GsSocket new.
+	(listener makeServer: 1) ifNil: [
+		string := listener lastErrorString.
+		listener close.
+		listener error: string.
+	].
+	client := GsSocket new.	"browser sending the request"
+	(client connectTo: listener port on: 'localhost') ifFalse: [
+		string := client lastErrorString.
+		client close.
+		client error: string.
+	].
+	(listener readWillNotBlockWithin: 1000) ifFalse: [
+		client close.
+		listener close.
+		self error: 'Listener did not receive request from client!'.
+	].
+	(server := listener accept) ifNil: [
+		string := listener lastErrorString.
+		client close.
+		listener close.
+		listener error: string.
+	].
+	listener close.
+	[:socket :bytes |
+		1 to: bytes size by: 4000 do: [:i |
+			(socket writeWillNotBlockWithin: 1000) ifTrue: [
+				socket write: (bytes copyFrom: i to: (i + 3999 min: bytes size)).
+			] ifFalse: [
+				self error: 'Unable to write data!'.
+			].
+		].
+		socket close.
+	] forkWith: (Array with: client with: (ByteArray withAll: aByteArray)).
+	request := self readFromSocket: server.
+	^request
+]
+
+{ #category : 'other' }
+HttpRequest class >> fromString: aString [
+	"Used exclusively by tests"
+
+	^self fromBytes: aString encodeAsUTF8.
+]
+
+{ #category : 'other' }
+HttpRequest class >> installContentTypeHandlers [
+
+	" I set a dictionary with all configured Content-Type handlers.
+	  Handlers are blocks that take a httpRequest and a string as arguments. "
+
+	contentTypeHandlers := Dictionary new
+		at: 'application/x-www-form-urlencoded' put:  [ :httpReq :str | httpReq readArgumentsFrom: str ];
+		"at: 'application/json' put: [ :httpReq :str | httpReq parseContentsFrom: str interpreterClassName: #JSONReader action: #fromJSON:  ];"
+	yourself
+]
+
+{ #category : 'other' }
+HttpRequest class >> new [
+
+	self error: 'use #''readFromSocket:'''.
+]
+
+{ #category : 'other' }
+HttpRequest class >> readFromSocket: aSocket [
+
+	^self basicNew
+		initializeWithSocket: aSocket;
+		yourself.
+]
+
+{ #category : 'other' }
+HttpRequest class >> unsetContentTypeHandlers [
+
+	" I dischard old contentTypeHandlers. "
+
+	contentTypeHandlers := nil
+]
+
+{ #category : 'Accessing' }
+HttpRequest >> _sizeLeft [
+
+	^sizeLeft.
+]
+
+{ #category : 'Accessing' }
+HttpRequest >> arguments [
+
+   ^arguments
+]
+
+{ #category : 'Accessing' }
+HttpRequest >> argumentsAt: aKey [
+
+   ^arguments at: aKey
+]
+
+{ #category : 'Accessing' }
+HttpRequest >> argumentsAt: aKey ifAbsent: aBlock [
+
+   ^arguments at: aKey ifAbsent: aBlock
+]
+
+{ #category : 'Accessing' }
+HttpRequest >> argumentsAt: aKey ifAbsentPut: aBlock [
+
+   ^arguments at: aKey ifAbsentPut: aBlock
+]
+
+{ #category : 'Accessing' }
+HttpRequest >> bodyContents [
+
+   ^bodyContents
+]
+
+{ #category : 'Accessing' }
+HttpRequest >> contentType [
+
+   ^headers at: 'content-type' ifAbsent: nil
+]
+
+{ #category : 'Accessing' }
+HttpRequest >> cookie [
+
+   ^self cookies
+]
+
+{ #category : 'Accessing' }
+HttpRequest >> cookies [
+
+	| cookie string |
+	cookie := Dictionary new.
+	string := headers at: 'cookie' ifAbsent: [^cookie].
+	(string subStrings: $;) do: [:each |
+		| pieces |
+		pieces := each subStrings: $=.
+		cookie at: pieces first trimSeparators put: pieces last trimSeparators.
+	].
+   ^cookie
+]
+
+{ #category : 'Accessing' }
+HttpRequest >> headers [
+
+   ^headers
+]
+
+{ #category : 'Accessing' }
+HttpRequest >> method [
+
+   ^method
+]
+
+{ #category : 'Accessing' }
+HttpRequest >> multipartFormDataBoundary [
+
+   ^multipartFormDataBoundary
+]
+
+{ #category : 'Accessing' }
+HttpRequest >> path [
+
+   ^path
+]
+
+{ #category : 'Accessing' }
+HttpRequest >> uri [
+
+   ^uri
+]
+
+{ #category : 'Accessing' }
+HttpRequest >> version [
+
+   ^version
+]
+
+{ #category : 'other' }
+HttpRequest >> closeSocket [
+
+	socket ifNotNil: [
+		socket close.
+		socket := nil.
+	].
+]
+
+{ #category : 'other' }
+HttpRequest >> initializeWithSocket: aSocket [
+
+	socket := aSocket.
+	arguments := Dictionary new.
+	headers := Dictionary new
+		at: 'X-Date' 				put: (HttpResponse webStringForDateTime: DateTime now);
+		at: 'X-Peer-Name' 		put: aSocket peerName;
+		at: 'X-Peer-Address' 	put: aSocket peerAddress;
+		at: 'X-Peer-Port' 			put: aSocket peerPort asString;
+		yourself.
+	self readRequest ifTrue: [socket := nil].	"did the read finish?"
+]
+
+{ #category : 'other' }
+HttpRequest >> isClientChrome [
+
+	^(headers at: 'user-agent') includesString: 'Chrome'.
+]
+
+{ #category : 'other' }
+HttpRequest >> isClientFirefox [
+
+	^(headers at: 'user-agent') includesString: 'Firefox'.
+]
+
+{ #category : 'other' }
+HttpRequest >> isClientIE [
+
+	| userAgent |
+	userAgent := headers at: 'user-agent'.
+	^(userAgent includesString: 'MSIE') or: [userAgent includesString: 'Trident'].
+]
+
+{ #category : 'other' }
+HttpRequest >> isClientWindows [
+
+	^(headers at: 'user-agent') includesString: 'Windows'
+]
+
+{ #category : 'other' }
+HttpRequest >> isMultiPart [
+
+	| contentType pieces string |
+	multipartFormDataBoundary ifNotNil: [^true].
+	contentType := headers at: 'content-type' ifAbsent: [^false].
+	(pieces := contentType subStrings: $;) first = 'multipart/form-data' ifFalse: [^false].
+	((string := pieces at: 2) copyFrom: 1 to: 10) = ' boundary=' ifFalse: [self error: 'Unrecognized field in multipart/form-data'].
+	multipartFormDataBoundary := '--' , (string copyFrom: 11 to: string size).
+	^true.
+]
+
+{ #category : 'other' }
+HttpRequest >> isWebSocketUpgrade [
+
+	| connection upgrade |
+	connection := headers at: 'connection' ifAbsent: [''].
+	upgrade := headers at: 'upgrade' ifAbsent: [''].
+	^connection asLowercase = 'upgrade'  and: [upgrade asLowercase = 'websocket']
+]
+
+{ #category : 'other' }
+HttpRequest >> needsSocket [
+
+	^self isMultiPart or: [self isWebSocketUpgrade]
+]
+
+{ #category : 'other' }
+HttpRequest >> parseContentsFrom: aString interpreterClassName: aClassName action: aSelector [
+
+	" I resolve the interpreter class and send it aSelector, the result is saved in bodyContents attribute. "
+
+	| interpreterClass |
+	(interpreterClass := System myUserProfile resolveSymbol: aClassName) ifNil: [
+		self error: 'Can''t resolve symbol: ' , aClassName printString , ' - Handle of request content fail.'
+	].
+
+	bodyContents := interpreterClass value perform: aSelector with: aString
+]
+
+{ #category : 'other' }
+HttpRequest >> printOn: aStream [
+
+	aStream nextPutAll: (method ifNil: ['???']).
+	aStream space.
+	aStream nextPutAll: (uri ifNil: ['???']).
+]
+
+{ #category : 'other' }
+HttpRequest >> readArgumentsFrom: aString [
+
+	(aString subStrings: $&) do: [:each |
+		| index key value values |
+		index := each indexOf: $=.
+		key := each copyFrom: 1 to: index - 1.
+		value := self translate: (each copyFrom: index + 1 to: each size).
+		(6 < key size and: [(key copyFrom: key size - 5 to: key size) = '%5B%5D']) ifTrue: [
+			key := key copyFrom: 1 to: key size - 6.
+			values := arguments at: key ifAbsent: [Array new].
+			values add: value.
+			value := values.
+		].
+		key notEmpty ifTrue: [
+			(arguments includesKey: key) ifFalse: [
+				arguments at: key put: value.
+			] ifTrue: [
+				| current |
+				((current := arguments at: key) isKindOf: Array) ifTrue: [
+					current add: value.
+				] ifFalse: [
+					arguments at: key put: (Array with: current with: value).
+				].
+			].
+		].
+	].
+]
+
+{ #category : 'other' }
+HttpRequest >> readContents [
+
+	" Read and parse the content itself.
+	  In GET method there are interpreted as arguments.
+	  For POST methos how I handle contents depends on Content-Type value.
+	  For each Content-Type supported must be a handler configured.
+	  If none, the original string contents is saved.
+	  For handlers configuration see class method #contentTypeHandlers.  "
+
+	| string pieces handler |
+
+	method = 'GET' ifTrue: [
+		pieces := uri subStrings: $?.
+		path := pieces at: 1.
+		string := 1 < pieces size
+			ifTrue: [pieces at: 2]
+			ifFalse: [''].
+		^self readArgumentsFrom: string
+	].
+	string := self upToEnd.
+	method = 'POST' ifTrue: [
+		handler := self class contentTypeHandlers
+			at: (headers at: 'content-type' ifAbsent: [ nil ])
+			ifAbsent: [ nil ].
+		handler isNil ifTrue: [
+			" No handler for current content-type, just set the string as bodyContents "
+			bodyContents := string.
+			^self
+		].
+
+		handler value: self value: string
+	]
+]
+
+{ #category : 'other' }
+HttpRequest >> readHeaders [
+
+	| line |
+	[
+		line := self nextLine.
+		line notEmpty.
+	] whileTrue: [
+		| index key value |
+		index := line indexOf: $:.
+		key := (line copyFrom: 1 to: index - 1) asLowercase.
+		value := (line copyFrom: index + 1 to: line size) trimBlanks.
+		key notEmpty ifTrue: [headers at: key asString put: value asString].
+	].
+
+	sizeLeft := headers at: 'content-length' ifAbsent: [nil].
+	sizeLeft notNil ifTrue: [
+		| bytes |
+		bytes := stream upToEnd.
+		sizeLeft := sizeLeft asNumber - bytes size.
+		stream := ReadStream on: bytes.
+	].
+]
+
+{ #category : 'other' }
+HttpRequest >> readLine1 [
+
+	method := [
+		self upToSpace asString.
+	] on: EndOfStream do: [:ex |
+		Log instance haltIfRequested.
+		ex return: ''.
+	].
+	Log instance log: #'debug' string: 'HttpRequest>>readLine1 got method of ' , method printString.
+	method isEmpty ifTrue: [^self].
+	(#('GET' 'HEAD' 'OPTIONS' 'POST' 'PUT') includes: method) ifFalse: [
+		self error: 'Expected a GET, HEAD, OPTIONS, or POST but got ' , method printString , ' (' , method size printString , ' characters)'
+	].
+	uri := self upToSpace asString.
+	path := uri.
+	version := self nextLine asString.
+	Log instance log: #'request' string: method , ' ' , (uri copyFrom: 1 to: (40 min: uri size)).
+]
+
+{ #category : 'other' }
+HttpRequest >> readRequest [
+	"answer whether we are done reading"
+
+	self readLine1.
+	method isEmpty ifTrue: [^true].
+	self readHeaders.
+	self needsSocket ifTrue: [^false].
+	self readContents.
+	^true.
+]
+
+{ #category : 'other' }
+HttpRequest >> translate: aString [
+
+	| readStream writeStream string |
+	readStream := ReadStream on: aString.
+	writeStream := WriteStream on: ByteArray new.
+	[
+		readStream atEnd not.
+	] whileTrue: [
+		| char |
+		char := readStream next.
+		char = $+ ifTrue: [
+			writeStream nextPut: Character space codePoint.
+		] ifFalse: [
+			char = $% ifTrue: [
+				| array value |
+				array := #($0 $1 $2 $3 $4 $5 $6 $7 $8 $9 $A $B $C $D $E $F).
+				value := (array indexOf: readStream next) - 1 * 16 + (array indexOf: readStream next) - 1.
+				writeStream nextPut: value.
+			] ifFalse: [
+				writeStream nextPut: char codePoint.
+			].
+		]
+	].
+	string := writeStream contents bytesIntoUnicode asString.
+	string = 'nil' ifTrue: [^nil].
+	string = 'null' ifTrue: [^nil].
+	string = 'true' ifTrue: [^true].
+	string = 'false' ifTrue: [^false].
+	^string
+		copyReplaceAll: Character cr asString , Character lf asString
+		with: Character lf asString.
+]
+
+{ #category : 'stream' }
+HttpRequest >> _fillStream [
+
+	| bytes want |
+	(stream isNil or: [stream atEnd]) ifFalse: [^self].	"No need to get more yet"
+	bytes := ByteArray new.
+	want := sizeLeft ifNil: [4096].
+	4096 < want ifTrue: [want := 4096].
+	[
+		Log instance log: #'debug' string: 'HttpRequest>>_fillStream - 1 - want = ' , want printString , '; have = ' , bytes size printString.
+		0 < want and: [socket readWillNotBlockWithin: 1000].
+	] whileTrue: [
+		| bytesRead t1 t2 |
+		t1 := System timeNs.
+		bytesRead := socket read: want into: bytes startingAt: bytes size + 1.
+		t2 := System timeNs.
+		System sessionCacheStatAt: 6 incrementBy: (t2 - t1) // 1000.	"time in socket read (us)"
+		Log instance log: #'debug' string: 'HttpRequest>>_fillStream - 2 - bytesRead = ' , bytesRead printString.
+		bytesRead == 0 ifTrue: [
+			socket checkForErrors.
+			Log instance log: #'warning' string: 'nothing more to read'.
+			EndOfStream signal: 'nothing more to read'.
+		].
+		((sizeLeft notNil and: [sizeLeft <= bytes size]) or: [0 < (bytes indexOf: Character lf codePoint)]) ifTrue: [
+			stream := ReadStream on: bytes.
+			sizeLeft notNil ifTrue: [sizeLeft := sizeLeft - bytes size].
+			Log instance log: #'debug' string: 'HttpRequest>>_fillStream - 4'.
+			^self
+		].
+	].
+	EndOfStream signal: 'Read ' , bytes size printString , ' bytes but wanted ' ,
+		(sizeLeft ifNil: ['a line'] ifNotNil: [sizeLeft printString]).
+]
+
+{ #category : 'stream' }
+HttpRequest >> nextLine [
+
+	| bytes |
+	bytes := self
+		upTo: Character lf
+		ifNotFoundWaitMs: 20.
+	(bytes notEmpty and: [bytes last == Character cr codePoint]) ifTrue: [
+		bytes size: bytes size - 1.
+	].
+	^bytes bytesIntoUnicode
+]
+
+{ #category : 'stream' }
+HttpRequest >> nextPartHeaders [
+
+	| string dict |
+	dict := Dictionary new.
+	[
+		string := self nextLine.
+		string notEmpty.
+	] whileTrue: [
+		| index key value |
+		0 == (index := string indexOf: $:) ifTrue: [self error: 'Expected header but got ' , string printString].
+		key := string copyFrom: 1 to: index - 1.
+		value := string copyFrom: index + 1 to: string size.
+		dict at: key put: value trimBlanks.
+	].
+	^dict.
+]
+
+{ #category : 'stream' }
+HttpRequest >> peekFor: aCharacter [
+
+	self _fillStream.
+	^stream peekFor: aCharacter codePoint.
+]
+
+{ #category : 'stream' }
+HttpRequest >> upTo: aCharacter ifNotFoundWaitMs: anInteger [
+
+	| utf8 didFindCharacter |
+	self _fillStream.
+	utf8 := stream upTo: aCharacter codePoint.		"stream consumes aCharacter but does not return it"
+	didFindCharacter := stream atEnd not	"if there is more, then we stopped because we found aCharacter"
+		or: [ | x |
+			x := stream contents.
+			x notEmpty and: [
+				x last == aCharacter codePoint.			"we read up to end and there was aCharacter at the end"
+			].
+		].
+	didFindCharacter ifTrue: [
+		^utf8
+	].
+	(Delay forMilliseconds: anInteger) wait.			"give a bit of time for more data to arrive"
+	200 < anInteger ifTrue: [self error: 'Tired of waiting for client to send full request!'].
+	^utf8 , (self upTo: aCharacter ifNotFoundWaitMs: anInteger + 20).
+]
+
+{ #category : 'stream' }
+HttpRequest >> upToEnd [
+	"Called by #'readContents'"
+
+	| utf8 |
+	utf8 := stream upToEnd.
+	sizeLeft isNil ifTrue: [^utf8 asUnicodeString asString].
+	[
+		0 < sizeLeft.
+	]whileTrue: [
+		self _fillStream.
+		utf8 addAll: stream upToEnd.
+	].
+	^utf8 asUnicodeString asString
+]
+
+{ #category : 'stream' }
+HttpRequest >> upToNextPartAsUnicode [
+
+	| bytes |
+	bytes := ByteArray new.
+	self upToNextPartDo: [:data | bytes addAll: data].
+	^bytes bytesIntoUnicode
+]
+
+{ #category : 'stream' }
+HttpRequest >> upToNextPartDo: aOneArgumentBlock [
+	"ByteArray passed to block"
+
+	| bytes count i j k |
+	bytes := ByteArray new.
+	count := 0.
+	k := 0.
+	[true] whileTrue: [
+		[
+			bytes addAll: stream upToEnd.
+			self _fillStream.		"we could get an EndOfStream here"
+			bytes addAll: stream upToEnd.
+		] on: Error do: [:ex |
+			Log instance haltIfRequested.
+			(ex isKindOf: EndOfStream) ifTrue: [ex return].
+			ex pass.
+		].
+		i := bytes indexOfSubCollection: multipartFormDataBoundary startingAt: 1.
+		0 < i ifTrue: [		"found boundary"
+			(1 < i and: [(bytes at: i - 1) == Character lf codePoint]) ifFalse: [
+				j := i - 1.
+			] ifTrue: [
+				(2 < i and: [(bytes at: i - 2) == Character cr codePoint]) ifFalse: [
+					j := i - 2.
+				] ifTrue: [
+					j := i - 3.
+				].
+			].
+			aOneArgumentBlock value: (bytes copyFrom: 1 to: j).
+			i := i + multipartFormDataBoundary size.
+			(i < bytes size and: [(bytes at: i) == Character cr codePoint]) ifTrue: [i := i + 1].
+			(i < bytes size and: [(bytes at: i) == Character lf codePoint]) ifTrue: [i := i + 1].
+			bytes := bytes copyFrom: i to: bytes size.
+			stream := ReadStream on: bytes.
+			^self.
+		].
+		i := bytes size - multipartFormDataBoundary size - 1.
+		0 < i ifTrue: [		"didn't find boundary, but might have part of it"
+			aOneArgumentBlock value: (bytes copyFrom: 1 to: i).
+			k := k + i.
+			bytes := bytes copyFrom: i + 1 to: bytes size.
+			stream := ReadStream on: bytes copy.	"#44335"
+			bytes size: 0.
+			count := 0.
+		] ifFalse: [			"didn't have enough to even check for a boundary"
+			20 < (count := count + 1) ifTrue: [self error: 'Timeout waiting on socket!'].
+		].
+	].
+]
+
+{ #category : 'stream' }
+HttpRequest >> upToSpace [
+
+	| bytes |
+	bytes := self
+		upTo: Character space
+		ifNotFoundWaitMs: 20.
+	^bytes bytesIntoUnicode
+]
