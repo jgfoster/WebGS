@@ -1,0 +1,15 @@
+RwLoadSpecificationV2 {
+	#projectName : 'Films',
+	#projectSpecFile : 'rowan/project.ston',
+	#componentNames : [
+		'Core'
+	],
+	#platformProperties : {
+		'gemstone' : {
+			'allusers' : {
+				#defaultSymbolDictName : 'Films'
+			}
+		}
+	},
+	#comment : 'The Films OpenAPI demo app. Loads Film + FilmsApi into the Films symbol dictionary (matches installFilmsApi.sh). Requires WebGS to be loaded first.'
+}

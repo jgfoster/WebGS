@@ -1,0 +1,9 @@
+RwLoadComponent {
+	#name : 'Core',
+	#projectNames : [ ],
+	#componentNames : [ ],
+	#packageNames : [
+		'Films-Core'
+	],
+	#comment : 'The Films demo: the Film data class and the FilmsApi OpenAPI-documented app.'
+}

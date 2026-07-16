@@ -1,0 +1,15 @@
+RwLoadSpecificationV2 {
+	#projectName : 'WebGS',
+	#projectSpecFile : 'rowan/project.ston',
+	#componentNames : [
+		'Core'
+	],
+	#platformProperties : {
+		'gemstone' : {
+			'allusers' : {
+				#defaultSymbolDictName : 'WebGS'
+			}
+		}
+	},
+	#comment : 'Base WebGS server: the HTTP framework plus OpenAPI support (matches install.sh).'
+}

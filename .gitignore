@@ -4,3 +4,6 @@ setEnv.sh
 webServer.log
 .claude
 locust/__pycache__
+
+# Jasper local read-only class mirror of a connected stone (per user/stone)
+.gemstone/
